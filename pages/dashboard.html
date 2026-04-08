@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LIQUID VELOCITY - Store Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#fdff6d",
+                        "primary-fixed": "#d0fa6c",
+                        "surface-container-highest": "#262626",
+                        "inverse-primary": "#4d6800",
+                        "tertiary-dim": "#efd841",
+                        "on-tertiary-fixed-variant": "#6a5e00",
+                        "secondary-dim": "#d9db4c",
+                        "on-tertiary": "#685c00",
+                        "surface-container-lowest": "#000000",
+                        "on-primary-fixed-variant": "#4f6a00",
+                        "primary": "#d2fd6e",
+                        "inverse-on-surface": "#565555",
+                        "on-background": "#ffffff",
+                        "primary-container": "#87ad26",
+                        "on-primary-fixed": "#374b00",
+                        "error-dim": "#d53d18",
+                        "surface-bright": "#2c2c2c",
+                        "on-tertiary-container": "#5f5400",
+                        "tertiary-container": "#fee74f",
+                        "secondary-fixed-dim": "#d9db4c",
+                        "inverse-surface": "#fcf9f8",
+                        "outline": "#767575",
+                        "error": "#ff7351",
+                        "tertiary": "#fff4c3",
+                        "on-primary": "#486100",
+                        "on-tertiary-fixed": "#4a4100",
+                        "secondary": "#e7e959",
+                        "on-secondary-fixed-variant": "#5e5f00",
+                        "surface": "#0e0e0e",
+                        "primary-dim": "#c4ef62",
+                        "surface-dim": "#0e0e0e",
+                        "surface-variant": "#262626",
+                        "error-container": "#b92902",
+                        "secondary-container": "#616200",
+                        "on-primary-container": "#1b2700",
+                        "on-surface-variant": "#adaaaa",
+                        "surface-container-low": "#131313",
+                        "surface-container-high": "#1f2020",
+                        "surface-tint": "#d2fd6e",
+                        "on-error": "#450900",
+                        "on-error-container": "#ffd2c8",
+                        "outline-variant": "#484848",
+                        "on-surface": "#ffffff",
+                        "tertiary-fixed-dim": "#efd841",
+                        "background": "#0e0e0e",
+                        "secondary-fixed": "#e7e959",
+                        "on-secondary": "#545500",
+                        "tertiary-fixed": "#fee74f",
+                        "on-secondary-fixed": "#414200",
+                        "primary-fixed-dim": "#c2ec5f",
+                        "surface-container": "#191a1a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; background-color: #0e0e0e; color: #ffffff; }
+        h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
+        .glass-nav { background: rgba(44, 44, 44, 0.6); backdrop-filter: blur(32px); }
+        .organic-wave { mask-image: url("data:image/svg+xml,%3Csvg width='400' height='400' viewBox='0 0 400 400' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M344.5 125.5C384.5 186.5 391 273.5 352.5 328.5C314 383.5 230.5 406.5 158.5 385.5C86.5 364.5 26 299.5 9.5 228.5C-7 157.5 20.5 80.5 79 38C137.5 -4.5 227 -12.5 289.5 20.5C352 53.5 304.5 64.5 344.5 125.5Z' fill='white'/%3E%3C/svg%3E"); mask-size: contain; mask-repeat: no-repeat; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface overflow-x-hidden">
+<!-- SideNavBar (Authority Source: JSON) -->
+<aside class="h-screen w-72 fixed left-0 top-0 hidden lg:flex flex-col bg-[#0E0E0E] z-40 border-r border-outline-variant/15">
+<div class="flex flex-col p-6 space-y-2">
+<div class="text-xl font-bold text-[#D2FD6E] mb-8 font-headline italic tracking-tighter">LIQUID VELOCITY</div>
+<div class="flex items-center gap-3 mb-8 px-2">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden">
+<img alt="Liquor Store Admin" data-alt="High-end liquor store logo icon with minimalist metallic texture on dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-HQoILUMVunbLRzQ5E5JeaL9RU2z3HGRokXqwmBVThKdVxLbydID3bTWgchLtfEIrl9rzx7MgtiEfT7JbSZa71zNLs3UmeNJVLZKG654Fxn-Kvlc1cpnvqkDR38Z-AKjRfvaevnFRxkvrAT0yTpNXD91cIB6-0NtS9xOlOmYJyOaziGE8qR9C5sRSjDJNzxAG6JB3roQ_6428t7nhn2df9Z0fjnuQ0lUFbfpaLjLNh0ptdUWS4z_MxIReFvPNOr1gxIVnQO5__yk"/>
+</div>
+<div>
+<div class="font-headline font-bold text-sm tracking-tight">Sede Central</div>
+<div class="text-[10px] text-on-surface-variant font-label uppercase tracking-widest">Admin SaaS</div>
+</div>
+</div>
+<nav class="space-y-1">
+<!-- Dashboard Active (Semantic Mapping: Primary Admin View) -->
+<a class="bg-gradient-to-r from-[#D2FD6E] to-[#87AD26] text-black rounded-full shadow-[0_0_20px_rgba(210,253,110,0.3)] px-4 py-3 flex items-center gap-3 font-['Manrope'] font-medium transition-transform hover:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="text-neutral-500 hover:text-white px-4 py-3 flex items-center gap-3 font-['Manrope'] font-medium transition-all rounded-full hover:bg-neutral-800/40 hover:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span>Pedidos</span>
+</a>
+<a class="text-neutral-500 hover:text-white px-4 py-3 flex items-center gap-3 font-['Manrope'] font-medium transition-all rounded-full hover:bg-neutral-800/40 hover:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">liquor</span>
+<span>Inventario</span>
+</a>
+<a class="text-neutral-500 hover:text-white px-4 py-3 flex items-center gap-3 font-['Manrope'] font-medium transition-all rounded-full hover:bg-neutral-800/40 hover:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">precision_manufacturing</span>
+<span>Flota Autónoma</span>
+</a>
+<a class="text-neutral-500 hover:text-white px-4 py-3 flex items-center gap-3 font-['Manrope'] font-medium transition-all rounded-full hover:bg-neutral-800/40 hover:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">insights</span>
+<span>Analítica</span>
+</a>
+</nav>
+<div class="pt-8 px-2">
+<button class="w-full bg-primary-container text-on-primary-container py-3 rounded-full font-label text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:shadow-[0_0_15px_rgba(210,253,110,0.4)] transition-all">
+<span class="material-symbols-outlined text-sm">add</span>
+                    Nuevo Pedido
+                </button>
+</div>
+</div>
+<div class="mt-auto p-6 space-y-2 border-t border-outline-variant/10">
+<a class="text-neutral-500 hover:text-white px-4 py-2 flex items-center gap-3 font-['Manrope'] text-sm transition-all rounded-full hover:bg-neutral-800/40" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Configuración</span>
+</a>
+<a class="text-neutral-500 hover:text-white px-4 py-2 flex items-center gap-3 font-['Manrope'] text-sm transition-all rounded-full hover:bg-neutral-800/40" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span>Cerrar Sesión</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="lg:ml-72 min-h-screen p-8 pb-32 lg:pb-8 relative">
+<!-- Header -->
+<header class="flex justify-between items-end mb-12">
+<div>
+<h1 class="text-4xl lg:text-5xl font-headline font-black tracking-tighter mb-2">DASHBOARD</h1>
+<p class="text-on-surface-variant font-body">Bienvenido al control central de <span class="text-primary font-bold">Liquid Velocity</span>.</p>
+</div>
+<div class="hidden lg:flex items-center gap-4">
+<div class="bg-surface-container-high px-4 py-2 rounded-full flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+<span class="text-xs font-label uppercase tracking-tighter text-on-surface-variant">Fleet Status: Active</span>
+</div>
+</div>
+</header>
+<!-- Bento Grid Metrics -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+<div class="md:col-span-2 relative bg-surface-container-low rounded-lg p-8 overflow-hidden group">
+<div class="absolute -right-10 -bottom-10 w-48 h-48 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all duration-700"></div>
+<div class="relative z-10">
+<span class="text-xs font-label uppercase tracking-widest text-on-surface-variant">Daily Sales</span>
+<h2 class="text-5xl font-headline font-bold mt-2 text-primary">$12,480.00</h2>
+<div class="mt-4 flex items-center gap-2 text-secondary text-sm">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="font-bold">+14% vs ayer</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-high rounded-lg p-8 flex flex-col justify-between hover:bg-surface-container-highest transition-colors">
+<div>
+<span class="text-xs font-label uppercase tracking-widest text-on-surface-variant">Total Orders</span>
+<h2 class="text-4xl font-headline font-bold mt-2">142</h2>
+</div>
+<div class="flex -space-x-2 mt-4">
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-neutral-700"></div>
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-neutral-600"></div>
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-neutral-500"></div>
+<div class="w-8 h-8 rounded-full border-2 border-surface flex items-center justify-center bg-primary text-on-primary text-[10px] font-bold">+12</div>
+</div>
+</div>
+<div class="bg-surface-container-high rounded-lg p-8 flex flex-col justify-between border border-primary/20 bg-gradient-to-br from-surface-container-high to-surface-container-low">
+<div>
+<span class="text-xs font-label uppercase tracking-widest text-on-surface-variant">Drone ETA Avg.</span>
+<h2 class="text-4xl font-headline font-bold mt-2">4.2 min</h2>
+</div>
+<span class="material-symbols-outlined text-primary text-3xl">precision_manufacturing</span>
+</div>
+</div>
+<!-- Incoming Orders Section -->
+<section class="mb-12">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-2xl font-headline font-bold tracking-tight">PEDIDOS RECIENTES</h3>
+<button class="text-primary text-xs font-label uppercase tracking-widest font-bold flex items-center gap-2">
+                    Ver todos <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+<div class="bg-surface-container-low rounded-lg overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-high/50 text-on-surface-variant font-label text-[10px] uppercase tracking-widest">
+<th class="px-6 py-4">ID</th>
+<th class="px-6 py-4">Cliente</th>
+<th class="px-6 py-4">Productos</th>
+<th class="px-6 py-4">Estado</th>
+<th class="px-6 py-4 text-right">Total</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/10">
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="px-6 py-5 font-headline text-sm font-bold">#LV-9832</td>
+<td class="px-6 py-5">
+<div class="flex flex-col">
+<span class="text-sm font-medium">Marcello Rossi</span>
+<span class="text-[10px] text-on-surface-variant">Level: Platinum</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs bg-surface-container-highest px-2 py-1 rounded">Glenmorangie 18Y (x1)</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(210,253,110,0.8)]"></div>
+<span class="text-xs font-label uppercase tracking-tighter text-primary">OnTheWay</span>
+</div>
+</td>
+<td class="px-6 py-5 text-right font-headline font-bold text-primary">$185.00</td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="px-6 py-5 font-headline text-sm font-bold">#LV-9831</td>
+<td class="px-6 py-5">
+<div class="flex flex-col">
+<span class="text-sm font-medium">Elena S.</span>
+<span class="text-[10px] text-on-surface-variant">Level: Gold</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs bg-surface-container-highest px-2 py-1 rounded">Hendrick's Gin (x2)</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="text-xs font-label uppercase tracking-tighter text-secondary">Preparing</span>
+</div>
+</td>
+<td class="px-6 py-5 text-right font-headline font-bold">$92.40</td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="px-6 py-5 font-headline text-sm font-bold">#LV-9830</td>
+<td class="px-6 py-5">
+<div class="flex flex-col">
+<span class="text-sm font-medium">Corporate Events LLC</span>
+<span class="text-[10px] text-on-surface-variant">Level: Enterprise</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs bg-surface-container-highest px-2 py-1 rounded">Moët &amp; Chandon (x6)</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<div class="w-2 h-2 rounded-full bg-white/20"></div>
+<span class="text-xs font-label uppercase tracking-tighter">Accepted</span>
+</div>
+</td>
+<td class="px-6 py-5 text-right font-headline font-bold">$640.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Product Management & Brand Identity -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<div class="lg:col-span-2">
+<h3 class="text-2xl font-headline font-bold tracking-tight mb-6">INVENTARIO DESTACADO</h3>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+<!-- Product Card -->
+<div class="bg-surface-container-high p-4 rounded-lg group cursor-pointer border border-transparent hover:border-primary/30 transition-all">
+<div class="relative h-32 mb-4 bg-surface rounded flex items-center justify-center overflow-hidden">
+<img alt="Glenfiddich Bottle" class="group-hover:scale-110 transition-transform duration-500" data-alt="Close-up of a premium scotch whisky bottle with luxury amber liquid and gold labeling against a dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAj8TQzLHp5Cp9FHCTm26x-XixVEfBdAPsXbZnixjCJT0tUEnt43ZRN4oTwVScoRrQExrdHBdJpCPaqUjKXhIte801piEsM8i-_U3SMCIsKrnwzpItddoemfFNpdABL0ZdAx3DF8G4mDgmciL3A8yTZ500ytCiN2whtiiCjWUuymt90pZ-wtbFXRRPFNthXCYN2vP-4zR8iwK8I037I-rCo1Qg-m0gVw7OXX49-InNJtzVd5z9vcD-eDXOM2uqhVZNf8A2HLUdPQsc"/>
+<div class="absolute top-2 right-2 px-2 py-1 bg-primary text-on-primary text-[8px] font-bold rounded-full uppercase tracking-widest">Low Stock</div>
+</div>
+<h4 class="text-sm font-bold mb-1">Glenfiddich 15Y</h4>
+<p class="text-[10px] text-on-surface-variant mb-3 uppercase tracking-tighter">Stock: 12 units</p>
+<div class="flex justify-between items-center">
+<span class="text-primary font-headline font-bold">$89.99</span>
+<span class="material-symbols-outlined text-sm text-on-surface-variant hover:text-primary transition-colors">edit</span>
+</div>
+</div>
+<!-- Product Card -->
+<div class="bg-surface-container-high p-4 rounded-lg group cursor-pointer border border-transparent hover:border-primary/30 transition-all">
+<div class="relative h-32 mb-4 bg-surface rounded flex items-center justify-center overflow-hidden">
+<img alt="Belvedere Vodka" class="group-hover:scale-110 transition-transform duration-500" data-alt="Frosted glass vodka bottle with elegant minimal design, softly backlit by neon green light on a dark charcoal surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5A8Jkd5nqAy0oKmXfB1aCZuB_NTzqwoPLxs1OgtYUwIlPAeSDhAQJNvPqOYna2J37b_TUy3UG-BKNWMo5-xuBxzEIUer2wKJW_FEN5dt7rbP601m15H9apsgKo36qUs0jtBuidMiEuvD5aEnxmNJV6Ly05paPl5YdhNkFi-ucvxKa2qHxmfBe5ILeywOIbOUaGM__tpZUX8NI9yw9hFVul7Dk8z2kQUIIsFTcMBOk9WXasXIRD_7a4STzIdMOQ3LkFvSBNZ8eZ5g"/>
+</div>
+<h4 class="text-sm font-bold mb-1">Belvedere Pure</h4>
+<p class="text-[10px] text-on-surface-variant mb-3 uppercase tracking-tighter">Stock: 48 units</p>
+<div class="flex justify-between items-center">
+<span class="text-primary font-headline font-bold">$42.50</span>
+<span class="material-symbols-outlined text-sm text-on-surface-variant hover:text-primary transition-colors">edit</span>
+</div>
+</div>
+<!-- Add New Product -->
+<div class="border-2 border-dashed border-outline-variant/30 rounded-lg p-4 flex flex-col items-center justify-center text-on-surface-variant hover:border-primary hover:text-primary transition-all group">
+<span class="material-symbols-outlined text-3xl mb-2 group-hover:scale-110 transition-transform">add_circle</span>
+<span class="text-[10px] font-label uppercase tracking-widest font-bold">Añadir producto</span>
+</div>
+</div>
+</div>
+<!-- Brand Accent / Secondary Metric -->
+<div class="relative bg-primary overflow-hidden rounded-lg p-8 text-black flex flex-col justify-between min-h-[300px]">
+<!-- Organic Wave Shape from Strategy -->
+<div class="absolute top-0 right-0 w-full h-full bg-[#0e0e0e] organic-wave transform translate-x-1/2 -translate-y-1/4 opacity-20"></div>
+<div class="relative z-10">
+<h3 class="text-3xl font-headline font-black italic tracking-tighter leading-tight">FLEET<br/>OPTIMIZATION</h3>
+<p class="mt-4 font-body text-sm font-medium leading-relaxed opacity-80">Nuestra red autónoma está operando al 98% de eficiencia. Reducción de costos detectada.</p>
+</div>
+<div class="relative z-10">
+<div class="text-5xl font-headline font-bold mb-2">98.4%</div>
+<div class="text-[10px] font-label uppercase tracking-widest font-bold">Delivery Success Rate</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Authority Source: JSON) - Visible only on Mobile -->
+<nav class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md rounded-full border border-white/10 bg-[#0E0E0E]/80 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex justify-around items-center px-2 py-2 z-50">
+<!-- Inicio (Inactive) -->
+<a class="text-neutral-500 p-3 hover:scale-110 transition-transform active:scale-90 duration-100 flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-['Manrope'] text-[8px] uppercase tracking-tighter">Inicio</span>
+</a>
+<!-- Explorar (Inactive) -->
+<a class="text-neutral-500 p-3 hover:scale-110 transition-transform active:scale-90 duration-100 flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-['Manrope'] text-[8px] uppercase tracking-tighter">Explorar</span>
+</a>
+<!-- Pedidos (Active - Admin focus is Orders/Inventory) -->
+<a class="bg-[#D2FD6E] text-black rounded-full p-3 shadow-[0_0_15px_rgba(210,253,110,0.6)] active:scale-90 duration-100 flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="font-['Manrope'] text-[8px] uppercase tracking-tighter font-bold">Pedidos</span>
+</a>
+<!-- Perfil (Inactive) -->
+<a class="text-neutral-500 p-3 hover:scale-110 transition-transform active:scale-90 duration-100 flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-['Manrope'] text-[8px] uppercase tracking-tighter">Perfil</span>
+</a>
+</nav>
+<!-- Decorative Top Accent -->
+<div class="fixed top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-secondary to-primary-container z-[60]"></div>
+</body></html>

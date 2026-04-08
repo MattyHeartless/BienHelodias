@@ -1,0 +1,64 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D5375FB5-037E-4BFE-8E56-97EA691321A3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiquorSaaS.Api", "src\LiquorSaaS.Api\LiquorSaaS.Api.csproj", "{5C3D40B9-A2B4-4FBE-AE48-EB8C3D75AB1D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiquorSaaS.Application", "src\LiquorSaaS.Application\LiquorSaaS.Application.csproj", "{800E25C0-E52D-41B8-B3FB-6342AB12D5D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiquorSaaS.Domain", "src\LiquorSaaS.Domain\LiquorSaaS.Domain.csproj", "{7DA42E07-09EA-411A-996F-F864289392FD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiquorSaaS.Infrastructure", "src\LiquorSaaS.Infrastructure\LiquorSaaS.Infrastructure.csproj", "{4BA21544-165F-47DA-ABE9-3251DD7BACBD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{63D3A2E7-A461-44EE-8F30-69AE3A71D9A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiquorSaaS.UnitTests", "tests\LiquorSaaS.UnitTests\LiquorSaaS.UnitTests.csproj", "{046CFC42-D594-4BED-968A-099E4AD8862E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiquorSaaS.IntegrationTests", "tests\LiquorSaaS.IntegrationTests\LiquorSaaS.IntegrationTests.csproj", "{D308E4DC-BAA0-4F1F-932E-2F9FD900D1E0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5C3D40B9-A2B4-4FBE-AE48-EB8C3D75AB1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C3D40B9-A2B4-4FBE-AE48-EB8C3D75AB1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C3D40B9-A2B4-4FBE-AE48-EB8C3D75AB1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C3D40B9-A2B4-4FBE-AE48-EB8C3D75AB1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{800E25C0-E52D-41B8-B3FB-6342AB12D5D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{800E25C0-E52D-41B8-B3FB-6342AB12D5D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{800E25C0-E52D-41B8-B3FB-6342AB12D5D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{800E25C0-E52D-41B8-B3FB-6342AB12D5D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DA42E07-09EA-411A-996F-F864289392FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DA42E07-09EA-411A-996F-F864289392FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DA42E07-09EA-411A-996F-F864289392FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DA42E07-09EA-411A-996F-F864289392FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4BA21544-165F-47DA-ABE9-3251DD7BACBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BA21544-165F-47DA-ABE9-3251DD7BACBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BA21544-165F-47DA-ABE9-3251DD7BACBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BA21544-165F-47DA-ABE9-3251DD7BACBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{046CFC42-D594-4BED-968A-099E4AD8862E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{046CFC42-D594-4BED-968A-099E4AD8862E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{046CFC42-D594-4BED-968A-099E4AD8862E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{046CFC42-D594-4BED-968A-099E4AD8862E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D308E4DC-BAA0-4F1F-932E-2F9FD900D1E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D308E4DC-BAA0-4F1F-932E-2F9FD900D1E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D308E4DC-BAA0-4F1F-932E-2F9FD900D1E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D308E4DC-BAA0-4F1F-932E-2F9FD900D1E0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5C3D40B9-A2B4-4FBE-AE48-EB8C3D75AB1D} = {D5375FB5-037E-4BFE-8E56-97EA691321A3}
+		{800E25C0-E52D-41B8-B3FB-6342AB12D5D8} = {D5375FB5-037E-4BFE-8E56-97EA691321A3}
+		{7DA42E07-09EA-411A-996F-F864289392FD} = {D5375FB5-037E-4BFE-8E56-97EA691321A3}
+		{4BA21544-165F-47DA-ABE9-3251DD7BACBD} = {D5375FB5-037E-4BFE-8E56-97EA691321A3}
+		{046CFC42-D594-4BED-968A-099E4AD8862E} = {63D3A2E7-A461-44EE-8F30-69AE3A71D9A4}
+		{D308E4DC-BAA0-4F1F-932E-2F9FD900D1E0} = {63D3A2E7-A461-44EE-8F30-69AE3A71D9A4}
+	EndGlobalSection
+EndGlobal

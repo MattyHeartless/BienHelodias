@@ -1,0 +1,235 @@
+<div class="min-h-screen overflow-x-hidden text-on-surface">
+  <header class="sticky top-0 z-50 border-b border-white/6 bg-surface/80 backdrop-blur-3xl">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-10">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-[0.28em] text-primary">{{ tenant.accentLabel }}</p>
+        <h1 class="font-display text-2xl font-black italic tracking-[-0.06em] text-primary">LIQUID VELOCITY</h1>
+      </div>
+
+      <div class="hidden items-center gap-6 text-xs font-semibold uppercase tracking-[0.28em] text-on-surface-variant md:flex">
+        <span>Catalogo</span>
+        <span>Ediciones</span>
+        <span>Entrega rapida</span>
+      </div>
+
+      <button class="ghost-button" type="button" (click)="trackLastOrder()">
+        <span class="material-symbols-outlined text-base">local_shipping</span>
+        Rastrear pedido
+      </button>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-7xl px-6 pb-24 pt-8 lg:px-10">
+    <section class="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+      <div class="relative overflow-hidden rounded-[2.5rem] bg-surface-container-low px-8 py-10 shadow-[0_35px_120px_rgba(0,0,0,0.38)] lg:px-12 lg:py-14">
+        <div class="absolute -right-20 top-0 h-60 w-60 rounded-full bg-primary/18 blur-[90px]"></div>
+        <div class="absolute bottom-0 left-10 h-40 w-40 rounded-full bg-secondary/10 blur-[70px]"></div>
+
+        <p class="eyebrow">Bien Helodias</p>
+        <h2 class="headline-display mt-4 max-w-3xl">
+          Premium spirits with a <span class="text-primary italic">liquid</span> pulse.
+        </h2>
+        <p class="mt-6 max-w-2xl text-lg leading-8 text-on-surface-variant">
+          Una tienda editorial para destilados, packs y etiquetas premium. El frontend solo arma el pedido y el backend decide
+          el total, el estado y la operacion final.
+        </p>
+
+        <div class="mt-8 flex flex-wrap gap-3">
+          <button class="liquid-button" type="button" (click)="selectCategory('all')">
+            <span class="material-symbols-outlined text-base">explore</span>
+            Explorar catalogo
+          </button>
+          <button class="ghost-button" type="button" (click)="trackLastOrder()">
+            <span class="material-symbols-outlined text-base">radar</span>
+            Ver seguimiento
+          </button>
+        </div>
+      </div>
+
+      <div class="grid gap-5">
+        @for (product of featuredProducts(); track product.id; let index = $index) {
+          <article class="glass-panel relative overflow-hidden p-6">
+            <div class="absolute inset-0" [style.background]="productTone(index)"></div>
+            <div class="relative flex items-start justify-between gap-5">
+              <div class="max-w-xs">
+                <p class="eyebrow">{{ product.category }}</p>
+                <h3 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">{{ product.name }}</h3>
+                <p class="mt-3 text-sm leading-7 text-on-surface-variant">{{ product.description }}</p>
+              </div>
+
+              <div class="rounded-full border border-primary/18 bg-surface/70 px-4 py-2 font-display text-xl font-bold text-primary">
+                {{ product.price | currency: 'MXN':'symbol-narrow':'1.0-0' }}
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section class="mt-12 grid gap-8 lg:grid-cols-[1fr_380px]">
+      <div class="space-y-8">
+        <div class="flex flex-wrap gap-3">
+          @for (category of categories(); track category) {
+            <button
+              type="button"
+              class="rounded-full px-5 py-3 text-sm font-semibold transition"
+              [class.bg-primary]="activeCategory() === category"
+              [class.text-on-primary]="activeCategory() === category"
+              [class.shadow-[0_0_24px_rgba(210,253,110,0.22)]]="activeCategory() === category"
+              [class.ghost-button]="activeCategory() !== category"
+              (click)="selectCategory(category)"
+            >
+              {{ category === 'all' ? 'Todo el catalogo' : category }}
+            </button>
+          }
+        </div>
+
+        @if (loading()) {
+          <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            @for (item of [1, 2, 3, 4, 5, 6]; track item) {
+              <div class="glass-panel h-80 animate-pulse bg-white/4"></div>
+            }
+          </div>
+        } @else {
+          <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            @for (product of filteredProducts(); track product.id; let index = $index) {
+              <article class="group overflow-hidden rounded-[2rem] bg-surface-container-low p-5 shadow-[0_22px_80px_rgba(0,0,0,0.32)]">
+                <div class="relative h-52 overflow-hidden rounded-[1.6rem] bg-surface-container-high">
+                  <div class="absolute inset-0" [style.background]="productTone(index)"></div>
+                  @if (product.imageUrl) {
+                    <img [src]="product.imageUrl" [alt]="product.name" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                  } @else {
+                    <div class="flex h-full items-end justify-between px-5 py-6">
+                      <div>
+                        <p class="eyebrow">{{ product.category }}</p>
+                        <p class="mt-2 max-w-[10rem] font-display text-2xl font-bold tracking-[-0.05em]">{{ product.name }}</p>
+                      </div>
+                      <span class="material-symbols-outlined text-5xl text-primary/60">liquor</span>
+                    </div>
+                  }
+                </div>
+
+                <div class="mt-5">
+                  <div class="flex items-start justify-between gap-4">
+                    <div>
+                      <p class="eyebrow">{{ product.category }}</p>
+                      <h3 class="mt-2 font-display text-2xl font-bold tracking-[-0.05em]">{{ product.name }}</h3>
+                    </div>
+                    <span class="rounded-full border border-white/8 bg-white/4 px-3 py-1 text-xs uppercase tracking-[0.24em] text-on-surface-variant">
+                      Stock {{ product.stock }}
+                    </span>
+                  </div>
+
+                  <p class="mt-3 min-h-16 text-sm leading-7 text-on-surface-variant">{{ product.description }}</p>
+
+                  <div class="mt-6 flex items-center justify-between">
+                    <div>
+                      <p class="text-xs uppercase tracking-[0.25em] text-on-surface-variant">Precio</p>
+                      <p class="font-display text-3xl font-bold text-primary">
+                        {{ product.price | currency: 'MXN':'symbol-narrow':'1.0-0' }}
+                      </p>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                      @if (cart()[product.id] > 0) {
+                        <button type="button" class="ghost-button h-11 w-11 !px-0" (click)="removeFromCart(product.id)">
+                          <span class="material-symbols-outlined text-base">remove</span>
+                        </button>
+                        <span class="w-10 text-center font-display text-xl font-bold">{{ cart()[product.id] }}</span>
+                      }
+
+                      <button type="button" class="liquid-button h-11 !px-5" (click)="addToCart(product)">
+                        <span class="material-symbols-outlined text-base">add_shopping_cart</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            }
+          </div>
+        }
+      </div>
+
+      <aside class="space-y-5 lg:sticky lg:top-28 lg:self-start">
+        <section class="glass-panel p-6">
+          <p class="eyebrow">Checkout</p>
+          <h3 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Build your drop.</h3>
+          <p class="mt-3 text-sm leading-7 text-on-surface-variant">
+            El backend calcula el total final y valida el pedido. Aqui solo armamos el payload.
+          </p>
+
+          <div class="mt-6 space-y-3">
+            @for (entry of cartItems(); track entry.product.id) {
+              <div class="rounded-[1.4rem] bg-white/4 px-4 py-4">
+                <div class="flex items-start justify-between gap-4">
+                  <div>
+                    <p class="font-semibold">{{ entry.product.name }}</p>
+                    <p class="mt-1 text-xs uppercase tracking-[0.24em] text-on-surface-variant">{{ entry.quantity }} piezas</p>
+                  </div>
+                  <div class="text-right">
+                    <p class="font-display text-lg font-bold text-primary">
+                      {{ entry.product.price * entry.quantity | currency: 'MXN':'symbol-narrow':'1.0-0' }}
+                    </p>
+                    <button type="button" class="mt-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant" (click)="removeFromCart(entry.product.id)">
+                      quitar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+
+            @if (cartItems().length === 0) {
+              <div class="rounded-[1.5rem] border border-dashed border-white/10 px-5 py-8 text-center text-sm leading-7 text-on-surface-variant">
+                Agrega etiquetas al carrito para generar tu pedido.
+              </div>
+            }
+          </div>
+
+          <div class="mt-6 flex items-end justify-between">
+            <div>
+              <p class="text-xs uppercase tracking-[0.24em] text-on-surface-variant">Subtotal visual</p>
+              <p class="font-display text-4xl font-bold text-primary">
+                {{ subtotal() | currency: 'MXN':'symbol-narrow':'1.0-0' }}
+              </p>
+            </div>
+            <span class="rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-xs uppercase tracking-[0.24em] text-primary">
+              {{ cartCount() }} items
+            </span>
+          </div>
+        </section>
+
+        <section class="section-shell">
+          <form class="space-y-4" [formGroup]="checkoutForm" (ngSubmit)="submitOrder()">
+            <div>
+              <label class="eyebrow">Nombre</label>
+              <input class="mt-2 w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none transition focus:border-primary" formControlName="customerName" />
+            </div>
+            <div>
+              <label class="eyebrow">Telefono</label>
+              <input class="mt-2 w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none transition focus:border-primary" formControlName="customerPhone" />
+            </div>
+            <div>
+              <label class="eyebrow">Direccion</label>
+              <textarea class="mt-2 min-h-28 w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none transition focus:border-primary" formControlName="deliveryAddress"></textarea>
+            </div>
+            <div>
+              <label class="eyebrow">Notas</label>
+              <textarea class="mt-2 min-h-24 w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none transition focus:border-primary" formControlName="notes"></textarea>
+            </div>
+
+            @if (error()) {
+              <div class="rounded-[1.25rem] border border-error/30 bg-error/10 px-4 py-3 text-sm text-white">
+                {{ error() }}
+              </div>
+            }
+
+            <button class="liquid-button mt-2 w-full !justify-center py-4" type="submit" [disabled]="submitting()">
+              <span class="material-symbols-outlined text-base">bolt</span>
+              {{ submitting() ? 'Creando pedido...' : 'Crear pedido' }}
+            </button>
+          </form>
+        </section>
+      </aside>
+    </section>
+  </main>
+</div>

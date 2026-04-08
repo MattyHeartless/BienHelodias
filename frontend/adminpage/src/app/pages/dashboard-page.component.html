@@ -1,0 +1,197 @@
+<div class="min-h-screen px-6 pb-16 pt-8 lg:px-10">
+  <div class="mx-auto max-w-7xl">
+    <header class="mb-8 flex flex-col gap-4 rounded-[2.2rem] bg-surface-container-low px-8 py-8 shadow-[0_35px_110px_rgba(0,0,0,0.4)] lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <p class="eyebrow">{{ isSuperAdmin() ? 'SuperAdmin' : 'StoreAdmin' }}</p>
+        <h1 class="mt-4 font-display text-5xl font-black tracking-[-0.06em]">Liquid Velocity Dashboard</h1>
+        <p class="mt-3 max-w-2xl text-sm leading-7 text-on-surface-variant">
+          {{ email() }}. Esta aplicacion no comparte rutas con el storefront ni con el panel de delivery.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap gap-3">
+        <button class="ghost-button" type="button" (click)="load()">
+          <span class="material-symbols-outlined text-base">refresh</span>
+          Refrescar
+        </button>
+        <button class="liquid-button" type="button" (click)="logout()">
+          <span class="material-symbols-outlined text-base">logout</span>
+          Cerrar sesion
+        </button>
+      </div>
+    </header>
+
+    @if (error()) {
+      <div class="mb-6 rounded-[1.25rem] border border-error/30 bg-error/10 px-4 py-3 text-sm text-white">
+        {{ error() }}
+      </div>
+    }
+
+    @if (feedback()) {
+      <div class="mb-6 rounded-[1.25rem] border border-primary/24 bg-primary/10 px-4 py-3 text-sm text-white">
+        {{ feedback() }}
+      </div>
+    }
+
+    @if (loading()) {
+      <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        @for (item of [1, 2, 3, 4]; track item) {
+          <div class="glass-panel h-48 animate-pulse bg-white/4"></div>
+        }
+      </div>
+    } @else if (isSuperAdmin()) {
+      <div class="grid gap-8 xl:grid-cols-[1.15fr_0.85fr]">
+        <section class="space-y-6">
+          <article class="glass-panel p-6">
+            <p class="eyebrow">Stores</p>
+            <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Alta y gobierno de tiendas</h2>
+            <div class="mt-6 grid gap-4">
+              @for (store of stores(); track store.id) {
+                <div class="rounded-[1.5rem] bg-white/4 p-5">
+                  <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <p class="font-display text-2xl font-bold tracking-[-0.05em]">{{ store.name }}</p>
+                      <p class="mt-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">{{ store.slug }}</p>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+                      @for (option of subscriptionOptions; track option.value) {
+                        <button
+                          type="button"
+                          class="rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] transition"
+                          [class.bg-primary]="store.subscriptionStatus === option.value"
+                          [class.text-on-primary]="store.subscriptionStatus === option.value"
+                          [class.ghost-button]="store.subscriptionStatus !== option.value"
+                          (click)="updateSubscription(store.id, option.value)"
+                        >
+                          {{ option.label }}
+                        </button>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </article>
+        </section>
+
+        <section class="space-y-6">
+          <article class="glass-panel p-6">
+            <p class="eyebrow">Nueva tienda</p>
+            <form class="mt-5 space-y-4" [formGroup]="storeForm" (ngSubmit)="createStore()">
+              <input class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="name" placeholder="Nombre de la tienda" />
+              <input class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="slug" placeholder="slug-publico" />
+              <select class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="subscriptionStatus">
+                @for (option of subscriptionOptions; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+              <button class="liquid-button w-full !justify-center" type="submit">Crear tienda</button>
+            </form>
+          </article>
+
+          <article class="glass-panel p-6">
+            <p class="eyebrow">Nuevo administrador</p>
+            <form class="mt-5 space-y-4" [formGroup]="adminForm" (ngSubmit)="createAdmin()">
+              <input class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="name" placeholder="Nombre del admin" />
+              <input class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="email" placeholder="correo@tienda.local" />
+              <input class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="password" placeholder="Contrasena" />
+              <select class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="storeId">
+                <option value="">Selecciona una tienda</option>
+                @for (store of stores(); track store.id) {
+                  <option [value]="store.id">{{ store.name }}</option>
+                }
+              </select>
+              <button class="liquid-button w-full !justify-center" type="submit">Asignar admin</button>
+            </form>
+          </article>
+        </section>
+      </div>
+    } @else {
+      <div class="space-y-8">
+        <section class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+          @for (metric of storeMetrics(); track metric.label) {
+            <article class="glass-panel p-6">
+              <p class="eyebrow">{{ metric.label }}</p>
+              <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">
+                @if (metric.currency) {
+                  {{ metric.value | currency: 'MXN':'symbol-narrow':'1.0-0' }}
+                } @else {
+                  {{ metric.value }}
+                }
+              </p>
+            </article>
+          }
+        </section>
+
+        <section class="grid gap-8 xl:grid-cols-[1fr_380px]">
+          <article class="glass-panel p-6">
+            <div class="flex items-end justify-between">
+              <div>
+                <p class="eyebrow">Pedidos</p>
+                <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Recientes</h2>
+              </div>
+            </div>
+
+            <div class="mt-6 space-y-4">
+              @for (order of orders(); track order.id) {
+                <div class="rounded-[1.5rem] bg-white/4 p-5">
+                  <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <p class="font-display text-xl font-bold tracking-[-0.04em]">{{ order.customerName }}</p>
+                      <p class="mt-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">{{ order.id }}</p>
+                    </div>
+                    <div class="text-right">
+                      <p class="font-display text-2xl font-bold text-primary">{{ order.total | currency: 'MXN':'symbol-narrow':'1.0-0' }}</p>
+                      <p class="mt-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">{{ order.createdAtUtc | date: 'dd MMM, HH:mm' }}</p>
+                    </div>
+                  </div>
+                  <p class="mt-4 text-sm leading-7 text-on-surface-variant">{{ order.deliveryAddress }}</p>
+                </div>
+              }
+            </div>
+          </article>
+
+          <article class="glass-panel p-6">
+            <p class="eyebrow">Nuevo producto</p>
+            <form class="mt-5 space-y-4" [formGroup]="productForm" (ngSubmit)="createProduct()">
+              <input class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="name" placeholder="Nombre" />
+              <textarea class="min-h-28 w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="description" placeholder="Descripcion"></textarea>
+              <input class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="category" placeholder="Categoria" />
+              <div class="grid grid-cols-2 gap-4">
+                <input class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="price" type="number" placeholder="Precio" />
+                <input class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="stock" type="number" placeholder="Stock" />
+              </div>
+              <input class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="imageUrl" placeholder="Imagen (opcional)" />
+              <button class="liquid-button w-full !justify-center" type="submit">Guardar producto</button>
+            </form>
+          </article>
+        </section>
+
+        <section>
+          <p class="eyebrow">Catalogo actual</p>
+          <div class="mt-5 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            @for (product of products(); track product.id) {
+              <article class="overflow-hidden rounded-[2rem] bg-surface-container-low p-5 shadow-[0_22px_80px_rgba(0,0,0,0.32)]">
+                <div class="rounded-[1.5rem] bg-surface-container-high px-5 py-10">
+                  <p class="eyebrow">{{ product.category }}</p>
+                  <h3 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">{{ product.name }}</h3>
+                  <p class="mt-3 text-sm leading-7 text-on-surface-variant">{{ product.description }}</p>
+                </div>
+                <div class="mt-5 flex items-center justify-between">
+                  <div>
+                    <p class="font-display text-3xl font-bold text-primary">{{ product.price | currency: 'MXN':'symbol-narrow':'1.0-0' }}</p>
+                    <p class="mt-1 text-xs uppercase tracking-[0.24em] text-on-surface-variant">Stock {{ product.stock }}</p>
+                  </div>
+                  <button class="ghost-button" type="button" (click)="toggleProduct(product)">
+                    {{ product.isActive ? 'Ocultar' : 'Activar' }}
+                  </button>
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,113 @@
+@if (order(); as currentOrder) {
+  <div class="min-h-screen px-6 pb-16 pt-8 lg:px-10">
+    <div class="mx-auto max-w-7xl">
+      <div class="mb-8 flex items-center justify-between">
+        <a routerLink="/" class="ghost-button">
+          <span class="material-symbols-outlined text-base">arrow_back</span>
+          Volver al catalogo
+        </a>
+        <span class="rounded-full border border-primary/24 bg-primary/10 px-4 py-2 text-xs uppercase tracking-[0.24em] text-primary">
+          {{ statusLabel() }}
+        </span>
+      </div>
+
+      <div class="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
+        <section class="space-y-6">
+          <article class="overflow-hidden rounded-[2.5rem] bg-surface-container-low px-8 py-10 shadow-[0_35px_120px_rgba(0,0,0,0.38)]">
+            <p class="eyebrow">Tracking</p>
+            <h1 class="mt-4 font-display text-6xl font-black tracking-[-0.06em]">Pedido en curso</h1>
+            <p class="mt-4 max-w-2xl text-lg leading-8 text-on-surface-variant">
+              Esta vista representa el ultimo snapshot recibido al crear el pedido. El backend actual no expone tracking publico
+              en vivo.
+            </p>
+
+            <div class="mt-8 grid gap-4 md:grid-cols-2">
+              <div class="glass-panel p-5">
+                <p class="eyebrow">Pedido</p>
+                <p class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">{{ currentOrder.id }}</p>
+              </div>
+              <div class="glass-panel p-5">
+                <p class="eyebrow">Creado</p>
+                <p class="mt-3 text-lg font-semibold">{{ currentOrder.createdAtUtc | date: 'dd MMM yyyy, HH:mm' }}</p>
+              </div>
+            </div>
+          </article>
+
+          <article class="relative overflow-hidden rounded-[2.25rem] bg-surface-container-high p-8">
+            <div class="absolute inset-0 bg-grid-noise opacity-30"></div>
+            <div class="absolute inset-x-12 top-1/2 h-px -translate-y-1/2 border-t border-dashed border-primary/30"></div>
+            <div class="relative flex flex-wrap items-center justify-between gap-6">
+              @for (step of steps; track step.status) {
+                <div class="flex flex-col items-center gap-3">
+                  <div
+                    class="flex h-14 w-14 items-center justify-center rounded-full border text-sm font-bold transition"
+                    [ngClass]="
+                      isCompleted(step.status)
+                        ? 'border-primary bg-primary text-on-primary'
+                        : 'border-white/10 bg-surface text-on-surface-variant'
+                    "
+                  >
+                    {{ $index + 1 }}
+                  </div>
+                  <span class="text-center text-xs uppercase tracking-[0.22em] text-on-surface-variant">{{ step.label }}</span>
+                </div>
+              }
+            </div>
+          </article>
+        </section>
+
+        <section class="space-y-6">
+          <article class="section-shell">
+            <p class="eyebrow">Cliente</p>
+            <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">{{ currentOrder.customerName }}</h2>
+            <div class="mt-6 space-y-4 text-sm text-on-surface-variant">
+              <p><span class="text-white">Telefono:</span> {{ currentOrder.customerPhone }}</p>
+              <p><span class="text-white">Direccion:</span> {{ currentOrder.deliveryAddress }}</p>
+              <p><span class="text-white">Notas:</span> {{ currentOrder.notes || 'Sin notas adicionales.' }}</p>
+            </div>
+          </article>
+
+          <article class="glass-panel p-6">
+            <p class="eyebrow">Resumen</p>
+            <div class="mt-5 space-y-4">
+              @for (item of currentOrder.items; track item.id) {
+                <div class="flex items-start justify-between gap-4 rounded-[1.25rem] bg-white/4 px-4 py-4">
+                  <div>
+                    <p class="font-semibold">{{ item.productNameSnapshot }}</p>
+                    <p class="mt-1 text-xs uppercase tracking-[0.24em] text-on-surface-variant">{{ item.quantity }} piezas</p>
+                  </div>
+                  <p class="font-display text-xl font-bold text-primary">
+                    {{ item.subtotal | currency: 'MXN':'symbol-narrow':'1.0-0' }}
+                  </p>
+                </div>
+              }
+            </div>
+
+            <div class="mt-6 border-t border-white/8 pt-5">
+              <div class="flex items-center justify-between">
+                <span class="text-sm uppercase tracking-[0.24em] text-on-surface-variant">Total</span>
+                <span class="font-display text-4xl font-bold text-primary">
+                  {{ currentOrder.total | currency: 'MXN':'symbol-narrow':'1.0-0' }}
+                </span>
+              </div>
+            </div>
+          </article>
+        </section>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="flex min-h-screen items-center justify-center px-6">
+    <div class="max-w-xl rounded-[2rem] bg-surface-container-low p-8 text-center shadow-[0_35px_100px_rgba(0,0,0,0.35)]">
+      <p class="eyebrow">Seguimiento</p>
+      <h1 class="mt-4 font-display text-4xl font-bold tracking-[-0.05em]">No hay un pedido disponible.</h1>
+      <p class="mt-4 leading-8 text-on-surface-variant">
+        Genera un pedido desde el catalogo para ver su snapshot de seguimiento.
+      </p>
+      <a routerLink="/" class="liquid-button mt-8">
+        <span class="material-symbols-outlined text-base">storefront</span>
+        Volver al inicio
+      </a>
+    </div>
+  </div>
+}

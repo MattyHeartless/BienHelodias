@@ -1,0 +1,6 @@
+{
+  "LiquorSaaS.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Users\\Jair\\Documents\\My Web Sites\\BienHelodias\\backend\\src\\LiquorSaaS.Api",
+  "LiquorSaaS.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Users\\Jair\\Documents\\My Web Sites\\BienHelodias\\backend\\src\\LiquorSaaS.Application",
+  "LiquorSaaS.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Users\\Jair\\Documents\\My Web Sites\\BienHelodias\\backend\\src\\LiquorSaaS.Domain",
+  "LiquorSaaS.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "C:\\Users\\Jair\\Documents\\My Web Sites\\BienHelodias\\backend\\src\\LiquorSaaS.Infrastructure"
+}

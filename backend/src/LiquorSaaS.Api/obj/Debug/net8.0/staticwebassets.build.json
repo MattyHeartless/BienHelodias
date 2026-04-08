@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "9A8HCwfvN9Qrsvz/qof+V2ppR3aoSwaY9YNtHPGy0tc=",
+  "Source": "LiquorSaaS.Api",
+  "BasePath": "_content/LiquorSaaS.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

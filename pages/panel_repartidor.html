@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-container": "#fdff6d",
+                    "primary-fixed": "#d0fa6c",
+                    "surface-container-highest": "#262626",
+                    "inverse-primary": "#4d6800",
+                    "tertiary-dim": "#efd841",
+                    "on-tertiary-fixed-variant": "#6a5e00",
+                    "secondary-dim": "#d9db4c",
+                    "on-tertiary": "#685c00",
+                    "surface-container-lowest": "#000000",
+                    "on-primary-fixed-variant": "#4f6a00",
+                    "primary": "#d2fd6e",
+                    "inverse-on-surface": "#565555",
+                    "on-background": "#ffffff",
+                    "primary-container": "#87ad26",
+                    "on-primary-fixed": "#374b00",
+                    "error-dim": "#d53d18",
+                    "surface-bright": "#2c2c2c",
+                    "on-tertiary-container": "#5f5400",
+                    "tertiary-container": "#fee74f",
+                    "secondary-fixed-dim": "#d9db4c",
+                    "inverse-surface": "#fcf9f8",
+                    "outline": "#767575",
+                    "error": "#ff7351",
+                    "tertiary": "#fff4c3",
+                    "on-primary": "#486100",
+                    "on-tertiary-fixed": "#4a4100",
+                    "secondary": "#e7e959",
+                    "on-secondary-fixed-variant": "#5e5f00",
+                    "surface": "#0e0e0e",
+                    "primary-dim": "#c4ef62",
+                    "surface-dim": "#0e0e0e",
+                    "surface-variant": "#262626",
+                    "error-container": "#b92902",
+                    "secondary-container": "#616200",
+                    "on-primary-container": "#1b2700",
+                    "on-surface-variant": "#adaaaa",
+                    "surface-container-low": "#131313",
+                    "surface-container-high": "#1f2020",
+                    "surface-tint": "#d2fd6e",
+                    "on-error": "#450900",
+                    "on-error-container": "#ffd2c8",
+                    "outline-variant": "#484848",
+                    "on-surface": "#ffffff",
+                    "tertiary-fixed-dim": "#efd841",
+                    "background": "#0e0e0e",
+                    "secondary-fixed": "#e7e959",
+                    "on-secondary": "#545500",
+                    "tertiary-fixed": "#fee74f",
+                    "on-secondary-fixed": "#414200",
+                    "primary-fixed-dim": "#c2ec5f",
+                    "surface-container": "#191a1a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Space Grotesk"],
+                    "body": ["Manrope"],
+                    "label": ["Manrope"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; background-color: #0e0e0e; color: #ffffff; }
+        .headline-font { font-family: 'Space Grotesk', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-panel { background: rgba(31, 32, 32, 0.6); backdrop-filter: blur(32px); }
+        .map-gradient { background: radial-gradient(circle at 50% 50%, rgba(210, 253, 110, 0.08) 0%, transparent 70%); }
+    </style>
+</head>
+<body class="overflow-hidden">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full flex justify-between items-center px-8 h-20 bg-neutral-950/60 backdrop-blur-3xl z-50 bg-gradient-to-b from-neutral-900 to-transparent shadow-[0_0_40px_rgba(210,253,110,0.05)]">
+<div class="text-2xl font-black italic tracking-tighter text-[#D2FD6E] headline-font">LIQUID VELOCITY</div>
+<nav class="hidden md:flex gap-8">
+<a class="font-['Space_Grotesk'] uppercase tracking-widest text-xs font-bold text-neutral-400 hover:text-neutral-100 transition-colors" href="#">Catálogo</a>
+<a class="font-['Space_Grotesk'] uppercase tracking-widest text-xs font-bold text-[#D2FD6E] border-b-2 border-[#D2FD6E] pb-1" href="#">Premium</a>
+<a class="font-['Space_Grotesk'] uppercase tracking-widest text-xs font-bold text-neutral-400 hover:text-neutral-100 transition-colors" href="#">Suscripción</a>
+</nav>
+<div class="flex gap-4 items-center">
+<button class="p-2 hover:bg-neutral-800/50 rounded-full transition-all text-neutral-400"><span class="material-symbols-outlined">shopping_cart</span></button>
+<button class="p-2 hover:bg-neutral-800/50 rounded-full transition-all text-neutral-400"><span class="material-symbols-outlined">notifications</span></button>
+<button class="p-2 hover:bg-neutral-800/50 rounded-full transition-all text-neutral-400"><span class="material-symbols-outlined">account_circle</span></button>
+</div>
+</header>
+<!-- Sidebar Navigation -->
+<aside class="h-screen w-72 fixed left-0 top-0 hidden lg:flex flex-col bg-[#0E0E0E] p-6 pt-28 space-y-2 z-40 border-r border-white/5">
+<div class="mb-8">
+<div class="text-xl font-bold text-[#D2FD6E] headline-font">Sede Central</div>
+<div class="text-neutral-500 text-xs uppercase tracking-widest font-label">Admin SaaS</div>
+</div>
+<a class="bg-gradient-to-r from-[#D2FD6E] to-[#87AD26] text-black rounded-full shadow-[0_0_20px_rgba(210,253,110,0.3)] px-4 py-3 flex items-center gap-3 font-medium transition-transform hover:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="text-neutral-500 hover:text-white px-4 py-3 flex items-center gap-3 font-medium hover:bg-neutral-800/40 transition-all rounded-full hover:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span>Pedidos</span>
+</a>
+<a class="text-neutral-500 hover:text-white px-4 py-3 flex items-center gap-3 font-medium hover:bg-neutral-800/40 transition-all rounded-full hover:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">liquor</span>
+<span>Inventario</span>
+</a>
+<a class="text-neutral-500 hover:text-white px-4 py-3 flex items-center gap-3 font-medium hover:bg-neutral-800/40 transition-all rounded-full hover:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">precision_manufacturing</span>
+<span>Flota Autónoma</span>
+</a>
+<div class="mt-auto space-y-2 pt-6 border-t border-white/5">
+<a class="text-neutral-500 hover:text-white px-4 py-3 flex items-center gap-3 font-medium hover:bg-neutral-800/40 transition-all rounded-full" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Configuración</span>
+</a>
+<a class="text-neutral-500 hover:text-white px-4 py-3 flex items-center gap-3 font-medium hover:bg-neutral-800/40 transition-all rounded-full" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span>Cerrar Sesión</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="lg:pl-72 pt-20 h-screen w-full relative overflow-hidden bg-surface">
+<!-- Simplified Editorial Map View -->
+<div class="absolute inset-0 z-0">
+<div class="w-full h-full bg-[#0e0e0e] relative opacity-90">
+<!-- Abstract Map Pattern -->
+<div class="absolute inset-0 map-gradient"></div>
+<img class="w-full h-full object-cover mix-blend-overlay opacity-30 grayscale brightness-50" data-alt="abstract dark architectural map view with neon lime light trails and geometric patterns on a charcoal background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4xzVEwMBwL6fL3iEFsO76Q0XZqQoDMj_lVMT0NfKPV1q3kmwlK5fXdDTZHdBLg7WmLXIiT6-wou7E98QNpVm-AjMrhttvv-kV97UD3pi4ySCBQu8vMRpMd99pJP3uSaEiWtveSDu-DOL0l_ZFQjyUE_E4VR480ucL2qIq2hk0zkr3GQbJqy9h-TJf4Xu2HZq0tzv_sziehglhHLT-bILc46Yc19InekEtFwTf7rfKeXku_uDiQEItfjs30aLNzOo5PuzSJxzjb5U"/>
+<!-- Map UI Elements (Drones/Points) -->
+<div class="absolute top-[40%] left-[60%] w-4 h-4 bg-primary rounded-full shadow-[0_0_20px_#d2fd6e]">
+<div class="absolute -top-12 -left-12 glass-panel p-3 rounded-xl border border-primary/20">
+<div class="text-[10px] uppercase font-bold text-primary">Drone 082</div>
+</div>
+</div>
+<div class="absolute top-[55%] left-[35%] w-3 h-3 bg-secondary rounded-full shadow-[0_0_15px_#e7e959] opacity-60"></div>
+<div class="absolute top-[25%] left-[45%] w-3 h-3 bg-secondary rounded-full shadow-[0_0_15px_#e7e959] opacity-60"></div>
+</div>
+</div>
+<!-- Dashboard Overlay UI -->
+<div class="relative z-10 h-full w-full p-8 flex flex-col md:flex-row gap-8">
+<!-- Left Side: Order Focus -->
+<div class="flex-1 flex flex-col justify-end">
+<div class="max-w-xl space-y-6">
+<div class="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 px-4 py-1.5 rounded-full">
+<span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+<span class="text-primary text-[10px] uppercase tracking-widest font-bold font-label">Activo: Repartidor Premium</span>
+</div>
+<h1 class="headline-font text-5xl md:text-7xl font-bold tracking-tighter leading-none text-white">
+                        RUTAS <span class="text-primary italic">VELOCES</span><br/>DESTILADAS.
+                    </h1>
+<p class="text-neutral-400 font-body text-lg leading-relaxed max-w-md">
+                        Gestión de flota autónoma y entregas premium en tiempo real. Selecciona tu próxima carga y optimiza tu trayectoria.
+                    </p>
+<!-- Large CTA -->
+<button class="group flex items-center gap-4 bg-gradient-to-br from-primary to-primary-container text-on-primary px-8 py-5 rounded-full font-bold text-xl uppercase tracking-widest shadow-[0_10px_30px_rgba(210,253,110,0.3)] hover:scale-105 transition-all">
+<span>Tomar Pedido</span>
+<span class="material-symbols-outlined group-hover:translate-x-2 transition-transform">trending_flat</span>
+</button>
+</div>
+</div>
+<!-- Right Side: Available Orders List -->
+<div class="w-full md:w-[400px] flex flex-col gap-4 overflow-y-auto pb-24 md:pb-8">
+<div class="flex justify-between items-end mb-2">
+<h3 class="headline-font text-xl font-bold uppercase tracking-widest">Available Orders</h3>
+<span class="text-primary text-xs font-bold font-label">3 PENDIENTES</span>
+</div>
+<!-- Order Card 1 -->
+<div class="glass-panel p-6 rounded-lg border border-white/5 hover:border-primary/30 transition-all group relative overflow-hidden">
+<div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full -mr-12 -mt-12 transition-all group-hover:bg-primary/10"></div>
+<div class="flex justify-between items-start mb-4">
+<div>
+<div class="text-white font-bold text-lg headline-font">Ginebra Artesanal X4</div>
+<div class="text-neutral-500 text-xs font-label">#ORD-88291</div>
+</div>
+<div class="bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-bold">$42.50</div>
+</div>
+<div class="flex items-center gap-4 text-neutral-400 text-sm mb-6">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">near_me</span>
+<span>2.4 km</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span>12 min</span>
+</div>
+</div>
+<button class="w-full py-3 border border-primary/40 text-primary rounded-full text-xs font-bold uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-colors">Ver Detalles</button>
+</div>
+<!-- Order Card 2 -->
+<div class="glass-panel p-6 rounded-lg border border-white/5 hover:border-primary/30 transition-all group">
+<div class="flex justify-between items-start mb-4">
+<div>
+<div class="text-white font-bold text-lg headline-font">Pack Premium Single Malt</div>
+<div class="text-neutral-500 text-xs font-label">#ORD-88304</div>
+</div>
+<div class="bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-bold">$38.00</div>
+</div>
+<div class="flex items-center gap-4 text-neutral-400 text-sm mb-6">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">near_me</span>
+<span>4.1 km</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span>18 min</span>
+</div>
+</div>
+<button class="w-full py-3 border border-primary/40 text-primary rounded-full text-xs font-bold uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-colors">Ver Detalles</button>
+</div>
+<!-- Order Card 3 (Bento-style variation) -->
+<div class="bg-surface-container-high p-6 rounded-lg border border-white/5 hover:border-secondary/30 transition-all relative">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-full overflow-hidden bg-neutral-800">
+<img class="w-full h-full object-cover" data-alt="Close-up of a high-end whiskey bottle with golden liquid and detailed label" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZXm-H9cCowIrhRFAKxe8hJ-Zg-SYsZ71CB0_wUSdzWD7p8D9fRl2eyEfVNm2BSJ8jA5u2o5GAjJjcbtrb1S7JsHBbqoX9saXUnl2rwVygO_0EVTWyPVNwqaIZAbe1w-sQIdJ8jSgzAqF0UBj3yK0GUHxQUQX956yxcEzrJDDpJ_Dq6R4ylrxJaPCdCM3071r2YSjiQDY8P-A9BaIDpFp7ZpKn1BTzmsLVeNDANUFXLU6Ori25JRxJY0Ggy71VjbCWpGuenqait9U"/>
+</div>
+<div>
+<div class="text-white font-bold headline-font">Reserva Especial</div>
+<div class="text-secondary text-[10px] font-bold uppercase tracking-tighter">URGENTE • FLASH DELIVERY</div>
+</div>
+</div>
+<div class="flex justify-between items-center pt-2">
+<div class="text-neutral-400 text-xs">1.1 km de distancia</div>
+<div class="text-secondary font-black">$55.00</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar (Mobile) -->
+<nav class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md rounded-full border border-white/10 bg-[#0E0E0E]/80 backdrop-blur-2xl flex justify-around items-center px-2 py-2 z-50 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+<a class="bg-[#D2FD6E] text-black rounded-full p-3 shadow-[0_0_15px_rgba(210,253,110,0.6)] transition-transform hover:scale-110 active:scale-90" href="#">
+<span class="material-symbols-outlined">home</span>
+</a>
+<a class="text-neutral-500 p-3 transition-transform hover:scale-110 active:scale-90" href="#">
+<span class="material-symbols-outlined">explore</span>
+</a>
+<a class="text-neutral-500 p-3 transition-transform hover:scale-110 active:scale-90" href="#">
+<span class="material-symbols-outlined">local_shipping</span>
+</a>
+<a class="text-neutral-500 p-3 transition-transform hover:scale-110 active:scale-90" href="#">
+<span class="material-symbols-outlined">person</span>
+</a>
+</nav>
+</body></html>

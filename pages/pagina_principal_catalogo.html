@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LIQUID VELOCITY | Premium Spirits</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#fdff6d",
+                        "primary-fixed": "#d0fa6c",
+                        "surface-container-highest": "#262626",
+                        "inverse-primary": "#4d6800",
+                        "tertiary-dim": "#efd841",
+                        "on-tertiary-fixed-variant": "#6a5e00",
+                        "secondary-dim": "#d9db4c",
+                        "on-tertiary": "#685c00",
+                        "surface-container-lowest": "#000000",
+                        "on-primary-fixed-variant": "#4f6a00",
+                        "primary": "#d2fd6e",
+                        "inverse-on-surface": "#565555",
+                        "on-background": "#ffffff",
+                        "primary-container": "#87ad26",
+                        "on-primary-fixed": "#374b00",
+                        "error-dim": "#d53d18",
+                        "surface-bright": "#2c2c2c",
+                        "on-tertiary-container": "#5f5400",
+                        "tertiary-container": "#fee74f",
+                        "secondary-fixed-dim": "#d9db4c",
+                        "inverse-surface": "#fcf9f8",
+                        "outline": "#767575",
+                        "error": "#ff7351",
+                        "tertiary": "#fff4c3",
+                        "on-primary": "#486100",
+                        "on-tertiary-fixed": "#4a4100",
+                        "secondary": "#e7e959",
+                        "on-secondary-fixed-variant": "#5e5f00",
+                        "surface": "#0e0e0e",
+                        "primary-dim": "#c4ef62",
+                        "surface-dim": "#0e0e0e",
+                        "surface-variant": "#262626",
+                        "error-container": "#b92902",
+                        "secondary-container": "#616200",
+                        "on-primary-container": "#1b2700",
+                        "on-surface-variant": "#adaaaa",
+                        "surface-container-low": "#131313",
+                        "surface-container-high": "#1f2020",
+                        "surface-tint": "#d2fd6e",
+                        "on-error": "#450900",
+                        "on-error-container": "#ffd2c8",
+                        "outline-variant": "#484848",
+                        "on-surface": "#ffffff",
+                        "tertiary-fixed-dim": "#efd841",
+                        "background": "#0e0e0e",
+                        "secondary-fixed": "#e7e959",
+                        "on-secondary": "#545500",
+                        "tertiary-fixed": "#fee74f",
+                        "on-secondary-fixed": "#414200",
+                        "primary-fixed-dim": "#c2ec5f",
+                        "surface-container": "#191a1a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; background-color: #0e0e0e; color: #ffffff; }
+        h1, h2, h3, .headline { font-family: 'Space Grotesk', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .organic-wave {
+            mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1440 320' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,160L48,176C96,192,192,224,288,213.3C384,203,480,149,576,149.3C672,149,768,203,864,202.7C960,203,1056,149,1152,117.3C1248,85,1344,75,1392,69.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z' fill='%23d2fd6e'/%3E%3C/svg%3E");
+            mask-size: cover;
+            mask-repeat: no-repeat;
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden selection:bg-primary selection:text-on-primary">
+<nav class="fixed top-0 w-full flex justify-between items-center px-8 h-20 bg-neutral-950/60 backdrop-blur-3xl z-50 bg-gradient-to-b from-neutral-900 to-transparent shadow-[0_0_40px_rgba(210,253,110,0.05)]">
+<div class="text-2xl font-black italic tracking-tighter text-[#D2FD6E]">LIQUID VELOCITY</div>
+<div class="hidden md:flex items-center gap-8 font-['Space_Grotesk'] uppercase tracking-widest text-xs font-bold">
+<a class="text-[#D2FD6E] border-b-2 border-[#D2FD6E] pb-1" href="#">Catálogo</a>
+<a class="text-neutral-400 hover:text-neutral-100 transition-colors" href="#">Premium</a>
+<a class="text-neutral-400 hover:text-neutral-100 transition-colors" href="#">Suscripción</a>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<input class="bg-surface-container-high border-none rounded-full py-2 px-6 text-sm focus:ring-2 focus:ring-primary w-64 text-on-surface" placeholder="Search spirits..." type="text"/>
+</div>
+<button class="p-2 hover:bg-neutral-800/50 rounded-full transition-all active:scale-95 duration-150 text-neutral-400">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+</button>
+<button class="p-2 hover:bg-neutral-800/50 rounded-full transition-all active:scale-95 duration-150 text-neutral-400">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 hover:bg-neutral-800/50 rounded-full transition-all active:scale-95 duration-150 text-[#D2FD6E]">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</nav>
+<main class="pt-20">
+<section class="relative min-h-[819px] flex items-center px-8 lg:px-24 overflow-hidden">
+<div class="absolute top-0 right-0 w-1/2 h-full bg-primary opacity-10 blur-[120px] -z-10"></div>
+<div class="max-w-4xl z-10">
+<span class="inline-block px-4 py-1 bg-primary text-on-primary rounded-full font-label text-[10px] font-bold uppercase tracking-widest mb-6">
+                    Autonomous Delivery Enabled
+                </span>
+<h1 class="text-6xl md:text-8xl font-black headline italic tracking-tighter leading-none mb-8">
+                    LIQUID <br/>
+<span class="text-primary">VELOCITY.</span>
+</h1>
+<p class="text-lg md:text-xl text-on-surface-variant max-w-xl leading-relaxed mb-10 font-body">
+                    The intersection of artisan distillation and kinetic tech. Premium spirits delivered by autonomous flight within 15 minutes.
+                </p>
+<div class="flex gap-4">
+<button class="px-10 py-4 bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold rounded-full shadow-[0_0_20px_rgba(210,253,110,0.3)] hover:scale-105 transition-transform">
+                        Explore Catalog
+                    </button>
+<button class="px-10 py-4 border border-outline-variant text-on-surface font-bold rounded-full hover:bg-surface-container-highest transition-colors">
+                        View Limited Ed.
+                    </button>
+</div>
+</div>
+<div class="hidden lg:block absolute right-12 top-1/2 -translate-y-1/2 w-[450px]">
+<div class="relative">
+<div class="absolute -inset-10 bg-primary/20 blur-3xl rounded-full"></div>
+<img class="relative rounded-lg rotate-3 shadow-2xl z-10" data-alt="A premium tall bottle of boutique gin with a vibrant lime and botanical label design, floating in a dark atmospheric studio setting with neon green backlighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLRkesjth4IaIxlw9nO0-mFNrILqfHu1KZWmI6h-ZeIoSlxyUXQdW2qXSlfI0f4cUrAksM0VeZcAJYlseo4V1OOKhOqiC8U_79cuR8TtsErSniKz0IJojWGf5Yyku1JZWqWy7x3j8PJNEzzbC7BQwFjEuCj05GqpoqkU749J90bffXyF57G-SrfDREf3c8USAzVylf90SP8i1r0LstOR9jvyP97fNAzkb5bkDzFkMPWFIHo05YvvK9yN2hDO7pLVYZZ-DgokrYCII"/>
+</div>
+</div>
+</section>
+<section class="py-24 px-8 lg:px-24">
+<div class="flex justify-between items-end mb-16">
+<div>
+<h2 class="text-4xl headline font-bold mb-4">Limited Editions</h2>
+<p class="text-on-surface-variant font-body">Exclusive drops from our master distillers.</p>
+</div>
+<div class="flex gap-2">
+<button class="w-12 h-12 flex items-center justify-center rounded-full border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary transition-all">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-12 h-12 flex items-center justify-center rounded-full border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary transition-all">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="group relative bg-surface-container-high rounded-lg overflow-hidden flex flex-col md:flex-row h-auto md:h-[400px]">
+<div class="w-full md:w-1/2 overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="A vibrant green cocktail with dark purple smoke swirling around it, presented in a high-end crystal glass for a Halloween theme." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCu-TPIWQoyJbpibm-H_qSdqNFxEP0PO7xRg506AKOTj7tHLAxzkEfd9x07Ni5hCEEK4gYb8-kvBQK-R8E18hkwT37-dPeknj3TTEPMk6bYxiQ3u5tz1BIIzh1NNdXiT_UVy4a2PeMBrIJ9tDznsKOafSaBziG3cLulRC-Db38f9k3VXOOzvjfwsjHHfmqH2f-91_w6rzCxwiw-9iAeXmEfZm-uLELgJQa615qrcFX7TSuRjJyYwdXum_urqNmUqf6eZFcVNxRZJF0"/>
+</div>
+<div class="p-10 flex flex-col justify-between w-full md:w-1/2">
+<div>
+<span class="text-primary font-bold text-xs uppercase tracking-widest mb-4 block">Seasonal Feature</span>
+<h3 class="text-3xl headline font-bold mb-4">Halloween Shake</h3>
+<p class="text-on-surface-variant text-sm mb-6 leading-relaxed">
+                                A spectral blend of cold-pressed botanicals, activated charcoal, and our signature neon lime liqueur.
+                            </p>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-2xl font-black headline">$85.00</span>
+<button class="bg-primary text-on-primary p-3 rounded-full hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="add_shopping_cart">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group relative bg-surface-container-high rounded-lg overflow-hidden flex flex-col md:flex-row h-auto md:h-[400px]">
+<div class="w-full md:w-1/2 overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="Close-up of a rare dark whisky bottle with gold accents on a black marble surface, atmospheric lighting casting sharp shadows." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDH1LVn3aW2zY_HAhNuP39c357BoSkMvH5DqzIEAyVcqUTuW8OJDoZnlDGs8adybOnpCXhXRXeB7n90XyyCvm07dreFO3SRK2rXuf3eY7uCF6WjMj3gB_ESwLfRP6Z_g-pYR4G9esH8a6iwv23Q5C9k4BTYSW2cY0p8ca8PT8WzbWJnwwD5blYg1WyY3h9SuIePy_V57KmO_fXV7k2-euV6ub2_ya_FJWU0FIgVBpgaAddzAn_B9jmKf5WCzYAgTJ7CybtgDfblLUc"/>
+</div>
+<div class="p-10 flex flex-col justify-between w-full md:w-1/2">
+<div>
+<span class="text-primary font-bold text-xs uppercase tracking-widest mb-4 block">Limited Supply</span>
+<h3 class="text-3xl headline font-bold mb-4">Obsidian Rye</h3>
+<p class="text-on-surface-variant text-sm mb-6 leading-relaxed">
+                                Double-aged in charred volcanic oak barrels for a profile that is smokier than a midnight fog.
+                            </p>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-2xl font-black headline">$142.00</span>
+<button class="bg-primary text-on-primary p-3 rounded-full hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="add_shopping_cart">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-24 bg-surface-container-low relative">
+<div class="absolute inset-x-0 top-0 h-24 bg-surface organic-wave rotate-180 opacity-5"></div>
+<div class="px-8 lg:px-24">
+<h2 class="text-4xl headline font-bold mb-12 text-center">Shop by Category</h2>
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+<a class="group relative aspect-square rounded-lg overflow-hidden bg-surface-container-highest" href="#">
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
+<img class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A collection of amber whiskey bottles on a dark shelf, sophisticated lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgV2GCwHZER8DIjsnrs3e2nEqhBFp_QjLDcPNpzs3wnBa6DK05mwrLh74_HX3SabjnKKckTbeb_1jXhHZ6jLWHeZzw_dC3lTniAyDP-kXHzRwEE8lrYLJNBmGUXUqBZWmDIGGfk-ODsAIHYApebw5aDEgpC7APSBMorEPuDdw08s5BhZVxeUBtBTJQ3UFEQTuDTQf4swAGEWfGJU5P6-hIOtURTVApqjj6zPdHSbLaDDUUEsOYvl3aUfVAULmXu2BK05rvCXODG00"/>
+<div class="absolute bottom-6 left-6 z-20">
+<h4 class="text-xl headline font-bold">Whisky</h4>
+<span class="text-primary text-[10px] font-bold uppercase tracking-widest">340+ Varieties</span>
+</div>
+</a>
+<a class="group relative aspect-square rounded-lg overflow-hidden bg-surface-container-highest" href="#">
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
+<img class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Elegant gin cocktails with citrus garnish on a dark bar counter." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWR00bRJRmfpO4efaZAKvFYGNoEdcAFvLMKX-zI1lcMtMPcuSuojkyMma_aQk5Efhmoh5GMb4etKa20OIoze6GR3NHZ4XwBnL0tZSIHaCu__xzaLq5KfENFgZuMPBH-aStjxwq1CfmSfuOWmzWzUWzXgDF3xO6WeFKUEPoGNQGBz1Vbs_KIRdlLiMhJVQDvMZWgRS5KKdUAFuA2gOw7mDoJTWfm21b-NaYsxpK6yPcn3qZ3WwM5xx_yy6p3bGMQxgKQEHy4_smYKg"/>
+<div class="absolute bottom-6 left-6 z-20">
+<h4 class="text-xl headline font-bold">Gin</h4>
+<span class="text-primary text-[10px] font-bold uppercase tracking-widest">120+ Varieties</span>
+</div>
+</a>
+<a class="group relative aspect-square rounded-lg overflow-hidden bg-surface-container-highest" href="#">
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
+<img class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Wine cellar with rows of premium wine bottles in dim lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAR6bS7uEhTPPIBcGVLW6YAMZtVINjfruuCqxudHVDIdGiJvFuxm35xs5_2NBAU6sTQJi-b36Wmxr5VH9o-pVAZ7z-evaogt96Zd0cbuykAQ0-GsORfoeD4Ob3wWy26YUTKscqdAE93vZnMaODQxb5g9DLZTJq_OMEIPGodRPaFhpWTN3xDyL-ue880svujAdUXMJ-ie34AVXWAExQ0-35UuQBZ3cj1cccAeyWeiKnPCnWkdZjxJ6Dku3DU5nGdSMvrojjwvZxockk"/>
+<div class="absolute bottom-6 left-6 z-20">
+<h4 class="text-xl headline font-bold">Wine</h4>
+<span class="text-primary text-[10px] font-bold uppercase tracking-widest">850+ Varieties</span>
+</div>
+</a>
+<a class="group relative aspect-square rounded-lg overflow-hidden bg-surface-container-highest" href="#">
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
+<img class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Selection of craft beer glasses with rich foam, backlighting highlighting the liquid colors." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcFKutigJaOaEDlPrA-eYXJkh8VHNloBMxuPitMIzJ13pcM7RqTqC2G8lzs-LLwcOfqzw2juhFOPIaYKciW_JeCUw6sjujjx8UGIBrH9wmKzx1REyKXMZL6BjJiR7pBJmwuHVRAIRwsB7nZ5fbVb_eh701jBdNN0j8JHfk4ul_ilFDgTTiXLEd-Ahw5JyWwE_hgAROHbrIoTXNyDXGQ12DRG-VdDuArQMfWwMJJUd1PiVwpwoMOLD2giwRjMg90Rl2Kk45pyvhj-4"/>
+<div class="absolute bottom-6 left-6 z-20">
+<h4 class="text-xl headline font-bold">Craft Beer</h4>
+<span class="text-primary text-[10px] font-bold uppercase tracking-widest">200+ Varieties</span>
+</div>
+</a>
+</div>
+</div>
+</section>
+<section class="py-24 px-8 lg:px-24">
+<div class="mb-16">
+<h2 class="text-4xl headline font-bold mb-4">Curated Selection</h2>
+<div class="flex flex-wrap gap-4 mt-8">
+<button class="px-6 py-2 bg-primary text-on-primary rounded-full font-bold text-sm">All Products</button>
+<button class="px-6 py-2 border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary rounded-full font-bold text-sm transition-colors">Popular</button>
+<button class="px-6 py-2 border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary rounded-full font-bold text-sm transition-colors">New Arrivals</button>
+<button class="px-6 py-2 border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary rounded-full font-bold text-sm transition-colors">On Sale</button>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+<div class="group">
+<div class="relative aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-high mb-4">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Minimalist product shot of a clear vodka bottle with a neon lime label against a dark grey background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDegGp3vhLkq-6pDtgeX7LI-8Dx4EilrKpWKWg_kLy4t43D3FFMoUq4mWNAajU7irr27nQ4DNSI210pDj3X6WKZST8rvZnEdb_oKTNuzVrcGE6fslbW8eAjVueqd4wQ-3SoAashHExTlSEVamaiV3zPZdqXDqLeW_BOO2KDA1X8KYoFSC3-ms0ylHqsBe2JDALrxPnd-cMzykINJ-0QDccBjSTMAi54iLFeCOnyU8ip4hOlj1Kp8Fwa4nKEiQ_4A2SJBTKD6T9RlE"/>
+<div class="absolute top-4 right-4 bg-black/40 backdrop-blur-md p-2 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined">favorite</span>
+</div>
+</div>
+<h4 class="text-lg font-bold font-headline mb-1">Velocity Vodka</h4>
+<p class="text-on-surface-variant text-xs mb-3 font-label">Quad-distilled / 40% ABV</p>
+<div class="flex items-center justify-between">
+<span class="text-xl font-bold headline text-primary">$49.00</span>
+<button class="w-10 h-10 border border-outline-variant rounded-full flex items-center justify-center hover:bg-primary hover:text-on-primary hover:border-primary transition-all">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+</div>
+<div class="group">
+<div class="relative aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-high mb-4">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Premium tequila bottle with textured glass and a silver cap on a dark stone surface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUQlxY1nKOIdJxcRVabNYjcfq3Sb_o9FXaDzALtX_PZqZwA2akNw7SWlYxRmjMTRdO9jpsTok4919kNLMYIRRDNv5yNPihxtp6iRMea1PY87WYdTt40_2BqoZ91-HjfQR87bO3cIwW7J5kJWouROvTjoLnkZRvudIuyV4RlT7x3rcGkgMZTDYfXNpsjC9HofOa2542-J8_PYIneplrtV-ZE1M9oXpeF0xIfOnNMpdIPXuX0mWDRwQ7w78a0kxvu3cw-cc9DzFkfLk"/>
+</div>
+<h4 class="text-lg font-bold font-headline mb-1">Neon Anejo</h4>
+<p class="text-on-surface-variant text-xs mb-3 font-label">Oak Aged / 38% ABV</p>
+<div class="flex items-center justify-between">
+<span class="text-xl font-bold headline text-primary">$115.00</span>
+<button class="w-10 h-10 border border-outline-variant rounded-full flex items-center justify-center hover:bg-primary hover:text-on-primary hover:border-primary transition-all">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+</div>
+<div class="group">
+<div class="relative aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-high mb-4">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Golden colored craft beer being poured into a tall glass with rising bubbles on a dark background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2DmjlpxZnEagJys5pL261oG6LE2yx0Ztc0pYbb8j2KVm1g21t8SzCg5vnf_9tHmHbSafVxW7mT6HZTZ74fKRm0O5GPg1ifboH6coz90lfVVnKXPpSDR0RpUeL9PWuMmzkvuE4adlneH9JDXvjXt5k83ts5V7vvKgDStAaJxqFIYqU9dOSceaJAT3XzBBmCYooe-kxu4e4f_1wdvSs8865pqHbS4hMRk6e8k7RfKqHM10owZG7WMupJw0m1ptdTBT9H6aR0Hvtc4A"/>
+</div>
+<h4 class="text-lg font-bold font-headline mb-1">Kinetic IPA</h4>
+<p class="text-on-surface-variant text-xs mb-3 font-label">Double Hopped / 6.5% ABV</p>
+<div class="flex items-center justify-between">
+<span class="text-xl font-bold headline text-primary">$12.00</span>
+<button class="w-10 h-10 border border-outline-variant rounded-full flex items-center justify-center hover:bg-primary hover:text-on-primary hover:border-primary transition-all">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+</div>
+<div class="group">
+<div class="relative aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-high mb-4">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Rich red wine in a large crystal glass with wine bottle slightly visible in soft focus." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBKfxyzUOk-Uoujk573f9sTp9u69ZiNEOi8HzGIcUOu7swms7CP_1R-ayb8_Aqj1GYdg6P6Nlbb4J0gExHbTzHCTJTTZcdfy4Wwh4CukDCZ11_weLloWzN4FcfUWawohcZiauqKA4zJWFG6wtorKPT9Ahz1KfDwbfD1KMOIXTKuarYM8v4vwd_n83OlDWwiogF0eN21ykabseWiPc-t3vxAMfN52_xk-Mpi9ELlXU5L4aC-AfMEknUvYcYqB4SYobsxQ92bYQt2hmo"/>
+</div>
+<h4 class="text-lg font-bold font-headline mb-1">Obsidian Red</h4>
+<p class="text-on-surface-variant text-xs mb-3 font-label">Cabernet Sauvignon / 14% ABV</p>
+<div class="flex items-center justify-between">
+<span class="text-xl font-bold headline text-primary">$68.00</span>
+<button class="w-10 h-10 border border-outline-variant rounded-full flex items-center justify-center hover:bg-primary hover:text-on-primary hover:border-primary transition-all">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<footer class="bg-surface-container-low pt-20 pb-32 lg:pb-12 px-8 lg:px-24">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+<div class="col-span-1 lg:col-span-1">
+<div class="text-2xl font-black italic tracking-tighter text-[#D2FD6E] mb-6">LIQUID VELOCITY</div>
+<p class="text-on-surface-variant text-sm leading-relaxed font-body">
+                    Revolutionizing the spirit industry with high-tech logistics and elite craftsmanship. Delivery by drone, standards by design.
+                </p>
+</div>
+<div>
+<h5 class="text-white font-bold headline mb-6">Shop</h5>
+<ul class="space-y-4 text-on-surface-variant text-sm font-label">
+<li><a class="hover:text-primary transition-colors" href="#">Catalog</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Limited Drop</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Subscriptions</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Gift Cards</a></li>
+</ul>
+</div>
+<div>
+<h5 class="text-white font-bold headline mb-6">Support</h5>
+<ul class="space-y-4 text-on-surface-variant text-sm font-label">
+<li><a class="hover:text-primary transition-colors" href="#">Delivery Range</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Help Center</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Privacy Policy</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Contact</a></li>
+</ul>
+</div>
+<div>
+<h5 class="text-white font-bold headline mb-6">Velocity Club</h5>
+<p class="text-on-surface-variant text-sm mb-4 font-body">Get exclusive access to pre-orders and kinetic drops.</p>
+<div class="flex gap-2">
+<input class="bg-surface-container-high border-none rounded-full py-2 px-4 text-sm focus:ring-1 focus:ring-primary w-full" placeholder="Email address" type="email"/>
+<button class="bg-primary text-on-primary p-2 rounded-full px-6 text-sm font-bold">Join</button>
+</div>
+</div>
+</div>
+<div class="pt-8 border-t border-outline-variant flex flex-col md:flex-row justify-between items-center gap-4 text-on-surface-variant text-[10px] uppercase tracking-widest font-label">
+<span>© 2024 LIQUID VELOCITY CORP. ALL RIGHTS RESERVED.</span>
+<div class="flex gap-6">
+<a class="hover:text-white transition-colors" href="#">Instagram</a>
+<a class="hover:text-white transition-colors" href="#">X (Twitter)</a>
+<a class="hover:text-white transition-colors" href="#">Threads</a>
+</div>
+</div>
+</footer>
+<nav class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-[#0E0E0E]/80 backdrop-blur-2xl rounded-full border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex justify-around items-center px-2 py-2 z-50">
+<a class="text-neutral-500 p-3 hover:scale-110 transition-transform active:scale-90 duration-100 flex flex-col items-center" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-['Manrope'] text-[10px] uppercase tracking-tighter mt-1">Inicio</span>
+</a>
+<a class="bg-[#D2FD6E] text-black rounded-full p-3 shadow-[0_0_15px_rgba(210,253,110,0.6)] hover:scale-110 transition-transform active:scale-90 duration-100 flex flex-col items-center" href="#">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="font-['Manrope'] text-[10px] uppercase tracking-tighter mt-1">Explorar</span>
+</a>
+<a class="text-neutral-500 p-3 hover:scale-110 transition-transform active:scale-90 duration-100 flex flex-col items-center" href="#">
+<span class="material-symbols-outlined" data-icon="local_shipping">local_shipping</span>
+<span class="font-['Manrope'] text-[10px] uppercase tracking-tighter mt-1">Pedidos</span>
+</a>
+<a class="text-neutral-500 p-3 hover:scale-110 transition-transform active:scale-90 duration-100 flex flex-col items-center" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-['Manrope'] text-[10px] uppercase tracking-tighter mt-1">Perfil</span>
+</a>
+</nav>
+</body></html>
