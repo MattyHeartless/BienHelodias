@@ -1,0 +1,136 @@
+:host {
+  display: block;
+}
+
+.nav-shell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.nav-brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.4rem;
+  height: 3.4rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgb(210 253 110 / 0.16);
+  background:
+    radial-gradient(circle at top, rgb(210 253 110 / 0.16), transparent 55%),
+    rgb(255 255 255 / 0.04);
+  flex-shrink: 0;
+}
+
+.nav-desktop {
+  align-items: center;
+  gap: 1rem;
+}
+
+.nav-cluster {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.45rem;
+  border-radius: 9999px;
+  border: 1px solid rgb(255 255 255 / 0.06);
+  background: rgb(255 255 255 / 0.035);
+}
+
+.nav-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 0.85rem 1.15rem;
+  color: #d8d8d8;
+  text-decoration: none;
+  transition: 180ms ease;
+  white-space: nowrap;
+}
+
+.nav-pill:hover {
+  border-color: rgb(255 255 255 / 0.08);
+  background: rgb(255 255 255 / 0.05);
+  color: #fff;
+}
+
+.nav-pill-active {
+  border-color: rgb(210 253 110 / 0.5);
+  background: linear-gradient(135deg, rgb(210 253 110 / 0.18), rgb(135 173 38 / 0.18));
+  color: #d2fd6e;
+}
+
+.nav-logout {
+  min-width: fit-content;
+}
+
+.menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 1rem;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  background: rgb(255 255 255 / 0.04);
+  color: #fff;
+}
+
+@media (min-width: 1024px) {
+  .menu-toggle {
+    display: none;
+  }
+}
+
+.mobile-menu {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.9rem;
+  border-top: 1px solid rgb(255 255 255 / 0.06);
+  padding-top: 1rem;
+}
+
+.mobile-nav {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.mobile-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 1.2rem;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  background: rgb(255 255 255 / 0.04);
+  padding: 1rem 1.1rem;
+  color: #fff;
+  text-decoration: none;
+  transition: 180ms ease;
+}
+
+.mobile-nav-item-active {
+  border-color: rgb(210 253 110 / 0.5);
+  background: linear-gradient(135deg, rgb(210 253 110 / 0.18), rgb(135 173 38 / 0.18));
+  color: #d2fd6e;
+}
+
+@media (max-width: 1023px) {
+  .nav-shell {
+    align-items: flex-start;
+  }
+
+  .nav-brand {
+    flex: 1;
+  }
+}

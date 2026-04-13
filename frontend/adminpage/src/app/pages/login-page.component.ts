@@ -47,7 +47,7 @@ export class LoginPageComponent {
         }
 
         this.submitting.set(false);
-        void this.router.navigate(['/dashboard']);
+        void this.router.navigate(['/dashboard/overview']);
       },
       error: (error) => {
         this.error.set(getApiErrorMessage(error, 'No fue posible iniciar sesion.'));

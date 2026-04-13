@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#0e0e0e",
+                        "primary-fixed": "#d0fa6c",
+                        "secondary-fixed-dim": "#d9db4c",
+                        "surface-variant": "#262626",
+                        "on-primary-container": "#1b2700",
+                        "on-error-container": "#ffd2c8",
+                        "background": "#0e0e0e",
+                        "surface-tint": "#d2fd6e",
+                        "on-error": "#450900",
+                        "on-tertiary-fixed-variant": "#6a5e00",
+                        "inverse-on-surface": "#565555",
+                        "tertiary-fixed": "#fee74f",
+                        "primary-container": "#87ad26",
+                        "secondary-fixed": "#e7e959",
+                        "primary-fixed-dim": "#c2ec5f",
+                        "primary-dim": "#c4ef62",
+                        "on-primary": "#486100",
+                        "tertiary-container": "#fee74f",
+                        "outline-variant": "#484848",
+                        "primary": "#d2fd6e",
+                        "inverse-surface": "#fcf9f8",
+                        "surface-container-low": "#131313",
+                        "error": "#ff7351",
+                        "secondary-container": "#616200",
+                        "on-surface-variant": "#adaaaa",
+                        "secondary-dim": "#d9db4c",
+                        "tertiary-fixed-dim": "#efd841",
+                        "on-secondary-container": "#fdff6d",
+                        "outline": "#767575",
+                        "inverse-primary": "#4d6800",
+                        "on-secondary-fixed": "#414200",
+                        "on-surface": "#ffffff",
+                        "surface-dim": "#0e0e0e",
+                        "surface-bright": "#2c2c2c",
+                        "error-container": "#b92902",
+                        "on-primary-fixed": "#374b00",
+                        "secondary": "#e7e959",
+                        "tertiary-dim": "#efd841",
+                        "on-background": "#ffffff",
+                        "surface-container": "#191a1a",
+                        "on-secondary": "#545500",
+                        "on-tertiary": "#685c00",
+                        "on-tertiary-container": "#5f5400",
+                        "error-dim": "#d53d18",
+                        "surface-container-high": "#1f2020",
+                        "on-primary-fixed-variant": "#4f6a00",
+                        "tertiary": "#fff4c3",
+                        "surface-container-lowest": "#000000",
+                        "on-tertiary-fixed": "#4a4100",
+                        "on-secondary-fixed-variant": "#5e5f00",
+                        "surface-container-highest": "#262626"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .neon-glow {
+            box-shadow: 0 0 50px -10px rgba(210, 253, 110, 0.1);
+        }
+        .primary-gradient {
+            background: linear-gradient(135deg, #D2FD6E 0%, #87AD26 100%);
+        }
+    </style>
+</head>
+<body class="bg-background font-body text-on-background antialiased min-h-screen flex flex-col items-center justify-center overflow-hidden">
+<main class="relative z-10 w-full min-h-screen grid grid-cols-1 lg:grid-cols-2">
+<div class="relative hidden lg:flex flex-col justify-between p-20 overflow-hidden">
+<div class="absolute inset-0 z-0">
+<img alt="Premium cocktail glass with atmospheric neon lighting" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMsIAgvpuVykgsiDsJ41FbXgrrr1g-dSiL6ubi1b4yVPEC9qboge4jnwX20z-7E6VRKrFyqRvTcZPBgPCYUFQd3Biz5FdC2GgkgNEfPJDfAmL_vT_H2prhVErw4D1hZltiYevgk3eJNOsJExrz-ZJu4_B5dUMk-OPtq5qB84ZeS6R-vKQvy9_gdu-m6t0XzyyLhjmSfoewzW0K6hYWVgE9emZrLXvIpVy9tAqS5Z00xJj0ZStGztOKjJxhb09XIfdPX8D19NS0iIE"/>
+<div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/60"></div>
+</div>
+<div class="relative z-10 space-y-4">
+<h1 class="font-headline text-[6rem] font-bold leading-[0.85] tracking-[-0.05em] text-primary">
+                    LIQUID<br/>VELOCITY
+                </h1>
+<p class="font-label text-sm uppercase tracking-[0.3em] text-primary/80">
+                    Autonomous Spirit Logistics &amp; Delivery
+                </p>
+</div>
+<div class="relative z-10 max-w-md">
+<div class="flex items-center gap-3 mb-4">
+<span class="w-12 h-[1px] bg-primary"></span>
+<span class="text-xs font-label uppercase tracking-widest text-primary font-semibold">System Status: Active</span>
+</div>
+<p class="text-3xl font-headline font-light text-white leading-tight">
+                    Precision delivery for the world's most exclusive spirits.
+                </p>
+</div>
+</div>
+<div class="flex items-center justify-center p-8 bg-background lg:bg-transparent relative">
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[60%] bg-primary/5 blur-[120px] rounded-full pointer-events-none"></div>
+<div class="w-full max-w-md bg-surface-container-high/80 backdrop-blur-2xl neon-glow rounded-xl p-8 md:p-12 border border-white/5 relative z-10">
+<div class="mb-12 lg:hidden">
+<h2 class="font-headline text-4xl font-bold text-primary tracking-tighter">LIQUID VELOCITY</h2>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant mt-2 opacity-60">Logistics Portal</p>
+</div>
+<div class="space-y-1 mb-10">
+<h3 class="font-headline text-2xl font-medium text-on-surface">Portal de Acceso</h3>
+<p class="text-on-surface-variant text-sm">Ingrese sus credenciales de administrador</p>
+</div>
+<form class="space-y-8">
+<div class="group flex flex-col gap-2">
+<label class="font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant group-focus-within:text-primary transition-colors" for="email">
+                            Email Corporativo
+                        </label>
+<div class="relative">
+<input class="w-full bg-transparent border-none border-b-2 border-outline-variant/30 focus:ring-0 focus:border-primary text-on-surface py-3 px-0 transition-all placeholder:text-on-surface-variant/20" id="email" placeholder="nombre@liquidvelocity.com" type="email"/>
+</div>
+</div>
+<div class="group flex flex-col gap-2">
+<label class="font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant group-focus-within:text-primary transition-colors" for="password">
+                            Contraseña
+                        </label>
+<div class="relative flex items-center">
+<input class="w-full bg-transparent border-none border-b-2 border-outline-variant/30 focus:ring-0 focus:border-primary text-on-surface py-3 px-0 transition-all placeholder:text-on-surface-variant/20" id="password" placeholder="••••••••" type="password"/>
+<button class="absolute right-0 text-on-surface-variant hover:text-primary transition-colors mb-2" type="button">
+<span class="material-symbols-outlined text-lg">visibility</span>
+</button>
+</div>
+</div>
+<div class="flex items-center justify-between pt-2">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-4 h-4 rounded border-outline-variant/50 bg-surface-container-highest text-primary focus:ring-offset-0 focus:ring-primary/20" type="checkbox"/>
+<span class="text-xs text-on-surface-variant group-hover:text-on-surface transition-colors">Recordarme</span>
+</label>
+<a class="text-xs text-primary/80 hover:text-primary transition-colors font-medium" href="#">¿Olvidaste tu contraseña?</a>
+</div>
+<button class="w-full primary-gradient text-on-primary font-headline font-bold uppercase tracking-[0.15em] py-5 rounded-full hover:shadow-[0_0_30px_rgba(210,253,110,0.4)] transition-all transform hover:-translate-y-0.5 active:translate-y-0" type="submit">
+                        INGRESAR
+                    </button>
+</form>
+<div class="mt-14 pt-8 border-t border-outline-variant/10 flex flex-col items-center gap-5">
+<p class="text-xs text-on-surface-variant">¿Aún no tienes acceso al portal?</p>
+<a class="font-label text-[10px] uppercase tracking-[0.25em] text-on-surface border border-outline-variant/40 px-10 py-4 rounded-full hover:bg-white/5 hover:border-primary/50 transition-all" href="#">
+                        Solicitar Acceso
+                    </a>
+</div>
+</div>
+</div>
+</main>
+<footer class="fixed bottom-6 w-full px-10 flex flex-col md:flex-row justify-between items-center z-20 pointer-events-none gap-4">
+<div class="flex gap-4 items-center bg-black/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/5">
+<span class="font-label text-[9px] tracking-widest text-on-surface-variant/60">LV-ADMIN-V4.2</span>
+<span class="w-1 h-1 rounded-full bg-primary/40"></span>
+<span class="font-label text-[9px] tracking-widest text-on-surface-variant/60 uppercase">Secure Terminal</span>
+</div>
+<div class="font-label text-[9px] tracking-widest text-on-surface-variant/40 bg-black/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/5">
+            © 2024 LIQUID VELOCITY SAAS. ALL RIGHTS RESERVED.
+        </div>
+</footer>
+
+</body></html>

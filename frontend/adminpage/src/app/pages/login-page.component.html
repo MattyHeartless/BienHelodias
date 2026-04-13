@@ -1,39 +1,41 @@
-<div class="grid min-h-screen lg:grid-cols-[1.05fr_0.95fr]">
-  <section class="relative overflow-hidden bg-surface-container-low px-8 py-10 lg:px-14 lg:py-16">
-    <div class="absolute -left-16 top-10 h-64 w-64 rounded-full bg-primary/10 blur-[90px]"></div>
-    <div class="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-secondary/8 blur-[110px]"></div>
+<div class="grid min-h-screen lg:grid-cols-2">
+  <section class="relative hidden overflow-hidden lg:flex lg:flex-col lg:justify-between lg:p-20">
+    <div class="absolute inset-0">
+      <img
+        alt="Premium cocktail glass with atmospheric neon lighting"
+        class="h-full w-full object-cover"
+        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMsIAgvpuVykgsiDsJ41FbXgrrr1g-dSiL6ubi1b4yVPEC9qboge4jnwX20z-7E6VRKrFyqRvTcZPBgPCYUFQd3Biz5FdC2GgkgNEfPJDfAmL_vT_H2prhVErw4D1hZltiYevgk3eJNOsJExrz-ZJu4_B5dUMk-OPtq5qB84ZeS6R-vKQvy9_gdu-m6t0XzyyLhjmSfoewzW0K6hYWVgE9emZrLXvIpVy9tAqS5Z00xJj0ZStGztOKjJxhb09XIfdPX8D19NS0iIE"
+      />
+      <div class="absolute inset-0 bg-linear-to-r from-black/80 via-black/40 to-transparent"></div>
+      <div class="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-black/60"></div>
+    </div>
 
-    <div class="relative z-10 max-w-2xl">
-      <p class="eyebrow">Admin Console</p>
-      <h1 class="mt-4 font-display text-6xl font-black tracking-[-0.06em] text-white">Liquid Velocity Control Layer.</h1>
-      <p class="mt-6 max-w-xl text-lg leading-8 text-on-surface-variant">
-        Consola administrativa separada del storefront y del panel de delivery. El backend mantiene la autoridad sobre reglas,
-        permisos y transiciones de dominio.
+    <div class="relative z-10 space-y-4">
+      <h1 class="font-display text-[6rem] leading-[0.85] font-bold tracking-[-0.05em] text-primary">
+        LIQUID<br />VELOCITY
+      </h1>
+      <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary/80">
+        Autonomous Spirit Logistics &amp; Delivery
       </p>
+    </div>
 
-      <div class="mt-12 grid gap-4 sm:grid-cols-2">
-        <div class="glass-panel p-5">
-          <p class="eyebrow">SuperAdmin</p>
-          <p class="mt-3 leading-7 text-on-surface-variant">
-            Alta de tiendas, ajuste de suscripcion y asignacion inicial de administradores.
-          </p>
-        </div>
-        <div class="glass-panel p-5">
-          <p class="eyebrow">StoreAdmin</p>
-          <p class="mt-3 leading-7 text-on-surface-variant">
-            Dashboard operativo, visibilidad del catalogo y carga de productos.
-          </p>
-        </div>
+    <div class="relative z-10 max-w-md">
+      <div class="mb-4 flex items-center gap-3">
+        <span class="h-px w-12 bg-primary"></span>
+        <span class="text-xs font-semibold uppercase tracking-widest text-primary">System Status: Active</span>
       </div>
+      <p class="font-display text-3xl leading-tight font-light text-white">
+        Precision delivery for the world's most exclusive spirits.
+      </p>
     </div>
   </section>
 
   <section class="flex items-center justify-center px-6 py-10 lg:px-10">
     <div class="w-full max-w-xl rounded-[2.25rem] bg-surface-container-low p-8 shadow-[0_35px_110px_rgba(0,0,0,0.42)]">
-      <p class="eyebrow">Secure Access</p>
+      <p class="eyebrow">Acceso exclusivo</p>
       <h2 class="mt-4 font-display text-4xl font-bold tracking-[-0.05em]">Iniciar sesion</h2>
       <p class="mt-3 text-sm leading-7 text-on-surface-variant">
-        Usa las credenciales seed del backend o tus usuarios reales. La app de delivery no comparte esta sesion.
+        Entra a tu espacio de gestion y continua impulsando la experiencia de compra de tus clientes.
       </p>
 
       <form class="mt-8 space-y-5" [formGroup]="form" (ngSubmit)="submit()">
@@ -54,7 +56,7 @@
 
         <button class="liquid-button w-full !justify-center py-4" type="submit" [disabled]="submitting()">
           <span class="material-symbols-outlined text-base">admin_panel_settings</span>
-          {{ submitting() ? 'Validando...' : 'Entrar al panel' }}
+          {{ submitting() ? 'Validando...' : 'Continuar' }}
         </button>
       </form>
 

@@ -1,0 +1,155 @@
+@if (error()) {
+  <div class="mb-6 rounded-[1.25rem] border border-error/30 bg-error/10 px-4 py-3 text-sm text-white">
+    {{ error() }}
+  </div>
+}
+
+<section class="mb-8 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <p class="eyebrow">Pedidos</p>
+    <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Listado y detalle operativo</h2>
+  </div>
+  <button class="ghost-button" type="button" (click)="loadOrders()">
+    <span class="material-symbols-outlined text-base">refresh</span>
+    Refrescar
+  </button>
+</section>
+
+<section class="mb-8 grid gap-6 md:grid-cols-3">
+  <article class="glass-panel p-6">
+    <p class="eyebrow">Total</p>
+    <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">{{ summary().total }}</p>
+  </article>
+  <article class="glass-panel p-6">
+    <p class="eyebrow">Pendientes</p>
+    <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">{{ summary().pending }}</p>
+  </article>
+  <article class="glass-panel p-6">
+    <p class="eyebrow">Facturacion</p>
+    <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">{{ summary().revenue | currency: 'MXN':'symbol-narrow':'1.0-0' }}</p>
+  </article>
+</section>
+
+<section class="grid gap-8 xl:grid-cols-[460px_1fr]">
+  <article class="glass-panel p-6">
+    <p class="eyebrow">Bandeja</p>
+    <h3 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">Pedidos recientes</h3>
+
+    <div class="mt-6 space-y-4">
+      @if (loading()) {
+        @for (item of [1, 2, 3]; track item) {
+          <div class="h-28 animate-pulse rounded-[1.5rem] bg-white/4"></div>
+        }
+      } @else {
+        @for (order of orders(); track order.id) {
+          <button class="order-list-item w-full text-left" type="button" (click)="selectOrder(order.id)" [class.order-list-item-active]="selectedOrder()?.id === order.id">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <p class="font-display text-lg font-bold tracking-[-0.04em]">{{ order.customerName }}</p>
+                <p class="mt-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">{{ order.id }}</p>
+              </div>
+              <p class="rounded-full bg-white/8 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-primary">
+                {{ orderStatusLabel(order.status) }}
+              </p>
+            </div>
+            <div class="mt-4 flex items-center justify-between gap-4 text-sm text-on-surface-variant">
+              <span>{{ order.createdAtUtc | date: 'dd MMM, HH:mm' }}</span>
+              <span class="font-semibold text-white">{{ order.total | currency: 'MXN':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+          </button>
+        }
+      }
+    </div>
+  </article>
+
+  <article class="glass-panel p-6">
+    <p class="eyebrow">Detalle</p>
+    <h3 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">Informacion del pedido</h3>
+
+    @if (detailLoading()) {
+      <div class="mt-6 h-80 animate-pulse rounded-[1.5rem] bg-white/4"></div>
+    } @else {
+      @if (selectedOrder(); as order) {
+        <div class="mt-6 space-y-6">
+          <div class="grid gap-4 md:grid-cols-2">
+            <div class="rounded-[1.5rem] bg-white/4 p-5">
+              <p class="text-xs uppercase tracking-[0.24em] text-on-surface-variant">Cliente</p>
+              <p class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">{{ order.customerName }}</p>
+              <p class="mt-3 text-sm leading-7 text-on-surface-variant">{{ order.customerPhone }}</p>
+            </div>
+            <div class="rounded-[1.5rem] bg-white/4 p-5">
+              <p class="text-xs uppercase tracking-[0.24em] text-on-surface-variant">Estado actual</p>
+              <p class="mt-3 font-display text-2xl font-bold tracking-[-0.05em] text-primary">{{ orderStatusLabel(order.status) }}</p>
+              <p class="mt-3 text-sm leading-7 text-on-surface-variant">{{ order.updatedAtUtc | date: 'dd MMM yyyy, HH:mm' }}</p>
+            </div>
+          </div>
+
+          <div class="rounded-[1.5rem] bg-white/4 p-5">
+            <p class="text-xs uppercase tracking-[0.24em] text-on-surface-variant">Entrega</p>
+            <p class="mt-3 text-sm leading-7 text-white">{{ order.deliveryAddress }}</p>
+            @if (order.notes) {
+              <p class="mt-4 text-sm leading-7 text-on-surface-variant">Notas: {{ order.notes }}</p>
+            }
+          </div>
+
+          <div class="rounded-[1.5rem] bg-white/4 p-5">
+            <div class="flex items-center justify-between gap-4">
+              <p class="text-xs uppercase tracking-[0.24em] text-on-surface-variant">Items</p>
+              <p class="font-display text-2xl font-bold text-primary">{{ order.total | currency: 'MXN':'symbol-narrow':'1.0-0' }}</p>
+            </div>
+
+            <div class="mt-5 space-y-4">
+              @for (item of order.items; track item.id) {
+                <div class="flex items-start justify-between gap-4 border-b border-white/6 pb-4 last:border-none last:pb-0">
+                  <div>
+                    <p class="font-semibold text-white">{{ item.productNameSnapshot }}</p>
+                    <p class="mt-2 text-sm text-on-surface-variant">{{ item.quantity }} x {{ item.unitPrice | currency: 'MXN':'symbol-narrow':'1.0-0' }}</p>
+                  </div>
+                  <p class="font-semibold text-white">{{ item.subtotal | currency: 'MXN':'symbol-narrow':'1.0-0' }}</p>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="rounded-[1.5rem] bg-white/4 p-5">
+            <p class="text-xs uppercase tracking-[0.24em] text-on-surface-variant">Timeline</p>
+            <div class="mt-5 space-y-5">
+              @for (step of orderTimeline(order); track step.label) {
+                <div class="timeline-step" [class.timeline-step-last]="$last">
+                  <div
+                    class="timeline-dot"
+                    [class.timeline-dot-complete]="step.state === 'complete'"
+                    [class.timeline-dot-current]="step.state === 'current'"
+                    [class.timeline-dot-cancelled]="step.state === 'cancelled'"
+                  ></div>
+                  <div class="min-w-0 flex-1">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                      <p
+                        class="font-semibold"
+                        [class.text-white]="step.state === 'upcoming'"
+                        [class.text-primary]="step.state === 'complete' || step.state === 'current'"
+                        [class.text-error]="step.state === 'cancelled'"
+                      >
+                        {{ step.label }}
+                      </p>
+                      @if (step.timestamp) {
+                        <span class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">
+                          {{ step.timestamp | date: 'dd MMM, HH:mm' }}
+                        </span>
+                      }
+                    </div>
+                    <p class="mt-2 text-sm leading-7 text-on-surface-variant">{{ step.description }}</p>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="mt-6 rounded-[1.5rem] bg-white/4 p-8 text-sm leading-7 text-on-surface-variant">
+          Selecciona un pedido para ver su detalle.
+        </div>
+      }
+    }
+  </article>
+</section>

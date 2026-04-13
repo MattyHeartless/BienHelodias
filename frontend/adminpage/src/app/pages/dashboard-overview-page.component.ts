@@ -1,7 +1,6 @@
-import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import {
   AppRole,
@@ -17,21 +16,19 @@ import { StoreAdminApiService } from '../services/store-admin-api.service';
 import { SuperadminApiService } from '../services/superadmin-api.service';
 
 @Component({
-  selector: 'app-dashboard-page',
+  selector: 'app-dashboard-overview-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, DatePipe],
-  templateUrl: './dashboard-page.component.html',
-  styleUrl: './dashboard-page.component.css'
+  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe],
+  templateUrl: './dashboard-overview-page.component.html',
+  styleUrl: './dashboard-overview-page.component.css'
 })
-export class DashboardPageComponent {
+export class DashboardOverviewPageComponent {
   private readonly session = inject(AdminSessionService);
   private readonly storeAdminApi = inject(StoreAdminApiService);
   private readonly superadminApi = inject(SuperadminApiService);
   private readonly formBuilder = inject(FormBuilder);
-  private readonly router = inject(Router);
 
   readonly role = this.session.role;
-  readonly email = this.session.email;
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly feedback = signal<string | null>(null);
@@ -53,30 +50,30 @@ export class DashboardPageComponent {
     storeId: ['', [Validators.required]]
   });
 
-  readonly productForm = this.formBuilder.nonNullable.group({
-    name: ['', [Validators.required, Validators.minLength(3)]],
-    description: ['', [Validators.required, Validators.minLength(6)]],
-    price: [0, [Validators.required, Validators.min(1)]],
-    stock: [0, [Validators.required, Validators.min(0)]],
-    category: ['', [Validators.required]],
-    imageUrl: ['']
-  });
-
-  readonly storeMetrics = computed(() => [
-    { label: 'Productos', value: this.dashboard()?.totalProducts ?? 0 },
-    { label: 'Activos', value: this.dashboard()?.activeProducts ?? 0 },
-    { label: 'Pedidos', value: this.dashboard()?.totalOrders ?? 0 },
-    { label: 'Revenue', value: this.dashboard()?.revenueInOrders ?? 0, currency: true }
-  ]);
-
   readonly isSuperAdmin = computed(() => this.role() === AppRole.SuperAdmin);
-  readonly isStoreAdmin = computed(() => this.role() === AppRole.StoreAdmin);
   readonly subscriptionOptions = [
     { label: 'Trial', value: SubscriptionStatus.Trial },
     { label: 'Active', value: SubscriptionStatus.Active },
     { label: 'Suspended', value: SubscriptionStatus.Suspended },
     { label: 'Cancelled', value: SubscriptionStatus.Cancelled }
   ];
+
+  readonly storeMetrics = computed(() => [
+    { label: 'Productos', value: this.dashboard()?.totalProducts ?? 0 },
+    { label: 'Activos', value: this.dashboard()?.activeProducts ?? 0 },
+    { label: 'Pedidos', value: this.dashboard()?.totalOrders ?? 0 },
+    { label: 'Pendientes', value: this.dashboard()?.pendingOrders ?? 0 },
+    { label: 'Listos', value: this.dashboard()?.readyOrders ?? 0 },
+    { label: 'En camino', value: this.dashboard()?.onTheWayOrders ?? 0 },
+    { label: 'Revenue', value: this.dashboard()?.revenueInOrders ?? 0, currency: true }
+  ]);
+
+  readonly latestOrders = computed(() => this.orders().slice(0, 5));
+  readonly lowStockProducts = computed(() =>
+    [...this.products()]
+      .sort((a, b) => a.stock - b.stock)
+      .slice(0, 4)
+  );
 
   constructor() {
     this.load();
@@ -98,7 +95,6 @@ export class DashboardPageComponent {
           this.loading.set(false);
         }
       });
-
       return;
     }
 
@@ -174,57 +170,5 @@ export class DashboardPageComponent {
         this.error.set(getApiErrorMessage(error, 'No fue posible actualizar la suscripcion.'));
       }
     });
-  }
-
-  createProduct(): void {
-    this.productForm.markAllAsTouched();
-    if (this.productForm.invalid) {
-      return;
-    }
-
-    const values = this.productForm.getRawValue();
-    this.storeAdminApi
-      .createProduct({
-        name: values.name,
-        description: values.description,
-        price: values.price,
-        stock: values.stock,
-        category: values.category,
-        imageUrl: values.imageUrl || null
-      })
-      .subscribe({
-        next: (response) => {
-          this.feedback.set(`Producto creado: ${response.data.name}`);
-          this.productForm.reset({
-            name: '',
-            description: '',
-            price: 0,
-            stock: 0,
-            category: '',
-            imageUrl: ''
-          });
-          this.load();
-        },
-        error: (error) => {
-          this.error.set(getApiErrorMessage(error, 'No fue posible crear el producto.'));
-        }
-      });
-  }
-
-  toggleProduct(product: ProductDto): void {
-    this.storeAdminApi.updateProductStatus(product.id, !product.isActive).subscribe({
-      next: (response) => {
-        this.feedback.set(`Estado actualizado: ${response.data.name}`);
-        this.load();
-      },
-      error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible actualizar el producto.'));
-      }
-    });
-  }
-
-  logout(): void {
-    this.session.clear();
-    void this.router.navigate(['/login']);
   }
 }

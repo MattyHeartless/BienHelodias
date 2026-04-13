@@ -1,0 +1,195 @@
+@if (error()) {
+  <div class="mb-6 rounded-[1.25rem] border border-error/30 bg-error/10 px-4 py-3 text-sm text-white">
+    {{ error() }}
+  </div>
+}
+
+@if (feedback()) {
+  <div class="mb-6 rounded-[1.25rem] border border-primary/24 bg-primary/10 px-4 py-3 text-sm text-white">
+    {{ feedback() }}
+  </div>
+}
+
+<section class="mb-8 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <p class="eyebrow">Catalogo</p>
+    <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Administra tus productos e inventario</h2>
+  </div>
+  <div class="flex flex-wrap gap-3">
+    <button class="ghost-button" type="button" (click)="loadProducts()">
+      <span class="material-symbols-outlined text-base">refresh</span>
+      Refrescar
+    </button>
+    <button class="liquid-button cursor-pointer" type="button" (click)="openCreateModal()">
+      <span class="material-symbols-outlined text-base">add</span>
+      Nuevo producto
+    </button>
+  </div>
+</section>
+
+<section class="mb-8 grid gap-6 md:grid-cols-3">
+  <article class="glass-panel p-6">
+    <p class="eyebrow">Productos</p>
+    <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">{{ inventorySummary().totalProducts }}</p>
+  </article>
+  <article class="glass-panel p-6">
+    <p class="eyebrow">Activos</p>
+    <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">{{ inventorySummary().activeProducts }}</p>
+  </article>
+  <article class="glass-panel p-6">
+    <p class="eyebrow">Inventario</p>
+    <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">{{ inventorySummary().totalUnits }}</p>
+  </article>
+</section>
+
+<section>
+  <article class="glass-panel p-6">
+    <p class="eyebrow">Inventario actual</p>
+    <h3 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">Productos disponibles</h3>
+
+    <div class="mt-6 grid gap-5 md:grid-cols-2">
+      @if (loading()) {
+        @for (item of [1, 2, 3, 4]; track item) {
+          <div class="h-64 animate-pulse rounded-[1.5rem] bg-white/4"></div>
+        }
+      } @else {
+        @for (product of products(); track product.id) {
+          <article class="product-card">
+            <div class="rounded-[1.35rem] bg-surface-container-high px-5 py-5">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <p class="eyebrow">{{ product.category }}</p>
+                  <h4 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">{{ product.name }}</h4>
+                </div>
+                <span
+                  class="rounded-full px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.22em]"
+                  [ngClass]="product.isActive ? 'product-badge-active' : 'product-badge-hidden'"
+                >
+                  {{ product.isActive ? 'Activo' : 'Oculto' }}
+                </span>
+              </div>
+              <p class="mt-4 text-sm leading-7 text-on-surface-variant">{{ product.description }}</p>
+            </div>
+
+            <div class="mt-5 flex items-center justify-between gap-4">
+              <div>
+                <p class="font-display text-3xl font-bold text-primary">{{ product.price | currency: 'MXN':'symbol-narrow':'1.0-0' }}</p>
+                <p class="mt-1 text-xs uppercase tracking-[0.24em] text-on-surface-variant">Stock {{ product.stock }}</p>
+              </div>
+              <p class="text-right text-xs uppercase tracking-[0.22em] text-on-surface-variant">
+                Actualizado
+                <span class="mt-1 block text-white">{{ product.updatedAtUtc | date: 'dd MMM' }}</span>
+              </p>
+            </div>
+
+            <div class="mt-5 flex flex-wrap gap-3">
+              <button class="ghost-button" type="button" (click)="editProduct(product)">Editar</button>
+              <button class="ghost-button" type="button" (click)="toggleProduct(product)">
+                {{ product.isActive ? 'Ocultar' : 'Activar' }}
+              </button>
+              <button class="danger-button" type="button" (click)="deleteProduct(product)">Eliminar</button>
+            </div>
+          </article>
+        }
+      }
+    </div>
+  </article>
+</section>
+
+@if (modalOpen()) {
+  <div class="modal-backdrop" (click)="resetForm()">
+    <div class="modal-panel" (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <p class="eyebrow">{{ isEditing() ? 'Editar producto' : 'Nuevo producto' }}</p>
+          <h3 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">
+            {{ isEditing() ? 'Actualiza datos del inventario' : 'Alta de producto' }}
+          </h3>
+        </div>
+        <button class="ghost-button" type="button" (click)="resetForm()">Cerrar</button>
+      </div>
+
+      <form class="mt-6 space-y-4" [formGroup]="productForm" (ngSubmit)="saveProduct()">
+        <div class="field-block">
+          <label class="field-label" for="product-name">Nombre del producto</label>
+          <input
+            id="product-name"
+            class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
+            formControlName="name"
+          />
+          <p class="field-help">Escribe el nombre comercial con el que quieres publicar el producto.</p>
+        </div>
+
+        <div class="field-block">
+          <label class="field-label" for="product-description">Descripcion</label>
+          <textarea
+            id="product-description"
+            class="min-h-[52px] w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
+            formControlName="description"
+          ></textarea>
+          <p class="field-help">Resume sabor, presentacion o cualquier dato util para vender mejor el producto.</p>
+        </div>
+
+        <div class="field-block">
+          <label class="field-label" for="product-category">Categoria</label>
+          <input
+            id="product-category"
+            class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
+            formControlName="category"
+            placeholder="Ej. Tequila, Whisky, Vodka, Ron"
+          />
+          <p class="field-help">Usa la familia comercial del producto para organizar mejor el catalogo.</p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div class="field-block">
+            <label class="field-label" for="product-price">Precio de venta</label>
+            <input
+              id="product-price"
+              class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
+              formControlName="price"
+              type="number"
+              placeholder="Ej. 299"
+            />
+            <p class="field-help">Precio que vera el cliente.</p>
+          </div>
+
+          <div class="field-block">
+            <label class="field-label" for="product-stock">Cantidad</label>
+            <input
+              id="product-stock"
+              class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
+              formControlName="stock"
+              type="number"
+              placeholder="Ej. 24"
+            />
+            <p class="field-help">Indica cuantas unidades tienes listas para vender.</p>
+          </div>
+        </div>
+
+        <div class="field-block">
+          <label class="field-label" for="product-image">URL de imagen</label>
+          <input
+            id="product-image"
+            class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
+            formControlName="imageUrl"
+            placeholder="https://tusitio.com/imagenes/producto.jpg"
+          />
+          <p class="field-help">Pega el enlace directo de la imagen que quieres mostrar en la tarjeta del producto.</p>
+        </div>
+
+        <label class="flex items-center gap-3 rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-sm text-white">
+          <input class="h-4 w-4 accent-primary" formControlName="isActive" type="checkbox" />
+          Producto activo en catalogo
+        </label>
+
+        <div class="flex flex-wrap gap-3 pt-2">
+          <button class="ghost-button flex-1" type="button" (click)="resetForm()">Cancelar</button>
+          <button class="liquid-button flex-1 !justify-center" type="submit" [disabled]="submitting()">
+            {{ submitting() ? 'Guardando...' : isEditing() ? 'Actualizar producto' : 'Crear producto' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

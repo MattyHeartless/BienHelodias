@@ -28,3 +28,4 @@ C:\Users\Jair\Documents\My Web Sites\BienHelodias\backend\src\LiquorSaaS.Applica
 C:\Users\Jair\Documents\My Web Sites\BienHelodias\backend\src\LiquorSaaS.Application\obj\Debug\net8.0\refint\LiquorSaaS.Application.dll
 C:\Users\Jair\Documents\My Web Sites\BienHelodias\backend\src\LiquorSaaS.Application\obj\Debug\net8.0\LiquorSaaS.Application.pdb
 C:\Users\Jair\Documents\My Web Sites\BienHelodias\backend\src\LiquorSaaS.Application\obj\Debug\net8.0\ref\LiquorSaaS.Application.dll
+C:\Users\Jair\Documents\My Web Sites\BienHelodias\backend\src\LiquorSaaS.Application\obj\Debug\net8.0\LiquorSaaS.Application.sourcelink.json

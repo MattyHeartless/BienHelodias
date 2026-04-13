@@ -20,6 +20,10 @@ export class StoreAdminApiService {
     });
   }
 
+  getProduct(productId: string): Observable<ApiResponse<ProductDto>> {
+    return this.http.get<ApiResponse<ProductDto>>(`${this.productsUrl}/${productId}`);
+  }
+
   createProduct(request: {
     name: string;
     description: string;
@@ -31,6 +35,25 @@ export class StoreAdminApiService {
     return this.http.post<ApiResponse<ProductDto>>(this.productsUrl, request);
   }
 
+  updateProduct(
+    productId: string,
+    request: {
+      name: string;
+      description: string;
+      price: number;
+      stock: number;
+      category: string;
+      imageUrl: string | null;
+      isActive: boolean;
+    }
+  ): Observable<ApiResponse<ProductDto>> {
+    return this.http.put<ApiResponse<ProductDto>>(`${this.productsUrl}/${productId}`, request);
+  }
+
+  deleteProduct(productId: string): Observable<ApiResponse<null>> {
+    return this.http.delete<ApiResponse<null>>(`${this.productsUrl}/${productId}`);
+  }
+
   updateProductStatus(productId: string, isActive: boolean): Observable<ApiResponse<ProductDto>> {
     return this.http.patch<ApiResponse<ProductDto>>(`${this.productsUrl}/${productId}/status`, { isActive });
   }
@@ -39,5 +62,9 @@ export class StoreAdminApiService {
     return this.http.get<ApiResponse<PagedResult<OrderDto>>>(this.ordersUrl, {
       params: { page: 1, pageSize: 10 }
     });
+  }
+
+  getOrder(orderId: string): Observable<ApiResponse<OrderDto>> {
+    return this.http.get<ApiResponse<OrderDto>>(`${this.ordersUrl}/${orderId}`);
   }
 }

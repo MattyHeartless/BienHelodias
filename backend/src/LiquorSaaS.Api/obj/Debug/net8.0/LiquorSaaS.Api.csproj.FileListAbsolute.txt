@@ -318,3 +318,4 @@ C:\Users\Jair\Documents\My Web Sites\BienHelodias\backend\src\LiquorSaaS.Api\obj
 C:\Users\Jair\Documents\My Web Sites\BienHelodias\backend\src\LiquorSaaS.Api\obj\Debug\net8.0\LiquorSaaS.Api.pdb
 C:\Users\Jair\Documents\My Web Sites\BienHelodias\backend\src\LiquorSaaS.Api\obj\Debug\net8.0\LiquorSaaS.Api.genruntimeconfig.cache
 C:\Users\Jair\Documents\My Web Sites\BienHelodias\backend\src\LiquorSaaS.Api\obj\Debug\net8.0\ref\LiquorSaaS.Api.dll
+C:\Users\Jair\Documents\My Web Sites\BienHelodias\backend\src\LiquorSaaS.Api\obj\Debug\net8.0\LiquorSaaS.Api.sourcelink.json
