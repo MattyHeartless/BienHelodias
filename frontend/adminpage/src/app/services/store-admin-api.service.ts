@@ -1,14 +1,18 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ApiResponse, DashboardDto, PagedResult, ProductDto, OrderDto } from '../core/models';
+import { ApiResponse, BannerDto, DashboardDto, OrderDto, PagedResult, ProductDto, StoreDto } from '../core/models';
+import { AdminSessionService } from '../core/admin-session.service';
 
 @Injectable({ providedIn: 'root' })
 export class StoreAdminApiService {
   private readonly http = inject(HttpClient);
+  private readonly session = inject(AdminSessionService);
   private readonly adminUrl = 'http://localhost:5078/api/admin/dashboard';
   private readonly productsUrl = 'http://localhost:5078/api/products';
   private readonly ordersUrl = 'http://localhost:5078/api/orders';
+  private readonly storesUrl = 'http://localhost:5078/api/stores';
+  private readonly bannersUrl = 'http://localhost:5078/api/banners';
 
   getDashboard(): Observable<ApiResponse<DashboardDto>> {
     return this.http.get<ApiResponse<DashboardDto>>(this.adminUrl);
@@ -66,5 +70,67 @@ export class StoreAdminApiService {
 
   getOrder(orderId: string): Observable<ApiResponse<OrderDto>> {
     return this.http.get<ApiResponse<OrderDto>>(`${this.ordersUrl}/${orderId}`);
+  }
+
+  getMyStore(): Observable<ApiResponse<StoreDto>> {
+    return this.http.get<ApiResponse<StoreDto>>(`${this.storesUrl}/${this.requireStoreId()}`);
+  }
+
+  updateMyStore(request: {
+    name: string;
+    slug: string;
+    isActive: boolean;
+    welcomePhrase: string | null;
+  }): Observable<ApiResponse<StoreDto>> {
+    return this.http.put<ApiResponse<StoreDto>>(`${this.storesUrl}/${this.requireStoreId()}`, request);
+  }
+
+  getBanners(): Observable<ApiResponse<PagedResult<BannerDto>>> {
+    return this.http.get<ApiResponse<PagedResult<BannerDto>>>(this.bannersUrl, {
+      params: { page: 1, pageSize: 24 }
+    });
+  }
+
+  createBanner(request: {
+    header: string;
+    title: string;
+    description: string;
+    wildcard: string | null;
+    expirationDate: string | null;
+    status: boolean;
+  }): Observable<ApiResponse<BannerDto>> {
+    return this.http.post<ApiResponse<BannerDto>>(this.bannersUrl, request);
+  }
+
+  updateBanner(
+    bannerId: string,
+    request: {
+      header: string;
+      title: string;
+      description: string;
+      wildcard: string | null;
+      expirationDate: string | null;
+      status: boolean;
+    }
+  ): Observable<ApiResponse<BannerDto>> {
+    return this.http.put<ApiResponse<BannerDto>>(`${this.bannersUrl}/${bannerId}`, request);
+  }
+
+  deleteBanner(bannerId: string): Observable<ApiResponse<null>> {
+    return this.http.delete<ApiResponse<null>>(`${this.bannersUrl}/${bannerId}`);
+  }
+
+  updateBannerStatus(bannerId: string, status: boolean): Observable<ApiResponse<BannerDto>> {
+    return this.http.patch<ApiResponse<BannerDto>>(`${this.bannersUrl}/${bannerId}/status`, { status });
+  }
+
+  private requireStoreId(): string {
+    const storeId = this.session.storeId();
+
+    if (!storeId) {
+      throw new Error('No se encontro el storeId en la sesion actual.');
+    }
+
+    return storeId;
   }
 }

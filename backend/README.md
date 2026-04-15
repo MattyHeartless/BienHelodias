@@ -56,6 +56,9 @@ Orden de resolución:
 - `POST /api/auth/register-delivery`
 - `GET /api/stores`
 - `POST /api/stores`
+- `GET /api/banners`
+- `GET /api/banners/active`
+- `POST /api/banners`
 - `GET /api/products`
 - `GET /api/products/catalog`
 - `POST /api/products`
@@ -69,6 +72,7 @@ Orden de resolución:
 - `PATCH /api/delivery/availability`
 - `GET /api/admin/dashboard`
 - `GET /api/superadmin/stores`
+- `GET /api/superadmin/stores/{id}/admins`
 - `PATCH /api/superadmin/stores/{id}/subscription`
 
 ## Credenciales seed

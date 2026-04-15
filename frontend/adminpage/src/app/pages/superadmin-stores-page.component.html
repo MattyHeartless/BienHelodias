@@ -1,0 +1,217 @@
+@if (error()) {
+  <div class="mb-6 rounded-[1.25rem] border border-error/30 bg-error/10 px-4 py-3 text-sm text-white">
+    {{ error() }}
+  </div>
+}
+
+@if (feedback()) {
+  <div class="mb-6 rounded-[1.25rem] border border-primary/24 bg-primary/10 px-4 py-3 text-sm text-white">
+    {{ feedback() }}
+  </div>
+}
+
+<section class="space-y-6">
+  <article class="glass-panel p-6">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div>
+        <p class="eyebrow">Licorerías</p>
+        <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Control de tiendas</h2>
+      </div>
+
+      <div class="flex flex-wrap gap-3">
+        <button class="liquid-button" type="button" (click)="openCreateStoreModal()">
+          <span class="material-symbols-outlined text-base">add_business</span>
+          Nueva licorería
+        </button>
+        <button class="ghost-button" type="button" (click)="load()">
+          <span class="material-symbols-outlined text-base">refresh</span>
+          Refrescar
+        </button>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="mt-6 grid gap-4">
+        @for (item of [1, 2, 3]; track item) {
+          <div class="h-36 rounded-[1.5rem] bg-white/4 animate-pulse"></div>
+        }
+      </div>
+    } @else {
+      <div class="mt-6 grid gap-4">
+        @for (store of orderedStores(); track store.id) {
+          <div class="rounded-[1.5rem] bg-white/4 p-5">
+            <div class="flex flex-col gap-5">
+              <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                  <p class="font-display text-2xl font-bold tracking-[-0.05em]">{{ store.name }}</p>
+                  <p class="mt-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">{{ store.slug }}</p>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                  @for (option of subscriptionOptions; track option.value) {
+                    <button
+                      type="button"
+                      class="rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] transition"
+                      [class.bg-primary]="store.subscriptionStatus === option.value"
+                      [class.text-on-primary]="store.subscriptionStatus === option.value"
+                      [class.ghost-button]="store.subscriptionStatus !== option.value"
+                      (click)="updateSubscription(store.id, option.value)"
+                    >
+                      {{ option.label }}
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div class="flex flex-wrap gap-3">
+                  <button class="ghost-button" type="button" (click)="openEditStoreModal(store)">
+                    <span class="material-symbols-outlined text-base">edit</span>
+                    Modificar datos
+                  </button>
+                  <button class="ghost-button" type="button" (click)="openAdminsModal(store)">
+                    <span class="material-symbols-outlined text-base">groups</span>
+                    Administradores
+                  </button>
+                </div>
+
+                <p class="rounded-full bg-white/8 px-3 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-primary">
+                  {{ store.isActive ? 'Operando' : 'Inactiva' }}
+                </p>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </article>
+</section>
+
+@if (createStoreModalOpen()) {
+  <div class="modal-backdrop" (click)="closeCreateStoreModal()">
+    <div class="modal-panel glass-panel p-6" (click)="$event.stopPropagation()">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <p class="eyebrow">Nueva licorería</p>
+          <h3 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Alta de nueva tienda</h3>
+        </div>
+
+        <button class="icon-close" type="button" (click)="closeCreateStoreModal()" aria-label="Cerrar modal">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <form class="mt-6 space-y-4" [formGroup]="storeForm" (ngSubmit)="createStore()">
+        <input class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="name" placeholder="Nombre de la tienda" />
+        <input class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="slug" placeholder="slug-publico" />
+        <select class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="subscriptionStatus">
+          @for (option of subscriptionOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+
+        <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <button class="ghost-button" type="button" (click)="closeCreateStoreModal()">Cancelar</button>
+          <button class="liquid-button !justify-center" type="submit">Crear licorería</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (editStoreModalOpen() && selectedStore(); as store) {
+  <div class="modal-backdrop" (click)="closeEditStoreModal()">
+    <div class="modal-panel glass-panel p-6" (click)="$event.stopPropagation()">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <p class="eyebrow">Modificar licorería</p>
+          <h3 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">{{ store.name }}</h3>
+        </div>
+
+        <button class="icon-close" type="button" (click)="closeEditStoreModal()" aria-label="Cerrar modal">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <form class="mt-6 space-y-4" [formGroup]="editStoreForm" (ngSubmit)="saveStoreChanges()">
+        <input class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="name" placeholder="Nombre de la licorería" />
+        <input class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="slug" placeholder="slug-publico" />
+
+        <label class="flex items-center gap-3 rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white">
+          <input type="checkbox" class="h-4 w-4 accent-[var(--color-primary)]" formControlName="isActive" />
+          Licorería activa
+        </label>
+
+        <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <button class="ghost-button" type="button" (click)="closeEditStoreModal()">Cancelar</button>
+          <button class="liquid-button !justify-center" type="submit">Guardar cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (adminsModalOpen() && selectedStore(); as store) {
+  <div class="modal-backdrop" (click)="closeAdminsModal()">
+    <div class="modal-panel glass-panel p-6" (click)="$event.stopPropagation()">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <p class="eyebrow">Administradores</p>
+          <h3 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">{{ store.name }}</h3>
+        </div>
+
+        <button class="icon-close" type="button" (click)="closeAdminsModal()" aria-label="Cerrar modal">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="mt-6 space-y-6">
+        <section class="rounded-[1.5rem] border border-white/8 bg-white/4 p-5">
+          <p class="text-xs uppercase tracking-[0.24em] text-on-surface-variant">Listado</p>
+          @if (loadingAdmins()) {
+            <div class="mt-4 space-y-3">
+              @for (item of [1, 2]; track item) {
+                <div class="h-20 rounded-[1.25rem] bg-white/5 animate-pulse"></div>
+              }
+            </div>
+          } @else if (storeAdmins().length) {
+            <div class="mt-4 space-y-3">
+              @for (admin of storeAdmins(); track admin.id) {
+                <div class="rounded-[1.25rem] border border-white/8 bg-surface-container-high p-4">
+                  <div class="flex items-start justify-between gap-4">
+                    <div>
+                      <p class="font-display text-xl font-bold tracking-[-0.04em] text-white">{{ admin.name }}</p>
+                      <p class="mt-2 text-sm text-on-surface-variant">{{ admin.email }}</p>
+                    </div>
+                    <p class="rounded-full bg-white/8 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.22em]" [class.text-primary]="admin.isActive" [class.text-error]="!admin.isActive">
+                      {{ admin.isActive ? 'Activo' : 'Inactivo' }}
+                    </p>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="mt-3 text-sm leading-7 text-on-surface-variant">
+              Esta licorería todavía no tiene administradores registrados.
+            </p>
+          }
+        </section>
+
+        <section class="rounded-[1.5rem] border border-white/8 bg-white/4 p-5">
+          <p class="text-xs uppercase tracking-[0.24em] text-on-surface-variant">Nuevo administrador</p>
+
+          <form class="mt-5 space-y-4" [formGroup]="adminForm" (ngSubmit)="registerAdmin()">
+            <input class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="name" placeholder="Nombre del admin" />
+            <input class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="email" placeholder="correo@tienda.local" />
+            <input class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="password" placeholder="Contraseña" />
+
+            <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button class="ghost-button" type="button" (click)="closeAdminsModal()">Cerrar</button>
+              <button class="liquid-button !justify-center" type="submit">Agregar administrador</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+  </div>
+}

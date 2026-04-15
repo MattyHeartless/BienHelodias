@@ -36,6 +36,33 @@ export interface ProductDto {
   updatedAtUtc: string;
 }
 
+export interface StoreDto {
+  id: string;
+  name: string;
+  slug: string;
+  welcomePhrase: string | null;
+  isActive: boolean;
+  subscriptionStatus: number;
+  createdAtUtc: string;
+}
+
+export interface BannerDto {
+  bannerId: string;
+  storeId: string;
+  header: string;
+  title: string;
+  description: string;
+  wildcard: string | null;
+  expirationDate: string | null;
+  status: boolean;
+  created: string;
+}
+
+export interface StorefrontContentDto {
+  welcomePhrase: string | null;
+  banners: BannerDto[];
+}
+
 export interface OrderItemDto {
   id: string;
   productId: string;
@@ -60,7 +87,15 @@ export interface OrderDto {
   items: OrderItemDto[];
 }
 
+export interface DeliveryAddressDraft {
+  formattedAddress: string;
+  placeId: string | null;
+  latitude: number | null;
+  longitude: number | null;
+}
+
 export interface CreateOrderRequest {
+  storeId: string;
   customerName: string;
   customerPhone: string;
   deliveryAddress: string;

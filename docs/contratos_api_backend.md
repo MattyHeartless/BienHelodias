@@ -128,8 +128,22 @@ El backend actualmente serializa enums como enteros.
   "id": "6f514f4d-a00c-4580-88f4-a3c85c7f24db",
   "name": "Bien Helodias Centro",
   "slug": "bien-helodias-centro",
+  "welcomePhrase": "La mejor seleccion para tu noche.",
   "isActive": true,
   "subscriptionStatus": 1,
+  "createdAtUtc": "2026-04-08T18:00:00Z"
+}
+```
+
+### StoreAdminDto
+
+```json
+{
+  "id": "f4c088f0-c4cf-4bfe-ad57-44df5d4b78ce",
+  "storeId": "6f514f4d-a00c-4580-88f4-a3c85c7f24db",
+  "name": "Store Admin",
+  "email": "admin@bienhelodias.local",
+  "isActive": true,
   "createdAtUtc": "2026-04-08T18:00:00Z"
 }
 ```
@@ -149,6 +163,22 @@ El backend actualmente serializa enums como enteros.
   "isActive": true,
   "createdAtUtc": "2026-04-08T18:00:00Z",
   "updatedAtUtc": "2026-04-08T18:00:00Z"
+}
+```
+
+### BannerDto
+
+```json
+{
+  "bannerId": "9f3ca497-58dd-4bc4-a500-7c49fda9de0b",
+  "storeId": "6f514f4d-a00c-4580-88f4-a3c85c7f24db",
+  "header": "Happy Hour",
+  "title": "2x1 en botellas",
+  "description": "Solo por hoy",
+  "wildcard": "2x1",
+  "expirationDate": "2026-04-30T23:59:59Z",
+  "status": true,
+  "created": "2026-04-15T18:30:00Z"
 }
 ```
 
@@ -334,7 +364,8 @@ Request:
 {
   "name": "Store 2",
   "slug": "store-2",
-  "subscriptionStatus": 1
+  "subscriptionStatus": 1,
+  "welcomePhrase": "Promo de bienvenida toda la semana."
 }
 ```
 
@@ -350,7 +381,8 @@ Request:
 {
   "name": "Bien Helodias Centro",
   "slug": "bien-helodias-centro",
-  "isActive": true
+  "isActive": true,
+  "welcomePhrase": "Entrega express y promos del dia."
 }
 ```
 
@@ -380,6 +412,7 @@ Response `200 OK`:
         "id": "6f514f4d-a00c-4580-88f4-a3c85c7f24db",
         "name": "Bien Helodias Centro",
         "slug": "bien-helodias-centro",
+        "welcomePhrase": "La mejor seleccion para tu noche.",
         "isActive": true,
         "subscriptionStatus": 1,
         "createdAtUtc": "2026-04-08T18:00:00Z"
@@ -495,6 +528,116 @@ Request:
 ```
 
 Response `200 OK`: `ApiResponse<ProductDto>`
+
+## Banners
+
+### GET `/api/banners?page=1&pageSize=20`
+
+Auth: requerida
+
+Tenant:
+
+- `StoreAdmin`: claim `storeId`
+- `SuperAdmin`: debe enviar `X-Store-Id`
+
+Response `200 OK`: `ApiResponse<PagedResult<BannerDto>>`
+
+### GET `/api/banners/active?page=1&pageSize=20`
+
+Auth: publica
+
+Tenant:
+
+- Requiere `X-Store-Id`
+
+Notas:
+
+- Solo devuelve banners con `status = true`
+- Excluye banners expirados
+
+Response `200 OK`: `ApiResponse<PagedResult<BannerDto>>`
+
+### GET `/api/banners/{id}`
+
+Auth: publica
+
+Tenant:
+
+- Requiere `X-Store-Id`
+
+Response `200 OK`: `ApiResponse<BannerDto>`
+
+### POST `/api/banners`
+
+Auth: requerida
+
+Tenant:
+
+- `StoreAdmin`: claim `storeId`
+- `SuperAdmin`: `X-Store-Id`
+
+Request:
+
+```json
+{
+  "header": "Happy Hour",
+  "title": "2x1 en botellas",
+  "description": "Solo por hoy",
+  "wildcard": "2x1",
+  "expirationDate": "2026-04-30T23:59:59Z",
+  "status": true
+}
+```
+
+Response `201 Created`: `ApiResponse<BannerDto>`
+
+### PUT `/api/banners/{id}`
+
+Auth: requerida
+
+Request:
+
+```json
+{
+  "header": "Promo actualizada",
+  "title": "3x2 en mixologia",
+  "description": "Valido hasta agotar existencias",
+  "wildcard": "3x2",
+  "expirationDate": "2026-05-05T23:59:59Z",
+  "status": true
+}
+```
+
+Response `200 OK`: `ApiResponse<BannerDto>`
+
+### DELETE `/api/banners/{id}`
+
+Auth: requerida
+
+Response `200 OK`:
+
+```json
+{
+  "success": true,
+  "message": "Banner deleted successfully.",
+  "data": null,
+  "errors": []
+}
+```
+
+### PATCH `/api/banners/{id}/status`
+
+Auth: requerida
+
+Request:
+
+```json
+{
+  "status": false
+}
+```
+
+Response `200 OK`: `ApiResponse<BannerDto>`
 
 ## Orders
 
@@ -690,6 +833,34 @@ Response `200 OK`:
 Auth: `SuperAdmin`
 
 Response `200 OK`: `ApiResponse<PagedResult<StoreDto>>`
+
+### GET `/api/superadmin/stores/{id}/admins`
+
+Auth: `SuperAdmin`
+
+Path params:
+
+- `id`: `guid`
+
+Response `200 OK`:
+
+```json
+{
+  "success": true,
+  "message": "Store admins retrieved successfully.",
+  "data": [
+    {
+      "id": "f4c088f0-c4cf-4bfe-ad57-44df5d4b78ce",
+      "storeId": "6f514f4d-a00c-4580-88f4-a3c85c7f24db",
+      "name": "Store Admin",
+      "email": "admin@bienhelodias.local",
+      "isActive": true,
+      "createdAtUtc": "2026-04-08T18:00:00Z"
+    }
+  ],
+  "errors": []
+}
+```
 
 ### PATCH `/api/superadmin/stores/{id}/subscription`
 

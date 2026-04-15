@@ -6,6 +6,7 @@ namespace LiquorSaaS.Infrastructure.Persistence;
 public sealed class LiquorSaaSDbContext(DbContextOptions<LiquorSaaSDbContext> options) : DbContext(options)
 {
     public DbSet<Store> Stores => Set<Store>();
+    public DbSet<Banner> Banners => Set<Banner>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
@@ -20,9 +21,28 @@ public sealed class LiquorSaaSDbContext(DbContextOptions<LiquorSaaSDbContext> op
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Name).HasMaxLength(150).IsRequired();
             entity.Property(x => x.Slug).HasMaxLength(80).IsRequired();
+            entity.Property(x => x.WelcomePhrase).HasMaxLength(280);
             entity.HasIndex(x => x.Slug).IsUnique();
             entity.HasIndex(x => x.IsActive);
             entity.Property(x => x.SubscriptionStatus).HasConversion<int>();
+        });
+
+        modelBuilder.Entity<Banner>(entity =>
+        {
+            entity.ToTable("Banners");
+            entity.HasKey(x => x.BannerId);
+            entity.Property(x => x.Header).HasMaxLength(120).IsRequired();
+            entity.Property(x => x.Title).HasMaxLength(160).IsRequired();
+            entity.Property(x => x.Description).HasMaxLength(1000).IsRequired();
+            entity.Property(x => x.Wildcard).HasMaxLength(120);
+            entity.Property(x => x.ExpirationDate).HasColumnType("datetime2");
+            entity.Property(x => x.Status).IsRequired();
+            entity.Property(x => x.Created).HasColumnType("datetime2");
+            entity.HasIndex(x => x.StoreId);
+            entity.HasOne<Store>()
+                .WithMany(x => x.Banners)
+                .HasForeignKey(x => x.StoreId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Product>(entity =>

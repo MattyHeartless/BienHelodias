@@ -1,3 +1,4 @@
+using LiquorSaaS.Application.Banners;
 using System.Text;
 using LiquorSaaS.Application.Admin;
 using LiquorSaaS.Application.Auth;
@@ -5,6 +6,7 @@ using LiquorSaaS.Application.Common.Interfaces;
 using LiquorSaaS.Application.Delivery;
 using LiquorSaaS.Application.Orders;
 using LiquorSaaS.Application.Products;
+using LiquorSaaS.Application.Storefront;
 using LiquorSaaS.Application.Stores;
 using LiquorSaaS.Domain.Enums;
 using LiquorSaaS.Infrastructure.Identity;
@@ -41,6 +43,8 @@ public static class DependencyInjection
 
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IStoreService, StoreService>();
+        services.AddScoped<IStorefrontService, StorefrontService>();
+        services.AddScoped<IBannerService, BannerService>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IDeliveryService, DeliveryService>();

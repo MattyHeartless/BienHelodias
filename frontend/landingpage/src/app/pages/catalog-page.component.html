@@ -20,7 +20,7 @@
       <div class="phone-shell__body">
         <section class="intro-block">
           <h2 class="font-display text-4xl font-black tracking-[-0.06em] text-white">
-            No te compliques, aquí te lo mandamos.
+            {{ welcomePhrase() }}
           </h2>
         </section>
 
@@ -36,24 +36,47 @@
           />
         </label>
 
-        <section class="promo-strip">
-          <div class="promo-strip__copy">
-            <p class="eyebrow">Juicy Promo</p>
-            <h3 class="mt-2 font-display text-3xl font-bold tracking-[-0.05em]">
-              @if (promoProduct(); as promo) {
-                {{ promo.name }}
-              } @else {
-                Promo disponible
-              }
-            </h3>
-            <p class="mt-1 text-sm text-white/72">Explora el catálogo con layout tipo app y selecciona tu bebida al instante.</p>
-          </div>
+        @if (activeBanner(); as banner) {
+          <section class="promo-strip">
+            <div class="promo-strip__copy">
+              <p class="eyebrow">{{ banner.header }}</p>
+              <h3 class="mt-2 font-display text-3xl font-bold tracking-[-0.05em]">
+                {{ banner.title }}
+              </h3>
+              <p class="mt-1 text-sm text-white/72">{{ banner.description }}</p>
+            </div>
 
-          <div class="promo-strip__offer">
-            <span class="promo-strip__badge">50% OFF</span>
-            <button class="ghost-button promo-strip__button" type="button" (click)="selectCategory('all')">Ver promo</button>
-          </div>
-        </section>
+            <div class="promo-strip__offer">
+              <span class="promo-strip__badge">{{ banner.wildcard || 'Promo activa' }}</span>
+              <button class="ghost-button promo-strip__button" type="button" (click)="selectCategory('all')">Ver promo</button>
+            </div>
+
+            @if (banners().length > 1) {
+              <div class="flex items-center justify-between gap-3">
+                <button class="icon-button" type="button" (click)="showPreviousBanner()" aria-label="Banner anterior">
+                  <span class="material-symbols-outlined text-base">chevron_left</span>
+                </button>
+
+                <div class="flex flex-1 items-center justify-center gap-2">
+                  @for (item of banners(); track item.bannerId; let index = $index) {
+                    <button
+                      type="button"
+                      class="h-[0.55rem] w-[0.55rem] cursor-pointer rounded-full border-0 bg-white/25 transition duration-200"
+                      [class.!bg-primary]="index === activeBannerIndex()"
+                      [class.scale-110]="index === activeBannerIndex()"
+                      [attr.aria-label]="'Ir al banner ' + (index + 1)"
+                      (click)="showBanner(index)"
+                    ></button>
+                  }
+                </div>
+
+                <button class="icon-button" type="button" (click)="showNextBanner()" aria-label="Siguiente banner">
+                  <span class="material-symbols-outlined text-base">chevron_right</span>
+                </button>
+              </div>
+            }
+          </section>
+        }
 
         <div class="category-tabs">
           @for (category of categories(); track category) {
@@ -260,8 +283,7 @@
       <section class="checkout-modal" (click)="$event.stopPropagation()">
         <div class="checkout-modal__header">
           <div>
-            <p class="eyebrow">Formulario</p>
-            <h3 class="mt-2 font-display text-3xl font-bold tracking-[-0.05em]">Completa tu pedido</h3>
+            <h3 class="font-display text-3xl font-bold tracking-[-0.05em]">¿A donde te lo llevo?</h3>
           </div>
           <button class="icon-button" type="button" (click)="closeCheckout()">
             <span class="material-symbols-outlined text-base">close</span>
@@ -279,7 +301,26 @@
           </div>
           <div>
             <label class="eyebrow">Direccion</label>
-            <textarea class="mt-2 min-h-24 w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none transition focus:border-primary" formControlName="deliveryAddress"></textarea>
+            <input
+              #deliveryAddressInput
+              type="text"
+              autocomplete="street-address"
+              placeholder="Empieza a escribir tu direccion en Mexico"
+              class="mt-2 w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none transition focus:border-primary"
+              formControlName="deliveryAddress"
+              (input)="handleDeliveryAddressInput(deliveryAddressInput.value)"
+            />
+            <p class="mt-2 text-xs leading-6 text-on-surface-variant">
+              @if (selectedAddress()?.placeId) {
+                Direccion validada con Google Maps.
+              } @else if (placesLoading()) {
+                Cargando sugerencias de Google Places...
+              } @else if (placesError()) {
+                {{ placesError() }}
+              } @else {
+                Escribe y selecciona una sugerencia para obtener una direccion mas precisa.
+              }
+            </p>
           </div>
           <div>
             <label class="eyebrow">Notas</label>

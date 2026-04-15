@@ -52,3 +52,27 @@
     background-size: 26px 26px;
   }
 }
+
+.pac-container {
+  margin-top: 0.35rem;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  border-radius: 1rem;
+  background: rgb(20 20 20 / 0.98);
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.38);
+  font-family: var(--font-body);
+}
+
+.pac-item {
+  border-top-color: rgb(255 255 255 / 0.06);
+  padding: 0.75rem 0.9rem;
+  color: #fff;
+}
+
+.pac-item:hover,
+.pac-item-selected {
+  background: rgb(210 253 110 / 0.12);
+}
+
+.pac-item-query {
+  color: #fff;
+}

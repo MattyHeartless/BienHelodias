@@ -24,7 +24,7 @@ public sealed class StoreService(
             throw new ConflictException("Store slug already exists.");
         }
 
-        var store = Store.Create(request.Name, request.Slug, request.SubscriptionStatus);
+        var store = Store.Create(request.Name, request.Slug, request.SubscriptionStatus, request.WelcomePhrase);
         await dbContext.Stores.AddAsync(store, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
@@ -43,7 +43,7 @@ public sealed class StoreService(
             throw new ConflictException("Store slug already exists.");
         }
 
-        store.Update(request.Name, request.Slug, request.IsActive);
+        store.Update(request.Name, request.Slug, request.IsActive, request.WelcomePhrase);
         await dbContext.SaveChangesAsync(cancellationToken);
         return store.ToDto();
     }

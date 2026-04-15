@@ -1,0 +1,255 @@
+@if (error()) {
+  <div class="mb-6 rounded-[1.25rem] border border-error/30 bg-error/10 px-4 py-3 text-sm text-white">
+    {{ error() }}
+  </div>
+}
+
+@if (feedback()) {
+  <div class="mb-6 rounded-[1.25rem] border border-primary/24 bg-primary/10 px-4 py-3 text-sm text-white">
+    {{ feedback() }}
+  </div>
+}
+
+<section class="space-y-8">
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <p class="eyebrow">Mi tienda</p>
+      <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Configura la bienvenida y los banners de tu landing</h2>
+    </div>
+
+    <div class="flex flex-wrap gap-3">
+      <button class="ghost-button" type="button" (click)="load()">
+        <span class="material-symbols-outlined text-base">refresh</span>
+        Refrescar
+      </button>
+      <button class="liquid-button" type="button" (click)="openCreateBannerModal()">
+        <span class="material-symbols-outlined text-base">add_photo_alternate</span>
+        Nuevo banner
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="grid gap-6 md:grid-cols-3">
+      @for (item of [1, 2, 3]; track item) {
+        <div class="h-36 animate-pulse rounded-[1.75rem] bg-white/4"></div>
+      }
+    </div>
+  } @else {
+    @if (store(); as currentStore) {
+      <section class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        <article class="glass-panel p-6">
+          <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p class="eyebrow">Identidad</p>
+              <h3 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">{{ currentStore.name }}</h3>
+              <p class="mt-3 text-xs uppercase tracking-[0.26em] text-on-surface-variant">{{ currentStore.slug }}</p>
+            </div>
+
+            <p class="rounded-full bg-white/8 px-3 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-primary">
+              {{ currentStore.isActive ? 'Tienda activa' : 'Tienda inactiva' }}
+            </p>
+          </div>
+
+          <form class="mt-6 space-y-4" [formGroup]="welcomeForm" (ngSubmit)="saveWelcomePhrase()">
+            <div class="field-block">
+              <label class="field-label" for="welcome-phrase">Frase de entrada</label>
+              <textarea
+                id="welcome-phrase"
+                class="min-h-[128px] w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
+                formControlName="welcomePhrase"
+                placeholder="Ej. Bienvenido a la mejor selección de licores para tu noche."
+              ></textarea>
+              <p class="field-help">Este texto aparece como mensaje principal al entrar a la tienda.</p>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">
+                {{ welcomeForm.get('welcomePhrase')?.value?.length ?? 0 }}/280 caracteres
+              </p>
+
+              <button class="liquid-button !justify-center" type="submit" [disabled]="submittingWelcome()">
+                {{ submittingWelcome() ? 'Guardando...' : 'Guardar frase' }}
+              </button>
+            </div>
+          </form>
+        </article>
+
+        <div class="grid gap-6 sm:grid-cols-3 lg:grid-cols-1">
+          <article class="glass-panel p-6">
+            <p class="eyebrow">Banners</p>
+            <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">{{ bannerSummary().total }}</p>
+            <p class="mt-2 text-sm text-on-surface-variant">Piezas cargadas para la portada</p>
+          </article>
+
+          <article class="glass-panel p-6">
+            <p class="eyebrow">Activos</p>
+            <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">{{ bannerSummary().active }}</p>
+            <p class="mt-2 text-sm text-on-surface-variant">Visibles para el cliente</p>
+          </article>
+
+          <article class="glass-panel p-6">
+            <p class="eyebrow">Programados</p>
+            <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">{{ bannerSummary().scheduled }}</p>
+            <p class="mt-2 text-sm text-on-surface-variant">Con fecha de expiración definida</p>
+          </article>
+        </div>
+      </section>
+
+      <section>
+        <article class="glass-panel p-6">
+          <div class="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p class="eyebrow">Promociones y anuncios</p>
+              <h3 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">Banners publicados</h3>
+            </div>
+
+            <button class="ghost-button" type="button" (click)="openCreateBannerModal()">
+              <span class="material-symbols-outlined text-base">add</span>
+              Crear banner
+            </button>
+          </div>
+
+          <div class="mt-6 grid gap-5 lg:grid-cols-2">
+            @if (!orderedBanners().length) {
+              <article class="banner-card lg:col-span-2">
+                <p class="eyebrow">Sin banners</p>
+                <h4 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">Todavía no hay promociones publicadas</h4>
+                <p class="mt-4 text-sm leading-7 text-on-surface-variant">
+                  Crea tu primer banner para mostrar descuentos, anuncios o campañas temporales en la pantalla principal de la tienda.
+                </p>
+              </article>
+            } @else {
+              @for (banner of orderedBanners(); track banner.bannerId) {
+                <article class="banner-card">
+                  <div class="rounded-[1.35rem] bg-surface-container-high px-5 py-5">
+                    <div class="flex items-start justify-between gap-4">
+                      <div>
+                        <p class="eyebrow">{{ banner.header }}</p>
+                        <h4 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">{{ banner.title }}</h4>
+                      </div>
+
+                      <span
+                        class="rounded-full px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.22em]"
+                        [ngClass]="banner.status ? 'banner-badge-active' : 'banner-badge-hidden'"
+                      >
+                        {{ banner.status ? 'Activo' : 'Oculto' }}
+                      </span>
+                    </div>
+
+                    <p class="mt-4 text-sm leading-7 text-on-surface-variant">{{ banner.description }}</p>
+
+                    @if (banner.wildcard) {
+                      <p class="mt-4 rounded-[1rem] border border-primary/20 bg-primary/8 px-3 py-2 text-xs uppercase tracking-[0.2em] text-primary">
+                        {{ banner.wildcard }}
+                      </p>
+                    }
+                  </div>
+
+                  <div class="mt-5 flex items-center justify-between gap-4">
+                    <div class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">
+                      <p>Creado {{ banner.created | date: 'dd MMM yyyy' }}</p>
+                      <p class="mt-2">
+                        {{ banner.expirationDate ? ('Expira ' + (banner.expirationDate | date: 'dd MMM yyyy')) : 'Sin expiración' }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="mt-5 flex flex-wrap gap-3">
+                    <button class="ghost-button" type="button" (click)="editBanner(banner)">Editar</button>
+                    <button class="ghost-button" type="button" (click)="toggleBannerStatus(banner)">
+                      {{ banner.status ? 'Desactivar' : 'Activar' }}
+                    </button>
+                    <button class="danger-button" type="button" (click)="deleteBanner(banner)">Eliminar</button>
+                  </div>
+                </article>
+              }
+            }
+          </div>
+        </article>
+      </section>
+    }
+  }
+</section>
+
+@if (bannerModalOpen()) {
+  <div class="modal-backdrop" (click)="closeBannerModal()">
+    <div class="modal-panel" (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <p class="eyebrow">{{ isEditingBanner() ? 'Editar banner' : 'Nuevo banner' }}</p>
+          <h3 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">
+            {{ isEditingBanner() ? 'Actualiza la campaña visible' : 'Crea un nuevo banner para la portada' }}
+          </h3>
+        </div>
+        <button class="ghost-button" type="button" (click)="closeBannerModal()">Cerrar</button>
+      </div>
+
+      <form class="mt-6 space-y-4" [formGroup]="bannerForm" (ngSubmit)="saveBanner()">
+        <div class="field-block">
+          <label class="field-label" for="banner-header">Header</label>
+          <input
+            id="banner-header"
+            class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
+            formControlName="header"
+            placeholder="Promo destacada"
+          />
+        </div>
+
+        <div class="field-block">
+          <label class="field-label" for="banner-title">Titulo</label>
+          <input
+            id="banner-title"
+            class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
+            formControlName="title"
+            placeholder="2x1 en botellas seleccionadas"
+          />
+        </div>
+
+        <div class="field-block">
+          <label class="field-label" for="banner-description">Descripcion</label>
+          <textarea
+            id="banner-description"
+            class="min-h-[110px] w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
+            formControlName="description"
+            placeholder="Describe la promo o el anuncio que verá el cliente."
+          ></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div class="field-block">
+            <label class="field-label" for="banner-wildcard">Wildcard</label>
+            <input
+              id="banner-wildcard"
+              class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
+              formControlName="wildcard"
+              placeholder="Solo hoy"
+            />
+          </div>
+
+          <div class="field-block">
+            <label class="field-label" for="banner-expiration">Expiracion</label>
+            <input
+              id="banner-expiration"
+              class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
+              formControlName="expirationDate"
+              type="date"
+            />
+          </div>
+        </div>
+
+        <label class="flex items-center gap-3 rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-sm text-white">
+          <input class="h-4 w-4 accent-primary" formControlName="status" type="checkbox" />
+          Banner activo en la portada
+        </label>
+
+        <div class="flex flex-wrap gap-3 pt-2">
+          <button class="ghost-button flex-1" type="button" (click)="closeBannerModal()">Cancelar</button>
+          <button class="liquid-button flex-1 !justify-center" type="submit" [disabled]="submittingBanner()">
+            {{ submittingBanner() ? 'Guardando...' : isEditingBanner() ? 'Actualizar banner' : 'Crear banner' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

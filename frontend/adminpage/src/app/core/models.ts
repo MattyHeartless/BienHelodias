@@ -50,9 +50,31 @@ export interface StoreDto {
   id: string;
   name: string;
   slug: string;
+  welcomePhrase: string | null;
   isActive: boolean;
   subscriptionStatus: SubscriptionStatus;
   createdAtUtc: string;
+}
+
+export interface StoreAdminDto {
+  id: string;
+  storeId: string;
+  name: string;
+  email: string;
+  isActive: boolean;
+  createdAtUtc: string;
+}
+
+export interface BannerDto {
+  bannerId: string;
+  storeId: string;
+  header: string;
+  title: string;
+  description: string;
+  wildcard: string | null;
+  expirationDate: string | null;
+  status: boolean;
+  created: string;
 }
 
 export interface ProductDto {

@@ -68,6 +68,50 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
+            modelBuilder.Entity("LiquorSaaS.Domain.Entities.Banner", b =>
+                {
+                    b.Property<Guid>("BannerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime?>("ExpirationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Header")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("StoreId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("nvarchar(160)");
+
+                    b.Property<string>("Wildcard")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.HasKey("BannerId");
+
+                    b.HasIndex("StoreId");
+
+                    b.ToTable("Banners", (string)null);
+                });
+
             modelBuilder.Entity("LiquorSaaS.Domain.Entities.DeliveryUser", b =>
                 {
                     b.Property<Guid>("Id")
@@ -292,6 +336,10 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("UpdatedAtUtc")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("WelcomePhrase")
+                        .HasMaxLength(280)
+                        .HasColumnType("nvarchar(280)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("IsActive");
@@ -300,6 +348,15 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Stores", (string)null);
+                });
+
+            modelBuilder.Entity("LiquorSaaS.Domain.Entities.Banner", b =>
+                {
+                    b.HasOne("LiquorSaaS.Domain.Entities.Store", null)
+                        .WithMany("Banners")
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("LiquorSaaS.Domain.Entities.OrderItem", b =>
@@ -314,6 +371,11 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("LiquorSaaS.Domain.Entities.Order", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("LiquorSaaS.Domain.Entities.Store", b =>
+                {
+                    b.Navigation("Banners");
                 });
 #pragma warning restore 612, 618
         }

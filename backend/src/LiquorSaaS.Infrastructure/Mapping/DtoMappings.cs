@@ -1,3 +1,4 @@
+using LiquorSaaS.Application.Banners;
 using LiquorSaaS.Application.Delivery;
 using LiquorSaaS.Application.Orders;
 using LiquorSaaS.Application.Products;
@@ -8,8 +9,20 @@ namespace LiquorSaaS.Infrastructure.Mapping;
 
 internal static class DtoMappings
 {
+    public static BannerDto ToDto(this Banner entity) =>
+        new(
+            entity.BannerId,
+            entity.StoreId,
+            entity.Header,
+            entity.Title,
+            entity.Description,
+            entity.Wildcard,
+            entity.ExpirationDate,
+            entity.Status,
+            entity.Created);
+
     public static StoreDto ToDto(this Store entity) =>
-        new(entity.Id, entity.Name, entity.Slug, entity.IsActive, entity.SubscriptionStatus, entity.CreatedAtUtc);
+        new(entity.Id, entity.Name, entity.Slug, entity.WelcomePhrase, entity.IsActive, entity.SubscriptionStatus, entity.CreatedAtUtc);
 
     public static ProductDto ToDto(this Product entity) =>
         new(

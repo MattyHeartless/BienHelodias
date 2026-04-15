@@ -1,12 +1,15 @@
 import { CommonModule, CurrencyPipe } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnDestroy, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ProductDto } from '../core/models';
+import { DeliveryAddressDraft, ProductDto, BannerDto } from '../core/models';
 import { landingTenant } from '../core/tenant.config';
 import { getApiErrorMessage } from '../core/api-error.util';
+import { GooglePlacesService } from '../services/google-places.service';
 import { OrdersApiService } from '../services/orders-api.service';
 import { ProductsApiService } from '../services/products-api.service';
+import { StorefrontContentApiService } from '../services/storefront-content-api.service';
+import { catchError, forkJoin, of } from 'rxjs';
 
 const LAST_ORDER_KEY = 'bien-helodias-last-order';
 
@@ -20,15 +23,30 @@ const LAST_ORDER_KEY = 'bien-helodias-last-order';
 export class CatalogPageComponent {
   private readonly productsApi = inject(ProductsApiService);
   private readonly ordersApi = inject(OrdersApiService);
+  private readonly storefrontContentApi = inject(StorefrontContentApiService);
+  private readonly googlePlaces = inject(GooglePlacesService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private autocomplete: any | null = null;
+  private autocompleteListener: { remove: () => void } | null = null;
+  private autocompleteInput: HTMLInputElement | null = null;
+  private bannerRotationHandle: ReturnType<typeof window.setInterval> | null = null;
+
+  @ViewChild('deliveryAddressInput')
+  private deliveryAddressInput?: ElementRef<HTMLInputElement>;
 
   readonly tenant = landingTenant;
   readonly loading = signal(true);
   readonly submitting = signal(false);
   readonly error = signal<string | null>(null);
+  readonly placesLoading = signal(false);
+  readonly placesError = signal<string | null>(null);
+  readonly selectedAddress = signal<DeliveryAddressDraft | null>(null);
   readonly products = signal<ProductDto[]>([]);
+  readonly welcomePhrase = signal('No te compliques, aqui te lo mandamos.');
+  readonly banners = signal<BannerDto[]>([]);
+  readonly activeBannerIndex = signal(0);
   readonly activeCategory = signal<string>('all');
   readonly searchQuery = signal('');
   readonly highlightedProductId = signal<string | null>(null);
@@ -40,7 +58,10 @@ export class CatalogPageComponent {
     customerName: ['', [Validators.required, Validators.minLength(2)]],
     customerPhone: ['', [Validators.required, Validators.minLength(8)]],
     deliveryAddress: ['', [Validators.required, Validators.minLength(10)]],
-    notes: ['']
+    notes: [''],
+    deliveryPlaceId: [''],
+    deliveryLatitude: [''],
+    deliveryLongitude: ['']
   });
 
   readonly categories = computed(() => {
@@ -70,7 +91,14 @@ export class CatalogPageComponent {
     return source.find((product) => product.id === highlightedId) ?? source[0] ?? this.products()[0] ?? null;
   });
 
-  readonly promoProduct = computed(() => this.products()[0] ?? null);
+  readonly activeBanner = computed(() => {
+    const banners = this.banners();
+    if (banners.length === 0) {
+      return null;
+    }
+
+    return banners[this.activeBannerIndex() % banners.length] ?? null;
+  });
 
   readonly cartItems = computed(() =>
     this.products()
@@ -102,11 +130,18 @@ export class CatalogPageComponent {
     this.loading.set(true);
     this.error.set(null);
 
-    this.productsApi.getCatalog().subscribe({
+    forkJoin({
+      catalog: this.productsApi.getCatalog(),
+      storefront: this.storefrontContentApi.getContent().pipe(catchError(() => of(null)))
+    }).subscribe({
       next: (response) => {
-        const activeProducts = response.data.items.filter((product) => product.isActive);
+        const activeProducts = response.catalog.data.items.filter((product) => product.isActive);
         this.products.set(activeProducts);
         this.highlightedProductId.set(activeProducts[0]?.id ?? null);
+        this.welcomePhrase.set(response.storefront?.data.welcomePhrase?.trim() || 'No te compliques, aqui te lo mandamos.');
+        this.banners.set(response.storefront?.data.banners ?? []);
+        this.activeBannerIndex.set(0);
+        this.startBannerRotation();
         this.detailOpen.set(false);
         this.loading.set(false);
       },
@@ -161,10 +196,18 @@ export class CatalogPageComponent {
     }
 
     this.checkoutOpen.set(true);
+    setTimeout(() => {
+      void this.initializeDeliveryAddressAutocomplete();
+    }, 0);
   }
 
   closeCheckout(): void {
     this.checkoutOpen.set(false);
+  }
+
+  ngOnDestroy(): void {
+    this.destroyAutocompleteListener();
+    this.stopBannerRotation();
   }
 
   quickBuy(product: ProductDto): void {
@@ -190,15 +233,18 @@ export class CatalogPageComponent {
       return;
     }
 
+    const checkoutValues = this.checkoutForm.getRawValue();
+
     this.submitting.set(true);
     this.error.set(null);
 
     this.ordersApi
       .createOrder({
-        customerName: this.checkoutForm.getRawValue().customerName,
-        customerPhone: this.checkoutForm.getRawValue().customerPhone,
-        deliveryAddress: this.checkoutForm.getRawValue().deliveryAddress,
-        notes: this.checkoutForm.getRawValue().notes || null,
+        storeId: this.tenant.storeId,
+        customerName: checkoutValues.customerName,
+        customerPhone: checkoutValues.customerPhone,
+        deliveryAddress: checkoutValues.deliveryAddress,
+        notes: checkoutValues.notes || null,
         items: this.cartItems().map((entry) => ({
           productId: entry.product.id,
           quantity: entry.quantity
@@ -218,6 +264,19 @@ export class CatalogPageComponent {
           this.submitting.set(false);
         }
       });
+  }
+
+  handleDeliveryAddressInput(rawAddress: string): void {
+    const currentSelection = this.selectedAddress();
+    if (!currentSelection) {
+      return;
+    }
+
+    if (rawAddress.trim() === currentSelection.formattedAddress.trim()) {
+      return;
+    }
+
+    this.clearSelectedAddress();
   }
 
   trackLastOrder(): void {
@@ -242,5 +301,115 @@ export class CatalogPageComponent {
 
   productVolume(product: ProductDto): string {
     return product.category?.toLowerCase().includes('cerveza') ? '355ml' : '150ml';
+  }
+
+  showPreviousBanner(): void {
+    const banners = this.banners();
+    if (banners.length <= 1) {
+      return;
+    }
+
+    this.activeBannerIndex.update((current) => (current - 1 + banners.length) % banners.length);
+    this.restartBannerRotation();
+  }
+
+  showNextBanner(): void {
+    const banners = this.banners();
+    if (banners.length <= 1) {
+      return;
+    }
+
+    this.activeBannerIndex.update((current) => (current + 1) % banners.length);
+    this.restartBannerRotation();
+  }
+
+  showBanner(index: number): void {
+    this.activeBannerIndex.set(index);
+    this.restartBannerRotation();
+  }
+
+  private async initializeDeliveryAddressAutocomplete(): Promise<void> {
+    const input = this.deliveryAddressInput?.nativeElement;
+    if (!input) {
+      return;
+    }
+
+    if (this.autocomplete && this.autocompleteInput === input) {
+      return;
+    }
+
+    this.placesLoading.set(true);
+    this.placesError.set(null);
+
+    try {
+      this.destroyAutocompleteListener();
+      this.autocompleteInput = input;
+      this.autocomplete = await this.googlePlaces.createAddressAutocomplete(input);
+      this.autocompleteListener = this.googlePlaces.addPlaceChangedListener(this.autocomplete, () => {
+        this.applySelectedAddress();
+      });
+      this.placesLoading.set(false);
+    } catch (error) {
+      this.autocomplete = null;
+      this.autocompleteInput = null;
+      this.placesLoading.set(false);
+      this.placesError.set(getApiErrorMessage(error, 'No fue posible cargar Google Places. Puedes escribir la direccion manualmente.'));
+    }
+  }
+
+  private applySelectedAddress(): void {
+    if (!this.autocomplete) {
+      return;
+    }
+
+    const addressDraft = this.googlePlaces.extractAddressDraft(this.autocomplete);
+    if (!addressDraft?.formattedAddress) {
+      return;
+    }
+
+    this.selectedAddress.set(addressDraft);
+    this.checkoutForm.patchValue({
+      deliveryAddress: addressDraft.formattedAddress,
+      deliveryPlaceId: addressDraft.placeId ?? '',
+      deliveryLatitude: addressDraft.latitude !== null ? String(addressDraft.latitude) : '',
+      deliveryLongitude: addressDraft.longitude !== null ? String(addressDraft.longitude) : ''
+    });
+  }
+
+  private clearSelectedAddress(): void {
+    this.selectedAddress.set(null);
+    this.checkoutForm.patchValue({
+      deliveryPlaceId: '',
+      deliveryLatitude: '',
+      deliveryLongitude: ''
+    });
+  }
+
+  private destroyAutocompleteListener(): void {
+    this.autocompleteListener?.remove();
+    this.autocompleteListener = null;
+  }
+
+  private startBannerRotation(): void {
+    this.stopBannerRotation();
+
+    if (this.banners().length <= 1) {
+      return;
+    }
+
+    this.bannerRotationHandle = window.setInterval(() => {
+      this.activeBannerIndex.update((current) => (current + 1) % this.banners().length);
+    }, 5000);
+  }
+
+  private stopBannerRotation(): void {
+    if (this.bannerRotationHandle !== null) {
+      window.clearInterval(this.bannerRotationHandle);
+      this.bannerRotationHandle = null;
+    }
+  }
+
+  private restartBannerRotation(): void {
+    this.startBannerRotation();
   }
 }

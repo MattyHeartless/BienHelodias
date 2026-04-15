@@ -32,4 +32,34 @@ public sealed class AdminService(
             await orders.CountAsync(x => x.Status == OrderStatus.OnTheWay, cancellationToken),
             await orders.Where(x => x.Status != OrderStatus.Cancelled).Select(x => (decimal?)x.Total).SumAsync(cancellationToken) ?? 0m);
     }
+
+    public async Task<IReadOnlyList<StoreAdminDto>> GetStoreAdminsAsync(Guid storeId, CancellationToken cancellationToken)
+    {
+        if (currentUserService.Role != UserRole.SuperAdmin)
+        {
+            throw new ForbiddenException("Super admin role is required.");
+        }
+
+        var storeExists = await dbContext.Stores
+            .AsNoTracking()
+            .AnyAsync(x => x.Id == storeId, cancellationToken);
+
+        if (!storeExists)
+        {
+            throw new NotFoundException("Store not found.");
+        }
+
+        return await dbContext.Users
+            .AsNoTracking()
+            .Where(x => x.StoreId == storeId && x.Role == UserRole.StoreAdmin)
+            .OrderBy(x => x.Name)
+            .Select(x => new StoreAdminDto(
+                x.Id,
+                x.StoreId!.Value,
+                x.Name,
+                x.Email,
+                x.IsActive,
+                x.CreatedAtUtc))
+            .ToListAsync(cancellationToken);
+    }
 }

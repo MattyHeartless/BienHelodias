@@ -3,9 +3,9 @@ using LiquorSaaS.Domain.Enums;
 
 namespace LiquorSaaS.Application.Stores;
 
-public sealed record CreateStoreRequest(string Name, string Slug, SubscriptionStatus SubscriptionStatus);
-public sealed record UpdateStoreRequest(string Name, string Slug, bool IsActive);
-public sealed record StoreDto(Guid Id, string Name, string Slug, bool IsActive, SubscriptionStatus SubscriptionStatus, DateTime CreatedAtUtc);
+public sealed record CreateStoreRequest(string Name, string Slug, SubscriptionStatus SubscriptionStatus, string? WelcomePhrase = null);
+public sealed record UpdateStoreRequest(string Name, string Slug, bool IsActive, string? WelcomePhrase = null);
+public sealed record StoreDto(Guid Id, string Name, string Slug, string? WelcomePhrase, bool IsActive, SubscriptionStatus SubscriptionStatus, DateTime CreatedAtUtc);
 public sealed record UpdateSubscriptionRequest(SubscriptionStatus SubscriptionStatus);
 
 public interface IStoreService

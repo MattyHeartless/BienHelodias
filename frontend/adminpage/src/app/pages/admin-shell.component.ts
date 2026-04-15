@@ -24,8 +24,13 @@ export class AdminShellComponent {
       { label: 'Dashboard', route: '/dashboard/overview', icon: 'dashboard' }
     ];
 
+    if (this.role() === AppRole.SuperAdmin) {
+      items.push({ label: 'Licorerías', route: '/dashboard/stores', icon: 'storefront' });
+    }
+
     if (this.role() === AppRole.StoreAdmin) {
       items.push(
+        { label: 'Mi tienda', route: '/dashboard/store', icon: 'storefront' },
         { label: 'Pedidos', route: '/dashboard/orders', icon: 'receipt_long' },
         { label: 'Catalogo', route: '/dashboard/catalog', icon: 'inventory_2' }
       );

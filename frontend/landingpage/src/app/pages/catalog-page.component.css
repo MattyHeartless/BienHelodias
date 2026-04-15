@@ -87,7 +87,7 @@
 }
 
 .phone-shell__body--detail {
-  padding: 5.9rem 1.35rem 2rem;
+  padding: 0.9rem 1.35rem 2rem;
 }
 
 .brand-mark,
@@ -234,7 +234,7 @@
   position: absolute;
   top: 0.65rem;
   left: 0.65rem;
-  z-index: 10;
+  z-index: 20;
   border-radius: 999px;
   padding: 0.35rem 0.55rem;
   background: rgb(255 255 255 / 0.88);

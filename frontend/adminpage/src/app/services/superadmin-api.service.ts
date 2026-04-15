@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ApiResponse, PagedResult, StoreDto, SubscriptionStatus, AuthTokenDto } from '../core/models';
+import { ApiResponse, PagedResult, StoreDto, StoreAdminDto, SubscriptionStatus, AuthTokenDto } from '../core/models';
 
 @Injectable({ providedIn: 'root' })
 export class SuperadminApiService {
@@ -16,8 +16,16 @@ export class SuperadminApiService {
     });
   }
 
+  getStoreAdmins(storeId: string): Observable<ApiResponse<StoreAdminDto[]>> {
+    return this.http.get<ApiResponse<StoreAdminDto[]>>(`${this.superadminUrl}/${storeId}/admins`);
+  }
+
   createStore(request: { name: string; slug: string; subscriptionStatus: SubscriptionStatus }): Observable<ApiResponse<StoreDto>> {
     return this.http.post<ApiResponse<StoreDto>>(this.storesUrl, request);
+  }
+
+  updateStore(storeId: string, request: { name: string; slug: string; isActive: boolean }): Observable<ApiResponse<StoreDto>> {
+    return this.http.put<ApiResponse<StoreDto>>(`${this.storesUrl}/${storeId}`, request);
   }
 
   updateSubscription(storeId: string, subscriptionStatus: SubscriptionStatus): Observable<ApiResponse<StoreDto>> {

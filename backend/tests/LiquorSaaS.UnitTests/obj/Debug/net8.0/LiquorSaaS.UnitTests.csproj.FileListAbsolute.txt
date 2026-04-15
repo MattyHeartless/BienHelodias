@@ -210,3 +210,4 @@ C:\Users\Jair\Documents\My Web Sites\BienHelodias\backend\tests\LiquorSaaS.UnitT
 C:\Users\Jair\Documents\My Web Sites\BienHelodias\backend\tests\LiquorSaaS.UnitTests\obj\Debug\net8.0\LiquorSaaS.UnitTests.pdb
 C:\Users\Jair\Documents\My Web Sites\BienHelodias\backend\tests\LiquorSaaS.UnitTests\obj\Debug\net8.0\LiquorSaaS.UnitTests.genruntimeconfig.cache
 C:\Users\Jair\Documents\My Web Sites\BienHelodias\backend\tests\LiquorSaaS.UnitTests\obj\Debug\net8.0\ref\LiquorSaaS.UnitTests.dll
+C:\Users\Jair\Documents\My Web Sites\BienHelodias\backend\tests\LiquorSaaS.UnitTests\obj\Debug\net8.0\LiquorSaaS.UnitTests.sourcelink.json
