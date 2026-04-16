@@ -2,19 +2,19 @@
   <div class="mx-auto max-w-7xl">
     <header class="mb-8 flex flex-col gap-4 rounded-[2.2rem] bg-surface-container-low px-8 py-8 shadow-[0_35px_110px_rgba(0,0,0,0.4)] lg:flex-row lg:items-end lg:justify-between">
       <div>
-        <p class="eyebrow">Delivery Panel</p>
+        <p class="eyebrow">Panel de reparto</p>
         <h1 class="mt-4 font-display text-5xl font-black tracking-[-0.06em]">Rutas y pedidos listos.</h1>
         <p class="mt-3 max-w-2xl text-sm leading-7 text-on-surface-variant">
           {{ email() }}. El backend decide si el pedido se puede tomar, liberar o entregar.
         </p>
       </div>
 
-      <div class="flex flex-wrap gap-3">
-        <button class="ghost-button" type="button" (click)="load()">
+      <div class="grid w-full grid-cols-2 gap-3 lg:w-auto lg:flex lg:flex-wrap">
+        <button class="ghost-button w-full" type="button" (click)="load()">
           <span class="material-symbols-outlined text-base">refresh</span>
           Refrescar
         </button>
-        <button class="liquid-button" type="button" (click)="logout()">
+        <button class="liquid-button w-full" type="button" (click)="logout()">
           <span class="material-symbols-outlined text-base">logout</span>
           Cerrar sesion
         </button>
@@ -33,36 +33,39 @@
       </div>
     }
 
-    <section class="mb-8 grid gap-6 lg:grid-cols-[1fr_360px]">
+    <section class="mb-8">
       <article class="relative overflow-hidden rounded-[2.2rem] bg-surface-container-low px-8 py-10 shadow-[0_35px_110px_rgba(0,0,0,0.38)]">
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_60%_50%,rgba(210,253,110,0.12),transparent_45%)]"></div>
         <div class="absolute inset-0 opacity-30" style="background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 24px 24px;"></div>
-        <div class="relative z-10">
-          <p class="eyebrow">Fleet status</p>
-          <h2 class="mt-4 font-display text-5xl font-black tracking-[-0.06em]">{{ availabilityLabel() }}</h2>
-          <p class="mt-4 max-w-xl text-sm leading-7 text-on-surface-variant">
-            Ajusta tu disponibilidad y toma pedidos listos para salir. No hay transiciones locales; si el backend rechaza la
-            accion, el panel solo refleja el error.
-          </p>
-        </div>
-      </article>
+        <div class="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p class="eyebrow">Estado repartidor</p>
+            <h2 class="mt-4 font-display text-5xl font-black tracking-[-0.06em]">{{ availabilityLabel() }}</h2>
+            <p class="mt-4 max-w-xl text-sm leading-7 text-on-surface-variant">
+              Ajusta tu disponibilidad y toma pedidos listos para salir. No hay transiciones locales; si el backend rechaza la
+              accion, el panel solo refleja el error.
+            </p>
+          </div>
 
-      <article class="glass-panel p-6">
-        <p class="eyebrow">Disponibilidad</p>
-        <div class="mt-5 grid gap-3">
-          @for (option of availabilityOptions; track option.value) {
-            <button
-              type="button"
-              class="rounded-full px-5 py-3 text-sm font-semibold transition"
-              [class.bg-primary]="availability() === option.value"
-              [class.text-on-primary]="availability() === option.value"
-              [class.shadow-[0_0_24px_rgba(210,253,110,0.22)]]="availability() === option.value"
-              [class.ghost-button]="availability() !== option.value"
-              (click)="updateAvailability(option.value)"
-            >
-              {{ option.label }}
-            </button>
-          }
+          <div class="w-full max-w-xl">
+            <p class="text-xs font-semibold uppercase tracking-[0.24em] text-on-surface-variant">Disponibilidad</p>
+            <div class="mt-4 rounded-[1.4rem] border border-white/10 bg-black/20 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+              <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                @for (option of availabilityOptions; track option.value) {
+                  <button
+                    type="button"
+                    class="inline-flex items-center justify-center rounded-[1rem] px-5 py-4 text-sm font-semibold transition duration-200"
+                    [ngClass]="availability() === option.value
+                      ? 'bg-primary text-on-primary shadow-[0_0_24px_rgba(210,253,110,0.24)]'
+                      : 'bg-transparent text-on-surface-variant hover:bg-white/5 hover:text-on-surface'"
+                    (click)="updateAvailability(option.value)"
+                  >
+                    {{ option.label }}
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
         </div>
       </article>
     </section>
@@ -74,21 +77,25 @@
         }
       </div>
     } @else {
-      <div class="grid gap-8 xl:grid-cols-[1fr_1fr]">
+      <div class="space-y-8">
         <section class="glass-panel p-6">
           <div class="flex items-end justify-between">
             <div>
-              <p class="eyebrow">Available Orders</p>
+              <p class="eyebrow">Pedidos disponibles</p>
               <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Pedidos listos</h2>
             </div>
             <span class="rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-xs uppercase tracking-[0.24em] text-primary">
-              {{ availableOrders().length }} disponibles
+              <span class="sm:hidden">{{ availableOrders().length }} DISP.</span>
+              <span class="hidden sm:inline">{{ availableOrders().length }} disponibles</span>
             </span>
           </div>
 
           <div class="mt-6 space-y-4">
             @for (order of availableOrders(); track order.id) {
-              <article class="rounded-[1.6rem] bg-white/4 p-5">
+              <article
+                class="rounded-[1.6rem] border p-5 transition"
+                [ngClass]="isSelected(order.id) ? 'border-primary/35 bg-primary/8' : 'border-white/6 bg-white/4'"
+              >
                 <div class="flex items-start justify-between gap-4">
                   <div>
                     <p class="font-display text-2xl font-bold tracking-[-0.05em]">{{ order.customerName }}</p>
@@ -97,10 +104,15 @@
                   <p class="font-display text-2xl font-bold text-primary">{{ order.total | currency: 'MXN':'symbol-narrow':'1.0-0' }}</p>
                 </div>
                 <p class="mt-4 text-sm leading-7 text-on-surface-variant">{{ order.deliveryAddress }}</p>
-                <button class="liquid-button mt-5 w-full !justify-center" type="button" (click)="takeOrder(order.id)">
-                  <span class="material-symbols-outlined text-base">near_me</span>
-                  Tomar pedido
-                </button>
+                <div class="mt-5 flex gap-3">
+                  <button class="ghost-button flex-1 !justify-center" type="button" (click)="selectOrder(order)">
+                    Ver detalle
+                  </button>
+                  <button class="liquid-button flex-1 !justify-center" type="button" (click)="takeOrder(order.id)">
+                    <span class="material-symbols-outlined text-base">near_me</span>
+                    Tomar pedido
+                  </button>
+                </div>
               </article>
             }
 
@@ -115,7 +127,7 @@
         <section class="glass-panel p-6">
           <div class="flex items-end justify-between">
             <div>
-              <p class="eyebrow">My Orders</p>
+              <p class="eyebrow">Mis pedidos</p>
               <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Asignados</h2>
             </div>
             <span class="rounded-full border border-white/10 bg-white/4 px-4 py-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">
@@ -125,18 +137,43 @@
 
           <div class="mt-6 space-y-4">
             @for (order of myOrders(); track order.id) {
-              <article class="rounded-[1.6rem] bg-white/4 p-5">
+              <article
+                class="rounded-[1.6rem] border p-5 transition"
+                [ngClass]="isSelected(order.id) ? 'border-primary/35 bg-primary/8' : 'border-white/6 bg-white/4'"
+              >
                 <div class="flex items-start justify-between gap-4">
                   <div>
                     <p class="font-display text-2xl font-bold tracking-[-0.05em]">{{ order.customerName }}</p>
                     <p class="mt-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">{{ order.id }}</p>
                   </div>
-                  <p class="font-display text-2xl font-bold text-primary">{{ order.total | currency: 'MXN':'symbol-narrow':'1.0-0' }}</p>
+                  <div class="text-right">
+                    <p class="font-display text-2xl font-bold text-primary">{{ order.total | currency: 'MXN':'symbol-narrow':'1.0-0' }}</p>
+                    <p class="mt-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">{{ getOrderStatusLabel(order.status) }}</p>
+                  </div>
                 </div>
                 <p class="mt-4 text-sm leading-7 text-on-surface-variant">{{ order.deliveryAddress }}</p>
                 <div class="mt-5 flex gap-3">
-                  <button class="ghost-button flex-1 !justify-center" type="button" (click)="releaseOrder(order.id)">Liberar</button>
-                  <button class="liquid-button flex-1 !justify-center" type="button" (click)="markDelivered(order.id)">Entregar</button>
+                  <button class="ghost-button flex-1 !justify-center" type="button" (click)="selectOrder(order)">Ver detalle</button>
+                  <button
+                    class="ghost-button flex-1 !justify-center"
+                    type="button"
+                    [disabled]="!canRelease(order)"
+                    [class.opacity-50]="!canRelease(order)"
+                    [class.pointer-events-none]="!canRelease(order)"
+                    (click)="releaseOrder(order.id)"
+                  >
+                    Liberar
+                  </button>
+                  <button
+                    class="liquid-button flex-1 !justify-center"
+                    type="button"
+                    [disabled]="!canMarkDelivered(order)"
+                    [class.opacity-50]="!canMarkDelivered(order)"
+                    [class.pointer-events-none]="!canMarkDelivered(order)"
+                    (click)="markDelivered(order.id)"
+                  >
+                    Entregar
+                  </button>
                 </div>
               </article>
             }
@@ -151,4 +188,103 @@
       </div>
     }
   </div>
+
+  @if (selectedOrder(); as order) {
+    <div class="fixed inset-0 z-50 bg-black/70 px-4 py-6 backdrop-blur-sm sm:px-6 lg:px-8" (click)="closeOrderDetail()">
+      <div
+        class="mx-auto flex h-full max-w-4xl items-center justify-center"
+      >
+        <div
+          class="glass-panel max-h-full w-full overflow-hidden rounded-[2rem] border border-white/10 bg-surface-container-low shadow-[0_40px_120px_rgba(0,0,0,0.48)]"
+          (click)="$event.stopPropagation()"
+        >
+          <div class="flex items-start justify-between gap-4 border-b border-white/8 px-6 py-5 sm:px-8">
+            <div>
+              <p class="eyebrow">Detalle del pedido</p>
+              <h2 class="mt-3 font-display text-3xl font-black tracking-[-0.05em]">{{ order.customerName }}</h2>
+              <p class="mt-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">{{ order.id }}</p>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <div class="rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-xs uppercase tracking-[0.2em] text-primary">
+                {{ getOrderStatusLabel(order.status) }}
+              </div>
+              <button class="ghost-button !px-4 !py-2" type="button" (click)="closeOrderDetail()">
+                <span class="material-symbols-outlined text-base">close</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="max-h-[calc(100vh-9rem)] overflow-y-auto px-6 py-6 sm:px-8">
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div class="rounded-[1.4rem] bg-white/4 p-4">
+                <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Cliente</p>
+                <p class="mt-3 text-lg font-semibold text-on-surface">{{ order.customerName }}</p>
+                <p class="mt-2 text-sm text-on-surface-variant">{{ order.customerPhone }}</p>
+              </div>
+
+              <div class="rounded-[1.4rem] bg-white/4 p-4">
+                <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Total</p>
+                <p class="mt-3 font-display text-3xl font-black text-primary">
+                  {{ order.total | currency: 'MXN':'symbol-narrow':'1.0-0' }}
+                </p>
+              </div>
+            </div>
+
+            <div class="mt-4 rounded-[1.6rem] bg-white/4 p-5">
+              <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Direccion de entrega</p>
+              <p class="mt-3 text-sm leading-7 text-on-surface">{{ order.deliveryAddress }}</p>
+              @if (hasDeliveryCoordinates(order)) {
+                <button class="liquid-button mt-4" type="button" (click)="openGoogleMapsNavigation(order)">
+                  <span class="material-symbols-outlined text-base">map</span>
+                  Abrir en Google Maps
+                </button>
+              }
+            </div>
+
+            <div class="mt-4 rounded-[1.6rem] bg-white/4 p-5">
+              <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Notas</p>
+              <p class="mt-3 text-sm leading-7 text-on-surface-variant">
+                {{ order.notes || 'Sin notas para este pedido.' }}
+              </p>
+            </div>
+
+            <div class="mt-4 rounded-[1.6rem] bg-white/4 p-5">
+              <div class="flex items-center justify-between gap-3">
+                <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Detalle del pedido</p>
+                <span class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">{{ order.items.length }} productos</span>
+              </div>
+
+              <div class="mt-4 space-y-3">
+                @for (item of order.items; track item.id) {
+                  <div class="rounded-[1.2rem] border border-white/8 bg-black/10 px-4 py-3">
+                    <div class="flex items-start justify-between gap-4">
+                      <div>
+                        <p class="font-semibold text-on-surface">{{ item.productNameSnapshot }}</p>
+                        <p class="mt-1 text-sm text-on-surface-variant">
+                          {{ item.quantity }} x {{ item.unitPrice | currency: 'MXN':'symbol-narrow':'1.0-0' }}
+                        </p>
+                      </div>
+                      <p class="font-semibold text-primary">{{ item.subtotal | currency: 'MXN':'symbol-narrow':'1.0-0' }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="mt-4 grid gap-4 sm:grid-cols-2">
+              <div class="rounded-[1.4rem] bg-white/4 p-4">
+                <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Creado</p>
+                <p class="mt-3 text-sm text-on-surface">{{ order.createdAtUtc | date:'medium' }}</p>
+              </div>
+              <div class="rounded-[1.4rem] bg-white/4 p-4">
+                <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Actualizado</p>
+                <p class="mt-3 text-sm text-on-surface">{{ order.updatedAtUtc | date:'medium' }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
 </div>

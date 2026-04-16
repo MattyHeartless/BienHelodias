@@ -102,13 +102,3 @@
   border-color: rgb(255 115 81 / 0.6);
   background: rgb(255 115 81 / 0.18);
 }
-
-.product-badge-active {
-  background: rgb(210 253 110 / 0.2);
-  color: #d2fd6e;
-}
-
-.product-badge-hidden {
-  background: rgb(255 255 255 / 0.08);
-  color: #adaaaa;
-}

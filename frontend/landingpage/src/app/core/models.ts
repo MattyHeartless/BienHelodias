@@ -46,6 +46,13 @@ export interface StoreDto {
   createdAtUtc: string;
 }
 
+export interface StorefrontStoreDto {
+  id: string;
+  name: string;
+  slug: string;
+  welcomePhrase: string | null;
+}
+
 export interface BannerDto {
   bannerId: string;
   storeId: string;
@@ -78,6 +85,8 @@ export interface OrderDto {
   customerName: string;
   customerPhone: string;
   deliveryAddress: string;
+  deliveryLatitude: number | null;
+  deliveryLongitude: number | null;
   notes: string | null;
   status: OrderStatus;
   deliveryUserId: string | null;
@@ -99,6 +108,8 @@ export interface CreateOrderRequest {
   customerName: string;
   customerPhone: string;
   deliveryAddress: string;
+  deliveryLatitude: number | null;
+  deliveryLongitude: number | null;
   notes: string | null;
   items: Array<{
     productId: string;

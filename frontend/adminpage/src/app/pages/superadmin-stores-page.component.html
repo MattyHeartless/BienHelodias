@@ -202,12 +202,24 @@
 
           <form class="mt-5 space-y-4" [formGroup]="adminForm" (ngSubmit)="registerAdmin()">
             <input class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="name" placeholder="Nombre del admin" />
+            @if (adminForm.controls.name.touched && adminForm.controls.name.invalid) {
+              <p class="text-sm text-error">Captura un nombre de al menos 3 caracteres.</p>
+            }
             <input class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="email" placeholder="correo@tienda.local" />
+            @if (adminForm.controls.email.touched && adminForm.controls.email.invalid) {
+              <p class="text-sm text-error">Captura un correo valido.</p>
+            }
             <input class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="password" placeholder="Contraseña" />
+            <p class="text-sm text-on-surface-variant">Si no la cambias, se usara <span class="font-semibold text-white">Admin123!</span> como contrasena inicial.</p>
+            @if (adminForm.controls.password.touched && adminForm.controls.password.invalid) {
+              <p class="text-sm text-error">La contrasena debe tener al menos 8 caracteres.</p>
+            }
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <button class="ghost-button" type="button" (click)="closeAdminsModal()">Cerrar</button>
-              <button class="liquid-button !justify-center" type="submit">Agregar administrador</button>
+              <button class="liquid-button !justify-center disabled:cursor-not-allowed disabled:opacity-60" type="submit" [disabled]="savingAdmin()">
+                {{ savingAdmin() ? 'Agregando...' : 'Agregar administrador' }}
+              </button>
             </div>
           </form>
         </section>

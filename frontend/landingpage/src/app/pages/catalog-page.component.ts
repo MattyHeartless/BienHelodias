@@ -3,15 +3,13 @@ import { Component, ElementRef, OnDestroy, ViewChild, computed, inject, signal }
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DeliveryAddressDraft, ProductDto, BannerDto } from '../core/models';
-import { landingTenant } from '../core/tenant.config';
 import { getApiErrorMessage } from '../core/api-error.util';
 import { GooglePlacesService } from '../services/google-places.service';
 import { OrdersApiService } from '../services/orders-api.service';
 import { ProductsApiService } from '../services/products-api.service';
 import { StorefrontContentApiService } from '../services/storefront-content-api.service';
+import { StorefrontTenantService } from '../services/storefront-tenant.service';
 import { catchError, forkJoin, of } from 'rxjs';
-
-const LAST_ORDER_KEY = 'bien-helodias-last-order';
 
 @Component({
   selector: 'app-catalog-page',
@@ -21,6 +19,7 @@ const LAST_ORDER_KEY = 'bien-helodias-last-order';
   styleUrl: './catalog-page.component.css'
 })
 export class CatalogPageComponent {
+  private static readonly BANNER_SWIPE_THRESHOLD = 45;
   private readonly productsApi = inject(ProductsApiService);
   private readonly ordersApi = inject(OrdersApiService);
   private readonly storefrontContentApi = inject(StorefrontContentApiService);
@@ -28,15 +27,19 @@ export class CatalogPageComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly storefrontTenant = inject(StorefrontTenantService);
   private autocomplete: any | null = null;
   private autocompleteListener: { remove: () => void } | null = null;
   private autocompleteInput: HTMLInputElement | null = null;
   private bannerRotationHandle: ReturnType<typeof window.setInterval> | null = null;
+  private bannerPointerId: number | null = null;
+  private bannerPointerStartX: number | null = null;
+  private bannerPointerStartY: number | null = null;
 
   @ViewChild('deliveryAddressInput')
   private deliveryAddressInput?: ElementRef<HTMLInputElement>;
 
-  readonly tenant = landingTenant;
+  readonly tenant = computed(() => this.storefrontTenant.store());
   readonly loading = signal(true);
   readonly submitting = signal(false);
   readonly error = signal<string | null>(null);
@@ -49,6 +52,7 @@ export class CatalogPageComponent {
   readonly activeBannerIndex = signal(0);
   readonly activeCategory = signal<string>('all');
   readonly searchQuery = signal('');
+  readonly isBannerDragging = signal(false);
   readonly highlightedProductId = signal<string | null>(null);
   readonly detailOpen = signal(false);
   readonly cartOpen = signal(false);
@@ -123,7 +127,17 @@ export class CatalogPageComponent {
       this.cartOpen.set(panel === 'cart');
     });
 
-    this.loadCatalog();
+    this.route.paramMap.subscribe((params) => {
+      const slug = params.get('slug');
+      if (!slug) {
+        this.storefrontTenant.clear();
+        this.loading.set(false);
+        this.error.set('No se encontro el slug de la tienda.');
+        return;
+      }
+
+      this.resolveStorefront(slug);
+    });
   }
 
   loadCatalog(): void {
@@ -229,7 +243,8 @@ export class CatalogPageComponent {
 
   submitOrder(): void {
     this.checkoutForm.markAllAsTouched();
-    if (this.checkoutForm.invalid || this.cartCount() === 0) {
+    const storeId = this.storefrontTenant.storeId();
+    if (this.checkoutForm.invalid || this.cartCount() === 0 || !storeId) {
       return;
     }
 
@@ -240,10 +255,12 @@ export class CatalogPageComponent {
 
     this.ordersApi
       .createOrder({
-        storeId: this.tenant.storeId,
+        storeId,
         customerName: checkoutValues.customerName,
         customerPhone: checkoutValues.customerPhone,
         deliveryAddress: checkoutValues.deliveryAddress,
+        deliveryLatitude: checkoutValues.deliveryLatitude ? Number(checkoutValues.deliveryLatitude) : null,
+        deliveryLongitude: checkoutValues.deliveryLongitude ? Number(checkoutValues.deliveryLongitude) : null,
         notes: checkoutValues.notes || null,
         items: this.cartItems().map((entry) => ({
           productId: entry.product.id,
@@ -252,12 +269,17 @@ export class CatalogPageComponent {
       })
       .subscribe({
         next: (response) => {
-          localStorage.setItem(LAST_ORDER_KEY, JSON.stringify(response.data));
+          const activeSlug = this.storefrontTenant.slug();
+          if (activeSlug) {
+            localStorage.setItem(this.getLastOrderStorageKey(activeSlug), JSON.stringify(response.data));
+          }
           this.cart.set({});
           this.cartOpen.set(false);
           this.checkoutOpen.set(false);
           this.submitting.set(false);
-          void this.router.navigate(['/order', response.data.id]);
+          if (activeSlug) {
+            void this.router.navigate(['/', activeSlug, 'order', response.data.id]);
+          }
         },
         error: (error) => {
           this.error.set(getApiErrorMessage(error, 'No fue posible crear tu pedido.'));
@@ -280,13 +302,18 @@ export class CatalogPageComponent {
   }
 
   trackLastOrder(): void {
-    const rawOrder = localStorage.getItem(LAST_ORDER_KEY);
+    const activeSlug = this.storefrontTenant.slug();
+    if (!activeSlug) {
+      return;
+    }
+
+    const rawOrder = localStorage.getItem(this.getLastOrderStorageKey(activeSlug));
     if (!rawOrder) {
       return;
     }
 
     const parsedOrder = JSON.parse(rawOrder) as { id: string };
-    void this.router.navigate(['/order', parsedOrder.id]);
+    void this.router.navigate(['/', activeSlug, 'order', parsedOrder.id]);
   }
 
   productTone(index: number): string {
@@ -326,6 +353,54 @@ export class CatalogPageComponent {
   showBanner(index: number): void {
     this.activeBannerIndex.set(index);
     this.restartBannerRotation();
+  }
+
+  handleBannerPointerDown(event: PointerEvent): void {
+    if (this.banners().length <= 1 || this.isInteractiveBannerTarget(event.target)) {
+      return;
+    }
+
+    this.bannerPointerId = event.pointerId;
+    this.bannerPointerStartX = event.clientX;
+    this.bannerPointerStartY = event.clientY;
+    this.isBannerDragging.set(true);
+    (event.currentTarget as HTMLElement | null)?.setPointerCapture?.(event.pointerId);
+  }
+
+  handleBannerPointerMove(event: PointerEvent): void {
+    if (!this.isTrackingBannerPointer(event.pointerId) || this.bannerPointerStartX === null || this.bannerPointerStartY === null) {
+      return;
+    }
+
+    const deltaX = event.clientX - this.bannerPointerStartX;
+    const deltaY = event.clientY - this.bannerPointerStartY;
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      event.preventDefault();
+    }
+  }
+
+  handleBannerPointerUp(event: PointerEvent): void {
+    if (!this.isTrackingBannerPointer(event.pointerId) || this.bannerPointerStartX === null || this.bannerPointerStartY === null) {
+      this.resetBannerPointerState();
+      return;
+    }
+
+    const deltaX = event.clientX - this.bannerPointerStartX;
+    const deltaY = event.clientY - this.bannerPointerStartY;
+    const isHorizontalSwipe =
+      Math.abs(deltaX) >= CatalogPageComponent.BANNER_SWIPE_THRESHOLD &&
+      Math.abs(deltaX) > Math.abs(deltaY);
+
+    if (isHorizontalSwipe) {
+      if (deltaX > 0) {
+        this.showPreviousBanner();
+      } else {
+        this.showNextBanner();
+      }
+    }
+
+    (event.currentTarget as HTMLElement | null)?.releasePointerCapture?.(event.pointerId);
+    this.resetBannerPointerState();
   }
 
   private async initializeDeliveryAddressAutocomplete(): Promise<void> {
@@ -411,5 +486,43 @@ export class CatalogPageComponent {
 
   private restartBannerRotation(): void {
     this.startBannerRotation();
+  }
+
+  private resolveStorefront(slug: string): void {
+    this.loading.set(true);
+    this.error.set(null);
+
+    this.storefrontTenant.loadStore(slug).subscribe({
+      next: (store) => {
+        this.welcomePhrase.set(store.welcomePhrase?.trim() || 'No te compliques, aqui te lo mandamos.');
+        this.loadCatalog();
+      },
+      error: () => {
+        this.products.set([]);
+        this.banners.set([]);
+        this.highlightedProductId.set(null);
+        this.loading.set(false);
+        this.error.set(this.storefrontTenant.error() ?? 'No fue posible cargar la tienda solicitada.');
+      }
+    });
+  }
+
+  private getLastOrderStorageKey(slug: string): string {
+    return `bien-helodias-last-order:${slug}`;
+  }
+
+  private resetBannerPointerState(): void {
+    this.bannerPointerId = null;
+    this.bannerPointerStartX = null;
+    this.bannerPointerStartY = null;
+    this.isBannerDragging.set(false);
+  }
+
+  private isTrackingBannerPointer(pointerId: number): boolean {
+    return this.bannerPointerId === pointerId;
+  }
+
+  private isInteractiveBannerTarget(target: EventTarget | null): boolean {
+    return target instanceof Element && target.closest('button, a, input, textarea, select') !== null;
   }
 }

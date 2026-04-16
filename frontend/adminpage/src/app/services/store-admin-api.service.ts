@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ApiResponse, BannerDto, DashboardDto, OrderDto, PagedResult, ProductDto, StoreDto } from '../core/models';
+import { ApiResponse, AuthTokenDto, BannerDto, DashboardDto, DeliveryUserDto, OrderDto, PagedResult, ProductDto, StoreDto } from '../core/models';
 import { AdminSessionService } from '../core/admin-session.service';
 
 @Injectable({ providedIn: 'root' })
@@ -9,6 +9,8 @@ export class StoreAdminApiService {
   private readonly http = inject(HttpClient);
   private readonly session = inject(AdminSessionService);
   private readonly adminUrl = 'http://localhost:5078/api/admin/dashboard';
+  private readonly adminBaseUrl = 'http://localhost:5078/api/admin';
+  private readonly authUrl = 'http://localhost:5078/api/auth';
   private readonly productsUrl = 'http://localhost:5078/api/products';
   private readonly ordersUrl = 'http://localhost:5078/api/orders';
   private readonly storesUrl = 'http://localhost:5078/api/stores';
@@ -16,6 +18,26 @@ export class StoreAdminApiService {
 
   getDashboard(): Observable<ApiResponse<DashboardDto>> {
     return this.http.get<ApiResponse<DashboardDto>>(this.adminUrl);
+  }
+
+  getDeliveryUsers(): Observable<ApiResponse<DeliveryUserDto[]>> {
+    return this.http.get<ApiResponse<DeliveryUserDto[]>>(`${this.adminBaseUrl}/delivery-users`);
+  }
+
+  createDeliveryUser(request: {
+    name: string;
+    email: string;
+    password: string;
+    phone: string;
+  }): Observable<ApiResponse<AuthTokenDto>> {
+    return this.http.post<ApiResponse<AuthTokenDto>>(`${this.authUrl}/register-delivery`, {
+      ...request,
+      storeId: null
+    });
+  }
+
+  updateDeliveryUserStatus(deliveryUserId: string, isActive: boolean): Observable<ApiResponse<DeliveryUserDto>> {
+    return this.http.patch<ApiResponse<DeliveryUserDto>>(`${this.adminBaseUrl}/delivery-users/${deliveryUserId}/status`, { isActive });
   }
 
   getProducts(): Observable<ApiResponse<PagedResult<ProductDto>>> {

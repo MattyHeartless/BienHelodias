@@ -10,6 +10,8 @@ public sealed record CreateOrderRequest(
     string CustomerName,
     string CustomerPhone,
     string DeliveryAddress,
+    decimal? DeliveryLatitude,
+    decimal? DeliveryLongitude,
     string? Notes,
     IReadOnlyCollection<CreateOrderItemRequest> Items);
 
@@ -23,6 +25,8 @@ public sealed record OrderDto(
     string CustomerName,
     string CustomerPhone,
     string DeliveryAddress,
+    decimal? DeliveryLatitude,
+    decimal? DeliveryLongitude,
     string? Notes,
     OrderStatus Status,
     Guid? DeliveryUserId,

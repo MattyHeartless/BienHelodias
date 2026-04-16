@@ -1,9 +1,18 @@
 import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { StorefrontTenantService } from '../services/storefront-tenant.service';
 
 export const tenantInterceptor: HttpInterceptorFn = (request, next) => {
+  const storefrontTenant = inject(StorefrontTenantService);
+  const storeId = storefrontTenant.storeId();
+
+  if (!storeId || !request.url.startsWith('http://localhost:5078/api/')) {
+    return next(request);
+  }
+
   const apiRequest = request.clone({
     setHeaders: {
-      'X-Store-Id': '6f514f4d-a00c-4580-88f4-a3c85c7f24db'
+      'X-Store-Id': storeId
     }
   });
 

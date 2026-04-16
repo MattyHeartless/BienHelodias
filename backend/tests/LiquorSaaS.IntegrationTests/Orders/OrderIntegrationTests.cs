@@ -21,6 +21,8 @@ public sealed class OrderIntegrationTests(TestWebApplicationFactory factory) : I
             "Cliente Test",
             "55555",
             "Av Principal 123",
+            19.432608m,
+            -99.133209m,
             "Sin hielo",
             new[]
             {
@@ -34,6 +36,8 @@ public sealed class OrderIntegrationTests(TestWebApplicationFactory factory) : I
         var payload = await response.Content.ReadFromJsonAsync<ApiResponse<OrderDto>>();
         payload!.Data!.Total.Should().Be(70m);
         payload.Data.Status.Should().Be(OrderStatus.Pending);
+        payload.Data.DeliveryLatitude.Should().Be(19.432608m);
+        payload.Data.DeliveryLongitude.Should().Be(-99.133209m);
     }
 
     [Fact]
@@ -75,6 +79,8 @@ public sealed class OrderIntegrationTests(TestWebApplicationFactory factory) : I
             "Cliente Test",
             "55555",
             "Av Principal 123",
+            19.432608m,
+            -99.133209m,
             null,
             new[]
             {

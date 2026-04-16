@@ -60,6 +60,8 @@ export interface OrderDto {
   customerName: string;
   customerPhone: string;
   deliveryAddress: string;
+  deliveryLatitude: number | null;
+  deliveryLongitude: number | null;
   notes: string | null;
   status: OrderStatus;
   deliveryUserId: string | null;

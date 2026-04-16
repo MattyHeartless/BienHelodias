@@ -16,9 +16,11 @@ public sealed class OrderDomainTests
             OrderItem.Create(Guid.NewGuid(), "Tonica", 12.50m, 1)
         };
 
-        var order = Order.Create(Guid.NewGuid(), "Cliente", "5555", "Calle 123", null, items);
+        var order = Order.Create(Guid.NewGuid(), "Cliente", "5555", "Calle 123", 19.432608m, -99.133209m, null, items);
 
         order.Total.Should().Be(102.50m);
+        order.DeliveryLatitude.Should().Be(19.432608m);
+        order.DeliveryLongitude.Should().Be(-99.133209m);
     }
 
     [Fact]

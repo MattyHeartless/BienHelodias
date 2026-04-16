@@ -65,6 +65,8 @@ public sealed class LiquorSaaSDbContext(DbContextOptions<LiquorSaaSDbContext> op
             entity.Property(x => x.CustomerName).HasMaxLength(150).IsRequired();
             entity.Property(x => x.CustomerPhone).HasMaxLength(50).IsRequired();
             entity.Property(x => x.DeliveryAddress).HasMaxLength(500).IsRequired();
+            entity.Property(x => x.DeliveryLatitude).HasColumnType("decimal(9,6)");
+            entity.Property(x => x.DeliveryLongitude).HasColumnType("decimal(9,6)");
             entity.Property(x => x.Notes).HasMaxLength(1000);
             entity.Property(x => x.Total).HasColumnType("decimal(18,2)");
             entity.Property(x => x.Status).HasConversion<int>();

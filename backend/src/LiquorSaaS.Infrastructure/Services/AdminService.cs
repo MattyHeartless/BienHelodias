@@ -1,7 +1,9 @@
 using LiquorSaaS.Application.Admin;
 using LiquorSaaS.Application.Common.Exceptions;
 using LiquorSaaS.Application.Common.Interfaces;
+using LiquorSaaS.Application.Delivery;
 using LiquorSaaS.Domain.Enums;
+using LiquorSaaS.Infrastructure.Mapping;
 using LiquorSaaS.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -61,5 +63,51 @@ public sealed class AdminService(
                 x.IsActive,
                 x.CreatedAtUtc))
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<DeliveryUserDto>> GetDeliveryUsersAsync(CancellationToken cancellationToken)
+    {
+        EnsureStoreAdminOrSuperAdmin();
+
+        var storeId = tenantProvider.GetRequiredStoreId();
+        return await dbContext.DeliveryUsers
+            .AsNoTracking()
+            .Where(x => x.StoreId == storeId)
+            .OrderBy(x => x.FullName)
+            .Select(x => x.ToDto())
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<DeliveryUserDto> UpdateDeliveryUserStatusAsync(Guid deliveryUserId, UpdateDeliveryUserStatusRequest request, CancellationToken cancellationToken)
+    {
+        EnsureStoreAdminOrSuperAdmin();
+
+        var storeId = tenantProvider.GetRequiredStoreId();
+        var deliveryUser = await dbContext.DeliveryUsers
+            .SingleOrDefaultAsync(x => x.Id == deliveryUserId && x.StoreId == storeId, cancellationToken)
+            ?? throw new NotFoundException("Delivery user not found.");
+
+        var appUser = await dbContext.Users
+            .SingleOrDefaultAsync(x => x.Id == deliveryUser.UserId && x.StoreId == storeId, cancellationToken)
+            ?? throw new NotFoundException("App user for delivery profile was not found.");
+
+        deliveryUser.SetActive(request.IsActive);
+        appUser.Update(appUser.Name, request.IsActive);
+
+        if (!request.IsActive)
+        {
+            deliveryUser.UpdateAvailability(DeliveryAvailability.Unavailable);
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return deliveryUser.ToDto();
+    }
+
+    private void EnsureStoreAdminOrSuperAdmin()
+    {
+        if (currentUserService.Role is not (UserRole.StoreAdmin or UserRole.SuperAdmin))
+        {
+            throw new ForbiddenException("Store admin or super admin role is required.");
+        }
     }
 }

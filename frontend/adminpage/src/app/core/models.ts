@@ -36,6 +36,12 @@ export enum SubscriptionStatus {
   Cancelled = 3
 }
 
+export enum DeliveryAvailability {
+  Unavailable = 0,
+  Available = 1,
+  Busy = 2
+}
+
 export interface AuthTokenDto {
   accessToken: string;
   expiresAtUtc: string;
@@ -77,6 +83,17 @@ export interface BannerDto {
   created: string;
 }
 
+export interface DeliveryUserDto {
+  id: string;
+  userId: string;
+  storeId: string;
+  fullName: string;
+  phone: string;
+  email: string;
+  isActive: boolean;
+  currentAvailability: DeliveryAvailability;
+}
+
 export interface ProductDto {
   id: string;
   storeId: string;
@@ -116,6 +133,8 @@ export interface OrderDto {
   customerName: string;
   customerPhone: string;
   deliveryAddress: string;
+  deliveryLatitude: number | null;
+  deliveryLongitude: number | null;
   notes: string | null;
   status: OrderStatus;
   deliveryUserId: string | null;

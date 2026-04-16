@@ -11,6 +11,17 @@ public sealed class StorefrontService(
     LiquorSaaSDbContext dbContext,
     ITenantProvider tenantProvider) : IStorefrontService
 {
+    public async Task<StorefrontStoreDto> GetStoreBySlugAsync(string slug, CancellationToken cancellationToken)
+    {
+        var normalizedSlug = slug.Trim().ToLowerInvariant();
+
+        var store = await dbContext.Stores.AsNoTracking()
+            .SingleOrDefaultAsync(x => x.Slug == normalizedSlug && x.IsActive, cancellationToken)
+            ?? throw new NotFoundException("Store not found.");
+
+        return new StorefrontStoreDto(store.Id, store.Name, store.Slug, store.WelcomePhrase);
+    }
+
     public async Task<StorefrontContentDto> GetContentAsync(CancellationToken cancellationToken)
     {
         var storeId = tenantProvider.GetRequiredStoreId();

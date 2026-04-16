@@ -45,6 +45,8 @@ internal static class DtoMappings
             entity.CustomerName,
             entity.CustomerPhone,
             entity.DeliveryAddress,
+            entity.DeliveryLatitude,
+            entity.DeliveryLongitude,
             entity.Notes,
             entity.Status,
             entity.DeliveryUserId,

@@ -5,6 +5,8 @@ import { StoreAdminDto, StoreDto, SubscriptionStatus } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
 import { SuperadminApiService } from '../services/superadmin-api.service';
 
+const DEFAULT_ADMIN_PASSWORD = 'Admin123!';
+
 @Component({
   selector: 'app-superadmin-stores-page',
   standalone: true,
@@ -25,6 +27,7 @@ export class SuperadminStoresPageComponent {
   readonly adminsModalOpen = signal(false);
   readonly selectedStore = signal<StoreDto | null>(null);
   readonly loadingAdmins = signal(false);
+  readonly savingAdmin = signal(false);
   readonly storeAdmins = signal<StoreAdminDto[]>([]);
 
   readonly storeForm = this.formBuilder.nonNullable.group({
@@ -42,7 +45,7 @@ export class SuperadminStoresPageComponent {
   readonly adminForm = this.formBuilder.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(3)]],
     email: ['', [Validators.required, Validators.email]],
-    password: ['Admin123!', [Validators.required, Validators.minLength(8)]]
+    password: [DEFAULT_ADMIN_PASSWORD, [Validators.required, Validators.minLength(8)]]
   });
 
   readonly subscriptionOptions = [
@@ -105,7 +108,7 @@ export class SuperadminStoresPageComponent {
     this.adminForm.reset({
       name: '',
       email: '',
-      password: 'Admin123!'
+      password: DEFAULT_ADMIN_PASSWORD
     });
     this.adminsModalOpen.set(true);
     this.loadStoreAdmins(store.id);
@@ -118,8 +121,9 @@ export class SuperadminStoresPageComponent {
     this.adminForm.reset({
       name: '',
       email: '',
-      password: 'Admin123!'
+      password: DEFAULT_ADMIN_PASSWORD
     });
+    this.savingAdmin.set(false);
   }
 
   load(clearFeedback = true): void {
@@ -188,13 +192,21 @@ export class SuperadminStoresPageComponent {
       return;
     }
 
+    this.error.set(null);
+    this.feedback.set(null);
     this.adminForm.markAllAsTouched();
     if (this.adminForm.invalid) {
+      this.error.set('Completa nombre, correo valido y una contrasena de al menos 8 caracteres.');
       return;
     }
 
+    const formValue = this.adminForm.getRawValue();
+    const password = formValue.password.trim() || DEFAULT_ADMIN_PASSWORD;
+
+    this.savingAdmin.set(true);
     this.superadminApi.registerAdmin({
-      ...this.adminForm.getRawValue(),
+      ...formValue,
+      password,
       storeId: store.id
     }).subscribe({
       next: () => {
@@ -202,12 +214,14 @@ export class SuperadminStoresPageComponent {
         this.adminForm.reset({
           name: '',
           email: '',
-          password: 'Admin123!'
+          password: DEFAULT_ADMIN_PASSWORD
         });
+        this.savingAdmin.set(false);
         this.loadStoreAdmins(store.id);
       },
       error: (error) => {
         this.error.set(getApiErrorMessage(error, 'No fue posible registrar el administrador.'));
+        this.savingAdmin.set(false);
       }
     });
   }

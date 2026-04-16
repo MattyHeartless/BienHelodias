@@ -16,6 +16,8 @@ public sealed class Order : AuditableEntity
     public string CustomerName { get; private set; } = string.Empty;
     public string CustomerPhone { get; private set; } = string.Empty;
     public string DeliveryAddress { get; private set; } = string.Empty;
+    public decimal? DeliveryLatitude { get; private set; }
+    public decimal? DeliveryLongitude { get; private set; }
     public string? Notes { get; private set; }
     public OrderStatus Status { get; private set; } = OrderStatus.Pending;
     public Guid? DeliveryUserId { get; private set; }
@@ -27,6 +29,8 @@ public sealed class Order : AuditableEntity
         string customerName,
         string customerPhone,
         string deliveryAddress,
+        decimal? deliveryLatitude,
+        decimal? deliveryLongitude,
         string? notes,
         IEnumerable<OrderItem> items)
     {
@@ -45,6 +49,21 @@ public sealed class Order : AuditableEntity
             throw new DomainRuleException("Delivery address is required.");
         }
 
+        if (deliveryLatitude.HasValue != deliveryLongitude.HasValue)
+        {
+            throw new DomainRuleException("Delivery latitude and longitude must both be provided.");
+        }
+
+        if (deliveryLatitude is < -90 or > 90)
+        {
+            throw new DomainRuleException("Delivery latitude must be between -90 and 90.");
+        }
+
+        if (deliveryLongitude is < -180 or > 180)
+        {
+            throw new DomainRuleException("Delivery longitude must be between -180 and 180.");
+        }
+
         var itemList = items.ToList();
         if (itemList.Count == 0)
         {
@@ -57,6 +76,8 @@ public sealed class Order : AuditableEntity
             CustomerName = customerName.Trim(),
             CustomerPhone = customerPhone.Trim(),
             DeliveryAddress = deliveryAddress.Trim(),
+            DeliveryLatitude = deliveryLatitude,
+            DeliveryLongitude = deliveryLongitude,
             Notes = string.IsNullOrWhiteSpace(notes) ? null : notes.Trim(),
             Status = OrderStatus.Pending
         };

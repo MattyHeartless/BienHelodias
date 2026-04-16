@@ -66,6 +66,8 @@ public sealed class OrderService(
             request.CustomerName,
             request.CustomerPhone,
             request.DeliveryAddress,
+            request.DeliveryLatitude,
+            request.DeliveryLongitude,
             request.Notes,
             orderItems);
 
