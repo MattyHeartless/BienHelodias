@@ -2,6 +2,7 @@ using LiquorSaaS.Application.Common;
 using LiquorSaaS.Application.Common.Exceptions;
 using LiquorSaaS.Application.Common.Interfaces;
 using LiquorSaaS.Application.Orders;
+using LiquorSaaS.Application.Push;
 using LiquorSaaS.Domain.Entities;
 using LiquorSaaS.Domain.Enums;
 using LiquorSaaS.Domain.Exceptions;
@@ -17,6 +18,7 @@ public sealed class OrderService(
     LiquorSaaSDbContext dbContext,
     ITenantProvider tenantProvider,
     ICurrentUserService currentUserService,
+    IPushNotificationService pushNotificationService,
     ILogger<OrderService> logger) : IOrderService
 {
     public async Task<OrderDto> CreateAsync(CreateOrderRequest request, CancellationToken cancellationToken)
@@ -75,6 +77,16 @@ public sealed class OrderService(
         await dbContext.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation("Order {OrderId} created for store {StoreId}", order.Id, storeId);
+
+        try
+        {
+            await pushNotificationService.NotifyNewOrderAsync(order.Id, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Push notification dispatch failed for order {OrderId}", order.Id);
+        }
+
         return order.ToDto();
     }
 

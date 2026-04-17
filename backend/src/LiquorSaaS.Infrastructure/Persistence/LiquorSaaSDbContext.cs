@@ -11,6 +11,7 @@ public sealed class LiquorSaaSDbContext(DbContextOptions<LiquorSaaSDbContext> op
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     public DbSet<DeliveryUser> DeliveryUsers => Set<DeliveryUser>();
+    public DbSet<CourierPushSubscription> CourierPushSubscriptions => Set<CourierPushSubscription>();
     public DbSet<AppUser> Users => Set<AppUser>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -97,6 +98,20 @@ public sealed class LiquorSaaSDbContext(DbContextOptions<LiquorSaaSDbContext> op
             entity.Property(x => x.CurrentAvailability).HasConversion<int>();
             entity.HasIndex(x => x.UserId).IsUnique();
             entity.HasIndex(x => x.StoreId);
+        });
+
+        modelBuilder.Entity<CourierPushSubscription>(entity =>
+        {
+            entity.ToTable("CourierPushSubscriptions");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Endpoint).HasMaxLength(2048).IsRequired();
+            entity.Property(x => x.P256DH).HasMaxLength(512).IsRequired();
+            entity.Property(x => x.Auth).HasMaxLength(256).IsRequired();
+            entity.Property(x => x.UserAgent).HasMaxLength(512).IsRequired();
+            entity.Property(x => x.LastNotificationSentAtUtc).HasColumnType("datetime2");
+            entity.HasIndex(x => x.Endpoint).IsUnique();
+            entity.HasIndex(x => x.DeliveryUserId);
+            entity.HasIndex(x => new { x.StoreId, x.IsActive });
         });
 
         modelBuilder.Entity<AppUser>(entity =>

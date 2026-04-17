@@ -27,13 +27,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("LocalFrontend", policy =>
     {
         policy
-            .WithOrigins(
-                "http://localhost:4200",
-                "http://localhost:4201",
-                "http://localhost:4202",
-                "http://localhost:4300",
-                "http://localhost:4301",
-                "http://localhost:4302")
+            .SetIsOriginAllowed(Program.IsLocalDevelopmentOrigin)
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -105,3 +99,40 @@ using (var scope = app.Services.CreateScope())
 app.Run();
 
 public partial class Program;
+
+public partial class Program
+{
+    internal static bool IsLocalDevelopmentOrigin(string? origin)
+    {
+        if (string.IsNullOrWhiteSpace(origin) || !Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+        {
+            return false;
+        }
+
+        if (!string.Equals(uri.Scheme, Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        if (uri.IsLoopback || string.Equals(uri.Host, "localhost", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        return System.Net.IPAddress.TryParse(uri.Host, out var ipAddress) && IsPrivateIPv4(ipAddress);
+    }
+
+    private static bool IsPrivateIPv4(System.Net.IPAddress ipAddress)
+    {
+        if (ipAddress.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
+        {
+            return false;
+        }
+
+        var bytes = ipAddress.GetAddressBytes();
+        return bytes[0] == 10
+            || (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31)
+            || (bytes[0] == 192 && bytes[1] == 168);
+    }
+}

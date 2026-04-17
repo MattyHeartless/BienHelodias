@@ -9,12 +9,13 @@ import {
   OrderStatus,
   PagedResult
 } from '../core/models';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class DeliveryApiService {
   private readonly http = inject(HttpClient);
-  private readonly deliveryUrl = 'http://localhost:5078/api/delivery';
-  private readonly ordersUrl = 'http://localhost:5078/api/orders';
+  private readonly deliveryUrl = `${environment.apiBaseUrl}/delivery`;
+  private readonly ordersUrl = `${environment.apiBaseUrl}/orders`;
 
   getAvailableOrders(): Observable<ApiResponse<PagedResult<OrderDto>>> {
     return this.http.get<ApiResponse<PagedResult<OrderDto>>>(`${this.deliveryUrl}/orders/available`, {

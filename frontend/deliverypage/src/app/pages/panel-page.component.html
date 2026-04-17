@@ -70,6 +70,77 @@
       </article>
     </section>
 
+    <section class="mb-8">
+      <article class="glass-panel overflow-hidden p-6">
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div class="max-w-2xl">
+            <p class="eyebrow">Notificaciones push</p>
+            <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Avisos de pedidos nuevos</h2>
+            <p class="mt-3 text-sm leading-7 text-on-surface-variant">
+              La idea es notificar a todos los repartidores activos cuando entre un pedido nuevo, hasta que uno lo tome.
+            </p>
+            <div class="mt-4 inline-flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.22em]">
+              <span
+                class="rounded-full border px-4 py-2"
+                [ngClass]="pushState().availability === 'supported'
+                  ? 'border-primary/20 bg-primary/10 text-primary'
+                  : 'border-error/30 bg-error/10 text-white'"
+              >
+                {{ pushState().availability === 'supported' ? 'Compatible' : 'No disponible' }}
+              </span>
+              <span
+                class="rounded-full border px-4 py-2"
+                [ngClass]="pushState().isSubscribed
+                  ? 'border-primary/20 bg-primary/10 text-primary'
+                  : 'border-white/10 bg-white/4 text-on-surface-variant'"
+              >
+                {{ pushState().isSubscribed ? 'Suscrito' : 'Sin suscripcion' }}
+              </span>
+              <span
+                class="rounded-full border px-4 py-2"
+                [ngClass]="pushState().backendSynchronized
+                  ? 'border-primary/20 bg-primary/10 text-primary'
+                  : 'border-white/10 bg-white/4 text-on-surface-variant'"
+              >
+                {{ pushState().backendSynchronized ? 'Backend sincronizado' : 'Backend pendiente' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="flex w-full flex-col gap-3 lg:w-auto lg:min-w-80">
+            <button
+              class="liquid-button w-full !justify-center"
+              type="button"
+              [disabled]="pushState().isRegistering || pushState().availability !== 'supported'"
+              [class.opacity-50]="pushState().isRegistering || pushState().availability !== 'supported'"
+              [class.pointer-events-none]="pushState().isRegistering || pushState().availability !== 'supported'"
+              (click)="enablePushNotifications()"
+            >
+              <span class="material-symbols-outlined text-base">notifications_active</span>
+              {{ pushState().isRegistering ? 'Procesando...' : 'Activar notificaciones' }}
+            </button>
+            <button
+              class="ghost-button w-full !justify-center"
+              type="button"
+              [disabled]="pushState().isRegistering || !pushState().isSubscribed"
+              [class.opacity-50]="pushState().isRegistering || !pushState().isSubscribed"
+              [class.pointer-events-none]="pushState().isRegistering || !pushState().isSubscribed"
+              (click)="disablePushNotifications()"
+            >
+              <span class="material-symbols-outlined text-base">notifications_off</span>
+              Desactivar en este dispositivo
+            </button>
+          </div>
+        </div>
+
+        @if (pushState().message) {
+          <div class="mt-5 rounded-[1.25rem] border border-white/8 bg-white/4 px-4 py-3 text-sm leading-7 text-on-surface-variant">
+            {{ pushState().message }}
+          </div>
+        }
+      </article>
+    </section>
+
     @if (loading()) {
       <div class="grid gap-6 md:grid-cols-2">
         @for (item of [1, 2, 3, 4]; track item) {

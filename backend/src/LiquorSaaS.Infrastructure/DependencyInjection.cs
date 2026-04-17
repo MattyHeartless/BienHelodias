@@ -6,6 +6,7 @@ using LiquorSaaS.Application.Common.Interfaces;
 using LiquorSaaS.Application.Delivery;
 using LiquorSaaS.Application.Orders;
 using LiquorSaaS.Application.Products;
+using LiquorSaaS.Application.Push;
 using LiquorSaaS.Application.Storefront;
 using LiquorSaaS.Application.Stores;
 using LiquorSaaS.Domain.Enums;
@@ -36,6 +37,7 @@ public static class DependencyInjection
             }));
 
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services.Configure<PushNotificationOptions>(configuration.GetSection(PushNotificationOptions.SectionName));
         services.AddScoped<BcryptPasswordHasher>();
         services.AddScoped<IPasswordHasher>(sp => sp.GetRequiredService<BcryptPasswordHasher>());
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
@@ -49,6 +51,8 @@ public static class DependencyInjection
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IDeliveryService, DeliveryService>();
         services.AddScoped<IAdminService, AdminService>();
+        services.AddScoped<IPushSubscriptionService, PushSubscriptionService>();
+        services.AddScoped<IPushNotificationService, PushNotificationService>();
 
         var jwtOptions = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new JwtOptions();
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Key));

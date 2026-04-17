@@ -1,0 +1,20 @@
+{
+  "name": "Bien Helodias Delivery",
+  "short_name": "BH Delivery",
+  "id": "/deliverypage",
+  "theme_color": "#0e0e0e",
+  "background_color": "#0e0e0e",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/login",
+  "lang": "es-MX",
+  "description": "Panel web para repartidores de Bien Helodias.",
+  "icons": [
+    {
+      "src": "icons/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -4,6 +4,9 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "build:lan": "ng build --configuration lan",
+    "serve:lan:https": "serve ./dist/deliverypage/browser --listen tcp://0.0.0.0:4200 --single --ssl-cert ../../.local-dev-certs/lan-dev-cert.pem --ssl-key ../../.local-dev-certs/lan-dev-key.pem",
+    "start:lan:https": "npm run build:lan && npm run serve:lan:https",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
@@ -17,6 +20,7 @@
     "@angular/platform-browser": "^19.2.0",
     "@angular/platform-browser-dynamic": "^19.2.0",
     "@angular/router": "^19.2.0",
+    "@angular/service-worker": "^19.2.20",
     "@tailwindcss/postcss": "^4.2.2",
     "jwt-decode": "^4.0.0",
     "postcss": "^8.5.9",
@@ -30,12 +34,14 @@
     "@angular/cli": "^19.2.23",
     "@angular/compiler-cli": "^19.2.0",
     "@types/jasmine": "~5.1.0",
+    "http-server": "^14.1.1",
     "jasmine-core": "~5.6.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "serve": "^14.2.4",
     "typescript": "~5.7.2"
   }
 }

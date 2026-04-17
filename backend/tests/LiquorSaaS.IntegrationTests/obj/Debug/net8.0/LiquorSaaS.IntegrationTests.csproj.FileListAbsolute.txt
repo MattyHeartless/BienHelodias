@@ -1039,3 +1039,5 @@ C:\Users\Jair\Documents\My Web Sites\BienHelodias\backend\tests\LiquorSaaS.Integ
 C:\Users\Jair\Documents\My Web Sites\BienHelodias\backend\tests\LiquorSaaS.IntegrationTests\obj\Debug\net8.0\LiquorSaaS.IntegrationTests.genruntimeconfig.cache
 C:\Users\Jair\Documents\My Web Sites\BienHelodias\backend\tests\LiquorSaaS.IntegrationTests\obj\Debug\net8.0\ref\LiquorSaaS.IntegrationTests.dll
 C:\Users\Jair\Documents\My Web Sites\BienHelodias\backend\tests\LiquorSaaS.IntegrationTests\obj\Debug\net8.0\LiquorSaaS.IntegrationTests.sourcelink.json
+C:\Users\Jair\Documents\My Web Sites\BienHelodias\backend\tests\LiquorSaaS.IntegrationTests\bin\Debug\net8.0\BouncyCastle.Crypto.dll
+C:\Users\Jair\Documents\My Web Sites\BienHelodias\backend\tests\LiquorSaaS.IntegrationTests\bin\Debug\net8.0\WebPush.dll

@@ -1,11 +1,12 @@
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { DeliveryAvailability, DeliveryUserDto, OrderDto, OrderStatus } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
 import { DeliverySessionService } from '../core/delivery-session.service';
 import { DeliveryApiService } from '../services/delivery-api.service';
+import { PushNotificationService } from '../services/push-notification.service';
 
 @Component({
   selector: 'app-panel-page',
@@ -16,7 +17,9 @@ import { DeliveryApiService } from '../services/delivery-api.service';
 })
 export class PanelPageComponent {
   private readonly deliveryApi = inject(DeliveryApiService);
+  private readonly pushNotifications = inject(PushNotificationService);
   private readonly session = inject(DeliverySessionService);
+  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
   readonly loading = signal(true);
@@ -34,6 +37,7 @@ export class PanelPageComponent {
   ];
 
   readonly email = this.session.email;
+  readonly pushState = this.pushNotifications.state;
   readonly selectedOrder = computed(() => {
     const selectedOrderId = this.selectedOrderId();
     if (!selectedOrderId) {
@@ -47,6 +51,12 @@ export class PanelPageComponent {
   );
 
   constructor() {
+    this.pushNotifications.initialize();
+
+    this.route.queryParamMap.subscribe((params) => {
+      this.selectedOrderId.set(params.get('orderId'));
+    });
+
     this.load();
   }
 
@@ -146,12 +156,30 @@ export class PanelPageComponent {
     void this.router.navigate(['/login']);
   }
 
+  enablePushNotifications(): void {
+    void this.pushNotifications.subscribeCourierToPushNotifications();
+  }
+
+  disablePushNotifications(): void {
+    void this.pushNotifications.unsubscribeCurrentDevice();
+  }
+
   selectOrder(order: OrderDto): void {
     this.selectedOrderId.set(order.id);
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { orderId: order.id },
+      queryParamsHandling: 'merge'
+    });
   }
 
   closeOrderDetail(): void {
     this.selectedOrderId.set(null);
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { orderId: null },
+      queryParamsHandling: 'merge'
+    });
   }
 
   hasDeliveryCoordinates(order: OrderDto): boolean {
