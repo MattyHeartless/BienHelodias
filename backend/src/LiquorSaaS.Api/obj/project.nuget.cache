@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "T24Apcdp1t4=",
+  "dgSpecHash": "3v2YFWWlTXc=",
   "success": true,
   "projectFilePath": "C:\\Users\\Jair\\Documents\\My Web Sites\\BienHelodias\\backend\\src\\LiquorSaaS.Api\\LiquorSaaS.Api.csproj",
   "expectedPackageFiles": [
@@ -177,11 +177,7 @@
     "C:\\Users\\Jair\\.nuget\\packages\\system.xml.readerwriter\\4.3.0\\system.xml.readerwriter.4.3.0.nupkg.sha512",
     "C:\\Users\\Jair\\.nuget\\packages\\system.xml.xdocument\\4.3.0\\system.xml.xdocument.4.3.0.nupkg.sha512",
     "C:\\Users\\Jair\\.nuget\\packages\\system.xml.xmldocument\\4.3.0\\system.xml.xmldocument.4.3.0.nupkg.sha512",
-    "C:\\Users\\Jair\\.nuget\\packages\\webpush\\1.0.12\\webpush.1.0.12.nupkg.sha512",
-    "C:\\Users\\Jair\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.24\\microsoft.netcore.app.ref.8.0.24.nupkg.sha512",
-    "C:\\Users\\Jair\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.24\\microsoft.windowsdesktop.app.ref.8.0.24.nupkg.sha512",
-    "C:\\Users\\Jair\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.24\\microsoft.aspnetcore.app.ref.8.0.24.nupkg.sha512",
-    "C:\\Users\\Jair\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\8.0.24\\microsoft.netcore.app.host.win-x64.8.0.24.nupkg.sha512"
+    "C:\\Users\\Jair\\.nuget\\packages\\webpush\\1.0.12\\webpush.1.0.12.nupkg.sha512"
   ],
   "logs": []
 }
