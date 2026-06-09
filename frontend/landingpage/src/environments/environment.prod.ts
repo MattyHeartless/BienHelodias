@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'http://api.bienhelodias.qzz.io/api'
+  apiBaseUrl: 'https://api.bienhelodias.qzz.io/api'
 };
