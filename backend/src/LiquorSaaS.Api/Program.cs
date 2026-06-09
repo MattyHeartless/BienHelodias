@@ -27,7 +27,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("LocalFrontend", policy =>
     {
         policy
-            .SetIsOriginAllowed(Program.IsLocalDevelopmentOrigin)
+            .WithOrigins(
+                "http://localhost:5173",
+                "https://m11qgowr0njvi3o1qf4j1cq7.5.78.222.52.sslip.io"
+            )
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
