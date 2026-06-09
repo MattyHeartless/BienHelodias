@@ -29,7 +29,7 @@ builder.Services.AddCors(options =>
         policy
             .WithOrigins(
                 "http://localhost:5173",
-                "http://bienhelodias.qzz.io/"
+                "http://bienhelodias.qzz.io"
             )
             .AllowAnyHeader()
             .AllowAnyMethod();
