@@ -27,7 +27,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("OpenCors", policy =>
     {
         policy
-            .AllowAnyOrigin()
+            .WithOrigins(
+                "http://localhost:5173",
+                "https://bienhelodias.qzz.io"
+            )
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -78,7 +81,8 @@ else
 }
 
 app.UseSerilogRequestLogging();
-app.UseCors("OpenCors");
+app.UseCors("LocalFrontend");
+//app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
