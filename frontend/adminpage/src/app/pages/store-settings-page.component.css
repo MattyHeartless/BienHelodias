@@ -112,3 +112,18 @@
   background: rgb(255 255 255 / 0.08);
   color: #adaaaa;
 }
+
+.banner-wildcard-badge {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  border-radius: 1rem;
+  border: 1px solid rgb(210 253 110 / 0.2);
+  background: rgb(210 253 110 / 0.08);
+  padding: 0.5rem 0.75rem;
+  color: #d2fd6e;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}

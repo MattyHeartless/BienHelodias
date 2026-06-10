@@ -21,6 +21,9 @@ export class CatalogPageComponent {
   readonly error = signal<string | null>(null);
   readonly feedback = signal<string | null>(null);
   readonly products = signal<ProductDto[]>([]);
+  readonly imageLoadErrors = signal<Record<string, boolean>>({});
+  readonly searchTerm = signal('');
+  readonly selectedCategory = signal('all');
   readonly editingProductId = signal<string | null>(null);
   readonly modalOpen = signal(false);
 
@@ -41,6 +44,24 @@ export class CatalogPageComponent {
   }));
 
   readonly isEditing = computed(() => this.editingProductId() !== null);
+  readonly categories = computed(() =>
+    [...new Set(this.products().map((product) => product.category.trim()).filter(Boolean))]
+      .sort((left, right) => left.localeCompare(right, 'es', { sensitivity: 'base' }))
+  );
+  readonly filteredProducts = computed(() => {
+    const search = this.searchTerm().trim().toLocaleLowerCase();
+    const category = this.selectedCategory();
+
+    return this.products().filter((product) => {
+      const matchesCategory = category === 'all' || product.category === category;
+      const matchesSearch =
+        !search ||
+        product.name.toLocaleLowerCase().includes(search) ||
+        product.category.toLocaleLowerCase().includes(search);
+
+      return matchesCategory && matchesSearch;
+    });
+  });
 
   constructor() {
     this.loadProducts();
@@ -53,6 +74,7 @@ export class CatalogPageComponent {
     this.storeAdminApi.getProducts().subscribe({
       next: (response) => {
         this.products.set(response.data.items);
+        this.imageLoadErrors.set({});
         this.loading.set(false);
       },
       error: (error) => {
@@ -171,5 +193,38 @@ export class CatalogPageComponent {
       isActive: true
     });
     this.modalOpen.set(true);
+  }
+
+  updateSearchTerm(value: string): void {
+    this.searchTerm.set(value);
+  }
+
+  updateSelectedCategory(value: string): void {
+    this.selectedCategory.set(value);
+  }
+
+  clearFilters(): void {
+    this.searchTerm.set('');
+    this.selectedCategory.set('all');
+  }
+
+  hasProductImage(product: ProductDto): boolean {
+    return Boolean(product.imageUrl && !this.imageLoadErrors()[product.id]);
+  }
+
+  markImageError(productId: string): void {
+    this.imageLoadErrors.update((current) => ({
+      ...current,
+      [productId]: true
+    }));
+  }
+
+  getProductInitials(product: ProductDto): string {
+    return product.name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((chunk) => chunk[0]?.toUpperCase() ?? '')
+      .join('');
   }
 }

@@ -114,13 +114,14 @@
                 <div class="mt-4">
                   <div class="flex items-start justify-between gap-3">
                     <div>
-                      <p class="text-xs text-on-surface-variant">{{ product.category }}</p>
-                      <h3 class="mt-1 font-display text-2xl font-bold tracking-[-0.05em]">{{ product.name }}</h3>
+                      <h3 class="font-display text-2xl font-bold tracking-[-0.05em]">{{ product.name }}</h3>
                     </div>
+                    <!-- Re-enable when product ratings are available.
                     <div class="rating-pill">
                       <span class="material-symbols-outlined text-sm">star</span>
                       4.9
                     </div>
+                    -->
                   </div>
 
                   <div class="mt-3 flex items-end gap-2">
@@ -135,9 +136,15 @@
                     </span>
                     <button
                       type="button"
-                      class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-primary to-primary-container text-on-primary"
-                      (click)="addToCart(product)"
+                      class="quick-add-button quick-add-feedback"
+                      [class.quick-add-feedback--burst]="isQuickAddAnimating(product.id)"
+                      (click)="addToCartWithFeedback(product)"
                     >
+                      @if (isQuickAddAnimating(product.id)) {
+                        <span class="quick-add-feedback__burst" aria-hidden="true"></span>
+                        <span class="quick-add-feedback__bubble quick-add-feedback__bubble--left" aria-hidden="true"></span>
+                        <span class="quick-add-feedback__bubble quick-add-feedback__bubble--right" aria-hidden="true"></span>
+                      }
                       <span class="material-symbols-outlined text-base">add_shopping_cart</span>
                     </button>
                   </div>
@@ -191,7 +198,7 @@
               <p class="eyebrow">Checkout</p>
               <h3 class="mt-2 font-display text-3xl font-bold tracking-[-0.05em]">Tu pedido</h3>
               <p class="mt-3 text-sm leading-7 text-on-surface-variant">
-                Revisa tus bebidas, confirma el subtotal y abre el formulario solo cuando ya estés listo para finalizar.
+                Confirma tu pedido para que recibas tus bebidas Bien Helodias y listas para disfrutarse.
               </p>
             </div>
             <div class="summary-pill">{{ cartCount() }} items</div>
@@ -224,14 +231,14 @@
             @if (cartItems().length === 0) {
               <div class="empty-state empty-state--drawer">
                 <p class="font-display text-2xl font-bold tracking-[-0.04em]">Tu carrito está vacío.</p>
-                <p class="mt-2 text-sm leading-7 text-on-surface-variant">Agrega bebidas desde la vista principal.</p>
+                <p class="mt-2 text-sm leading-7 text-on-surface-variant">¿Que se te antoja para este calorcito?</p>
               </div>
             }
           </div>
 
           <div class="cart-drawer__summary">
             <div>
-              <p class="text-xs uppercase tracking-[0.24em] text-on-surface-variant">Subtotal visual</p>
+              <p class="text-xs uppercase tracking-[0.24em] text-on-surface-variant">Subtotal</p>
               <p class="font-display text-4xl font-bold text-primary">
                 {{ subtotal() | currency: 'MXN':'symbol-narrow':'1.0-0' }}
               </p>
@@ -248,21 +255,6 @@
               Crear pedido
             </button>
           </div>
-        </div>
-
-        <div class="bottom-nav cart-drawer__bottom-nav">
-          <button class="bottom-nav__item" type="button" (click)="closeCart()">
-            <span class="material-symbols-outlined">local_bar</span>
-            Bebidas
-          </button>
-          <button class="bottom-nav__item" type="button" (click)="closeCart(); trackLastOrder()">
-            <span class="material-symbols-outlined">local_shipping</span>
-            Rastreo
-          </button>
-          <button class="bottom-nav__item bottom-nav__item--active" type="button">
-            <span class="material-symbols-outlined">shopping_bag</span>
-            Carrito
-          </button>
         </div>
       </aside>
     </div>
@@ -343,8 +335,7 @@
   @if (detailOpen() && selectedProduct(); as selected) {
     <div class="detail-overlay" (click)="closeDetail()">
       <section class="phone-shell phone-shell--detail" (click)="$event.stopPropagation()">
-        <div class="phone-shell__header">
-          <div></div>
+        <div class="phone-shell__header phone-shell__header--detail">
           <p class="text-sm font-semibold">Detalle</p>
           <button class="icon-button" type="button" (click)="closeDetail()">
             <span class="material-symbols-outlined text-base">close</span>
@@ -361,9 +352,6 @@
                   <span class="material-symbols-outlined text-[7rem] text-primary/60">liquor</span>
                 </div>
               }
-              <button class="detail-card__favorite" type="button">
-                <span class="material-symbols-outlined text-base">favorite</span>
-              </button>
             </div>
 
             <div class="detail-card__dots">
@@ -375,30 +363,53 @@
           <div class="detail-copy">
             <div class="flex items-start justify-between gap-3">
               <div>
-                <p class="text-sm text-on-surface-variant">{{ selected.category }}</p>
-                <h3 class="mt-2 font-display text-4xl font-bold tracking-[-0.05em]">{{ selected.name }}</h3>
+                <h3 class="font-display text-4xl font-bold tracking-[-0.05em]">{{ selected.name }}</h3>
               </div>
+              <!-- Re-enable when product ratings are available.
               <div class="rating-pill">
                 <span class="material-symbols-outlined text-sm">star</span>
                 4.9
               </div>
+              -->
             </div>
 
             <div class="mt-4 flex items-end justify-between gap-3">
-              <span class="font-display text-4xl font-bold text-primary">
-                {{ selected.price | currency: 'MXN':'symbol-narrow':'1.0-0' }}
-              </span>
-              <span class="text-sm text-on-surface-variant">{{ productVolume(selected) }}</span>
+              <div>
+                <span class="font-display text-4xl font-bold text-primary">
+                  {{ selected.price | currency: 'MXN':'symbol-narrow':'1.0-0' }}
+                </span>
+              </div>
+              <div class="quantity-stepper">
+                <button type="button" class="quantity-stepper__button" (click)="decreaseDetailQuantity()">
+                  <span class="material-symbols-outlined text-base">remove</span>
+                </button>
+                <span class="quantity-stepper__value">{{ detailQuantity() }}</span>
+                <button type="button" class="quantity-stepper__button" (click)="increaseDetailQuantity()">
+                  <span class="material-symbols-outlined text-base">add</span>
+                </button>
+              </div>
             </div>
 
             <p class="mt-5 text-sm leading-7 text-on-surface-variant">{{ selected.description }}</p>
 
             <div class="mt-8 grid grid-cols-2 gap-3">
-              <button type="button" class="ghost-button detail-copy__action" (click)="addToCart(selected)">
-                Add to Cart
+              <button type="button" class="ghost-button detail-copy__action" (click)="closeDetail()">
+                <span class="material-symbols-outlined text-base">close</span>
+                Cerrar
               </button>
-              <button type="button" class="liquid-button detail-copy__action" (click)="quickBuy(selected)">
-                Buy Now
+              <button
+                type="button"
+                class="liquid-button detail-copy__action quick-add-feedback"
+                [class.quick-add-feedback--burst]="isQuickAddAnimating(selected.id)"
+                (click)="addToCartWithFeedback(selected)"
+              >
+                @if (isQuickAddAnimating(selected.id)) {
+                  <span class="quick-add-feedback__burst" aria-hidden="true"></span>
+                  <span class="quick-add-feedback__bubble quick-add-feedback__bubble--left" aria-hidden="true"></span>
+                  <span class="quick-add-feedback__bubble quick-add-feedback__bubble--right" aria-hidden="true"></span>
+                }
+                <span class="material-symbols-outlined text-base">add_shopping_cart</span>
+                Agregar
               </button>
             </div>
           </div>

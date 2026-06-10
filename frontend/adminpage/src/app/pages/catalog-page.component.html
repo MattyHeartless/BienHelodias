@@ -47,43 +47,98 @@
     <p class="eyebrow">Inventario actual</p>
     <h3 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">Productos disponibles</h3>
 
+    <div class="catalog-filters mt-6">
+      <label class="catalog-search">
+        <span class="material-symbols-outlined text-lg text-primary">search</span>
+        <input
+          class="catalog-search-input"
+          type="search"
+          placeholder="Busca por nombre o categoria"
+          [value]="searchTerm()"
+          (input)="updateSearchTerm($any($event.target).value)"
+        />
+      </label>
+
+      <label class="catalog-category-filter">
+        <span class="eyebrow">Categoria</span>
+        <select
+          class="catalog-category-select"
+          [value]="selectedCategory()"
+          (change)="updateSelectedCategory($any($event.target).value)"
+        >
+          <option value="all">Todas</option>
+          @for (category of categories(); track category) {
+            <option [value]="category">{{ category }}</option>
+          }
+        </select>
+      </label>
+
+      @if (searchTerm() || selectedCategory() !== 'all') {
+        <button class="ghost-button" type="button" (click)="clearFilters()">Limpiar</button>
+      }
+    </div>
+
     <div class="mt-6 grid gap-5 md:grid-cols-2">
       @if (loading()) {
         @for (item of [1, 2, 3, 4]; track item) {
           <div class="h-64 animate-pulse rounded-[1.5rem] bg-white/4"></div>
         }
       } @else {
-        @for (product of products(); track product.id) {
-          <article class="product-card">
-            <div class="rounded-[1.35rem] bg-surface-container-high px-5 py-5">
-              <div class="flex items-start justify-between gap-4">
-                <div>
-                  <p class="eyebrow">{{ product.category }}</p>
-                  <h4 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">{{ product.name }}</h4>
+        @if (filteredProducts().length) {
+          @for (product of filteredProducts(); track product.id) {
+            <article class="product-card">
+              <div class="rounded-[1.35rem] bg-surface-container-high px-5 py-5">
+                <div class="flex items-start justify-between gap-4">
+                  <div>
+                    <p class="eyebrow">{{ product.category }}</p>
+                    <h4 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">{{ product.name }}</h4>
+                  </div>
+                  <div class="product-card-media">
+                    @if (hasProductImage(product)) {
+                      <img
+                        [src]="product.imageUrl!"
+                        [alt]="product.name"
+                        class="product-card-image"
+                        (error)="markImageError(product.id)"
+                      />
+                    } @else {
+                      <div class="product-card-placeholder" aria-hidden="true">
+                        <span>{{ getProductInitials(product) }}</span>
+                      </div>
+                    }
+                  </div>
                 </div>
+                <p class="mt-4 text-sm leading-7 text-on-surface-variant">{{ product.description }}</p>
               </div>
-              <p class="mt-4 text-sm leading-7 text-on-surface-variant">{{ product.description }}</p>
-            </div>
 
-            <div class="mt-5 flex items-center justify-between gap-4">
-              <div>
-                <p class="font-display text-3xl font-bold text-primary">{{ product.price | currency: 'MXN':'symbol-narrow':'1.0-0' }}</p>
-                <p class="mt-1 text-xs uppercase tracking-[0.24em] text-on-surface-variant">Stock {{ product.stock }}</p>
+              <div class="mt-5 flex items-center justify-between gap-4">
+                <div>
+                  <p class="font-display text-3xl font-bold text-primary">{{ product.price | currency: 'MXN':'symbol-narrow':'1.0-0' }}</p>
+                  <p class="mt-1 text-xs uppercase tracking-[0.24em] text-on-surface-variant">Stock {{ product.stock }}</p>
+                </div>
+                <p class="text-right text-xs uppercase tracking-[0.22em] text-on-surface-variant">
+                  Actualizado
+                  <span class="mt-1 block text-white">{{ product.updatedAtUtc | date: 'dd MMM' }}</span>
+                </p>
               </div>
-              <p class="text-right text-xs uppercase tracking-[0.22em] text-on-surface-variant">
-                Actualizado
-                <span class="mt-1 block text-white">{{ product.updatedAtUtc | date: 'dd MMM' }}</span>
-              </p>
-            </div>
 
-            <div class="mt-5 flex flex-wrap gap-3">
-              <button class="ghost-button" type="button" (click)="editProduct(product)">Editar</button>
-              <button class="ghost-button" type="button" (click)="toggleProduct(product)">
-                {{ product.isActive ? 'Ocultar' : 'Activar' }}
-              </button>
-              <button class="danger-button" type="button" (click)="deleteProduct(product)">Eliminar</button>
-            </div>
-          </article>
+              <div class="mt-5 flex flex-wrap gap-3">
+                <button class="ghost-button" type="button" (click)="editProduct(product)">Editar</button>
+                <button class="ghost-button" type="button" (click)="toggleProduct(product)">
+                  {{ product.isActive ? 'Ocultar' : 'Activar' }}
+                </button>
+                <button class="danger-button" type="button" (click)="deleteProduct(product)">Eliminar</button>
+              </div>
+            </article>
+          }
+        } @else {
+          <div class="catalog-empty-state md:col-span-2">
+            <p class="eyebrow">Sin resultados</p>
+            <h4 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">No encontramos productos con ese filtro</h4>
+            <p class="mt-3 text-sm leading-7 text-on-surface-variant">
+              Prueba con otro nombre, otra categoria o limpia los filtros para ver todo el catalogo.
+            </p>
+          </div>
         }
       }
     </div>

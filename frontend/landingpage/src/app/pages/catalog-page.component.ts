@@ -35,6 +35,7 @@ export class CatalogPageComponent {
   private bannerPointerId: number | null = null;
   private bannerPointerStartX: number | null = null;
   private bannerPointerStartY: number | null = null;
+  private readonly quickAddFeedbackTimeouts = new Map<string, ReturnType<typeof window.setTimeout>>();
 
   @ViewChild('deliveryAddressInput')
   private deliveryAddressInput?: ElementRef<HTMLInputElement>;
@@ -58,6 +59,8 @@ export class CatalogPageComponent {
   readonly cartOpen = signal(false);
   readonly checkoutOpen = signal(false);
   readonly cart = signal<Record<string, number>>({});
+  readonly quickAddFeedback = signal<Record<string, boolean>>({});
+  readonly detailQuantity = signal(1);
   readonly checkoutForm = this.formBuilder.nonNullable.group({
     customerName: ['', [Validators.required, Validators.minLength(2)]],
     customerPhone: ['', [Validators.required, Validators.minLength(8)]],
@@ -156,6 +159,7 @@ export class CatalogPageComponent {
         this.banners.set(response.storefront?.data.banners ?? []);
         this.activeBannerIndex.set(0);
         this.startBannerRotation();
+        this.detailQuantity.set(1);
         this.detailOpen.set(false);
         this.loading.set(false);
       },
@@ -177,21 +181,23 @@ export class CatalogPageComponent {
 
   selectProduct(productId: string): void {
     this.highlightedProductId.set(productId);
+    this.detailQuantity.set(1);
     this.detailOpen.set(true);
   }
 
   closeDetail(): void {
     this.detailOpen.set(false);
+    this.detailQuantity.set(1);
   }
 
   isSelectedProduct(productId: string): boolean {
     return this.selectedProduct()?.id === productId;
   }
 
-  addToCart(product: ProductDto): void {
+  addToCart(product: ProductDto, quantity = 1): void {
     this.cart.update((current) => ({
       ...current,
-      [product.id]: Math.min(product.stock, (current[product.id] ?? 0) + 1)
+      [product.id]: Math.min(product.stock, (current[product.id] ?? 0) + quantity)
     }));
   }
 
@@ -222,11 +228,28 @@ export class CatalogPageComponent {
   ngOnDestroy(): void {
     this.destroyAutocompleteListener();
     this.stopBannerRotation();
+    this.quickAddFeedbackTimeouts.forEach((handle) => window.clearTimeout(handle));
+    this.quickAddFeedbackTimeouts.clear();
   }
 
   quickBuy(product: ProductDto): void {
     this.addToCart(product);
     this.openCart();
+  }
+
+  addToCartWithFeedback(product: ProductDto): void {
+    const quantity = this.selectedProduct()?.id === product.id ? this.detailQuantity() : 1;
+    this.addToCart(product, quantity);
+    this.triggerQuickAddFeedback(product.id);
+  }
+
+  decreaseDetailQuantity(): void {
+    this.detailQuantity.update((current) => Math.max(1, current - 1));
+  }
+
+  increaseDetailQuantity(): void {
+    const maxQuantity = Math.max(1, this.selectedProduct()?.stock ?? 1);
+    this.detailQuantity.update((current) => Math.min(maxQuantity, current + 1));
   }
 
   removeFromCart(productId: string): void {
@@ -326,8 +349,8 @@ export class CatalogPageComponent {
     return tones[index % tones.length];
   }
 
-  productVolume(product: ProductDto): string {
-    return product.category?.toLowerCase().includes('cerveza') ? '355ml' : '150ml';
+  isQuickAddAnimating(productId: string): boolean {
+    return this.quickAddFeedback()[productId] ?? false;
   }
 
   showPreviousBanner(): void {
@@ -486,6 +509,35 @@ export class CatalogPageComponent {
 
   private restartBannerRotation(): void {
     this.startBannerRotation();
+  }
+
+  private triggerQuickAddFeedback(productId: string): void {
+    const currentTimeout = this.quickAddFeedbackTimeouts.get(productId);
+    if (currentTimeout) {
+      window.clearTimeout(currentTimeout);
+    }
+
+    this.quickAddFeedback.update((current) => {
+      const { [productId]: _removed, ...rest } = current;
+      return rest;
+    });
+
+    window.requestAnimationFrame(() => {
+      this.quickAddFeedback.update((current) => ({
+        ...current,
+        [productId]: true
+      }));
+
+      const timeoutHandle = window.setTimeout(() => {
+        this.quickAddFeedback.update((current) => {
+          const { [productId]: _removed, ...rest } = current;
+          return rest;
+        });
+        this.quickAddFeedbackTimeouts.delete(productId);
+      }, 720);
+
+      this.quickAddFeedbackTimeouts.set(productId, timeoutHandle);
+    });
   }
 
   private resolveStorefront(slug: string): void {

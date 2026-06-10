@@ -51,7 +51,7 @@ function renderFatalOverlay(title: string, details: string): void {
     <div style="max-width:960px;margin:0 auto">
       <h1 style="margin:0 0 16px;font-size:24px;line-height:1.2;color:#ff7351">${title}</h1>
       <p style="margin:0 0 16px;font:14px/1.6 system-ui,sans-serif;color:#d8d8d8">
-        Safari/iOS lanzó un error al cargar la app. Usa este texto para depurarlo.
+        Se nos calentó la app al abrirla en Safari/iOS. Usa este detalle para revisarlo.
       </p>
       <pre style="white-space:pre-wrap;word-break:break-word;background:#151515;border:1px solid #2a2a2a;border-radius:16px;padding:16px;margin:0">${details}</pre>
     </div>
@@ -70,18 +70,18 @@ if (typeof window !== 'undefined') {
       normalizeError(event.error ?? event.message)
     ].join('\n');
 
-    renderFatalOverlay('Error global en deliverypage', details);
+    renderFatalOverlay('Se nos calentó la app', details);
   });
 
   window.addEventListener('unhandledrejection', (event) => {
     const details = normalizeError(event.reason);
-    renderFatalOverlay('Promise rechazada sin manejar', details);
+    renderFatalOverlay('Quedó una promesa suelta', details);
   });
 }
 
 bootstrapApplication(AppComponent, appConfig)
   .catch((err) => {
     const details = normalizeError(err);
-    renderFatalOverlay('Falló el bootstrap de Angular', details);
+    renderFatalOverlay('La app no alcanzó a arrancar', details);
     console.error(err);
   });

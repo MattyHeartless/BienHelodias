@@ -73,7 +73,7 @@ export class PushNotificationService {
         isSubscribed: false,
         isRegistering: false,
         backendSynchronized: false,
-        message: 'Las notificaciones push solo funcionarán cuando abras la app como PWA con service worker activo.'
+        message: 'Los avisos solo jalan cuando abres la app instalada, con service worker activo.'
       });
       return;
     }
@@ -100,7 +100,7 @@ export class PushNotificationService {
         ...current,
         availability: 'supported',
         permission: Notification.permission,
-        message: 'Falta configurar la VAPID public key en environment antes de suscribir este dispositivo.'
+        message: 'Falta configurar la VAPID public key antes de activar avisos en este dispositivo.'
       }));
       return;
     }
@@ -110,7 +110,7 @@ export class PushNotificationService {
       availability: 'supported',
       permission: Notification.permission,
       isRegistering: true,
-      message: 'Solicitando permisos y registrando este dispositivo...'
+      message: 'Aguanta, estamos pidiendo permiso y dejando este dispositivo listo...'
     }));
 
     try {
@@ -130,8 +130,8 @@ export class PushNotificationService {
         isRegistering: false,
         backendSynchronized,
         message: backendSynchronized
-          ? 'Notificaciones activadas para este dispositivo.'
-          : 'El navegador quedó suscrito, pero el backend aún no pudo registrar este dispositivo.'
+          ? 'Listo, este dispositivo ya quedó pendiente de nuevos pedidos.'
+          : 'El navegador ya quedó listo, pero todavía falta amarrar este dispositivo.'
       });
     } catch (error) {
       this.state.set({
@@ -140,7 +140,7 @@ export class PushNotificationService {
         isSubscribed: false,
         isRegistering: false,
         backendSynchronized: false,
-        message: getApiErrorMessage(error, 'No fue posible activar las notificaciones push.')
+        message: getApiErrorMessage(error, 'Se nos calentaron los avisos... intenta otra vez.')
       });
     }
   }
@@ -154,7 +154,7 @@ export class PushNotificationService {
     this.state.update((current) => ({
       ...current,
       isRegistering: true,
-      message: 'Eliminando la suscripción de este dispositivo...'
+      message: 'Quitando los avisos de este dispositivo...'
     }));
 
     const subscription = await firstValueFrom(this.swPush.subscription);
@@ -172,7 +172,7 @@ export class PushNotificationService {
         isSubscribed: false,
         isRegistering: false,
         backendSynchronized: false,
-        message: 'Las notificaciones quedaron desactivadas en este dispositivo.'
+        message: 'Listo, este dispositivo ya no recibirá avisos.'
       });
     } catch (error) {
       this.state.set({
@@ -181,7 +181,7 @@ export class PushNotificationService {
         isSubscribed: true,
         isRegistering: false,
         backendSynchronized: false,
-        message: getApiErrorMessage(error, 'No fue posible desactivar la suscripción del dispositivo.')
+        message: getApiErrorMessage(error, 'No se pudieron apagar los avisos de este dispositivo.')
       });
     }
   }
@@ -255,14 +255,14 @@ export class PushNotificationService {
 
   private getStateMessage(permission: NotificationPermission, isSubscribed: boolean): string {
     if (permission === 'denied') {
-      return 'El navegador bloqueó las notificaciones. Tendrás que habilitarlas manualmente en la configuración del sitio.';
+      return 'El navegador bloqueó los avisos. Vas a tener que prenderlos manualmente en la configuración del sitio.';
     }
 
     if (isSubscribed) {
-      return 'Este dispositivo ya tiene una suscripción push creada.';
+      return 'Este dispositivo ya está listo para recibir avisos.';
     }
 
-    return 'Activa las notificaciones para recibir avisos de nuevos pedidos.';
+    return 'Activa los avisos para enterarte cuando caigan nuevos pedidos.';
   }
 
   private isSupported(): boolean {

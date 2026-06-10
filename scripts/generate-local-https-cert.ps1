@@ -9,6 +9,18 @@ $ErrorActionPreference = "Stop"
 $resolvedOutputDirectory = [System.IO.Path]::GetFullPath($OutputDirectory)
 New-Item -ItemType Directory -Force -Path $resolvedOutputDirectory | Out-Null
 
+function Convert-ToPem {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Label,
+        [Parameter(Mandatory = $true)]
+        [byte[]]$Bytes
+    )
+
+    $base64 = [System.Convert]::ToBase64String($Bytes, [System.Base64FormattingOptions]::InsertLineBreaks)
+    return "-----BEGIN $Label-----`n$base64`n-----END $Label-----`n"
+}
+
 $sanEntries = @("DNS=localhost", "IPAddress=127.0.0.1")
 foreach ($ip in $IpAddresses) {
     if (-not [string]::IsNullOrWhiteSpace($ip)) {
@@ -74,9 +86,15 @@ $exportableCert = [System.Security.Cryptography.X509Certificates.X509Certificate
     [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable
 )
 
-[System.IO.File]::WriteAllText($pemPath, $exportableCert.ExportCertificatePem())
+[System.IO.File]::WriteAllText(
+    $pemPath,
+    (Convert-ToPem -Label "CERTIFICATE" -Bytes $exportableCert.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Cert))
+)
 $rsa = [System.Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPrivateKey($exportableCert)
-[System.IO.File]::WriteAllText($keyPath, $rsa.ExportPkcs8PrivateKeyPem())
+[System.IO.File]::WriteAllText(
+    $keyPath,
+    (Convert-ToPem -Label "PRIVATE KEY" -Bytes $rsa.ExportPkcs8PrivateKey())
+)
 
 $alreadyTrusted = Get-ChildItem "Cert:\CurrentUser\Root" | Where-Object Thumbprint -eq $rootCert.Thumbprint
 if (-not $alreadyTrusted) {

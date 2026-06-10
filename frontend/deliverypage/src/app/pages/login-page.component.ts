@@ -40,7 +40,7 @@ export class LoginPageComponent {
       next: (response) => {
         this.session.setSession(response.data);
         if (response.data.role !== AppRole.DeliveryUser) {
-          this.error.set('Esta aplicacion solo admite usuarios de reparto.');
+          this.error.set('Este acceso es solo para la banda de reparto.');
           this.session.clear();
           this.submitting.set(false);
           return;
@@ -50,7 +50,7 @@ export class LoginPageComponent {
         void this.router.navigate(['/panel']);
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible iniciar sesion.'));
+        this.error.set(getApiErrorMessage(error, 'Se nos calento el acceso... intenta otra vez.'));
         this.submitting.set(false);
       }
     });

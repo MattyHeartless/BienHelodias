@@ -24,10 +24,10 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddControllers();
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("LocalFrontend", policy =>
+    options.AddPolicy("OpenCors", policy =>
     {
         policy
-            .SetIsOriginAllowed(Program.IsLocalDevelopmentOrigin)
+            .AllowAnyOrigin()
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -72,10 +72,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+else
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseSerilogRequestLogging();
-app.UseHttpsRedirection();
-app.UseCors("LocalFrontend");
+app.UseCors("OpenCors");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
@@ -100,39 +103,3 @@ app.Run();
 
 public partial class Program;
 
-public partial class Program
-{
-    internal static bool IsLocalDevelopmentOrigin(string? origin)
-    {
-        if (string.IsNullOrWhiteSpace(origin) || !Uri.TryCreate(origin, UriKind.Absolute, out var uri))
-        {
-            return false;
-        }
-
-        if (!string.Equals(uri.Scheme, Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase)
-            && !string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        if (uri.IsLoopback || string.Equals(uri.Host, "localhost", StringComparison.OrdinalIgnoreCase))
-        {
-            return true;
-        }
-
-        return System.Net.IPAddress.TryParse(uri.Host, out var ipAddress) && IsPrivateIPv4(ipAddress);
-    }
-
-    private static bool IsPrivateIPv4(System.Net.IPAddress ipAddress)
-    {
-        if (ipAddress.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
-        {
-            return false;
-        }
-
-        var bytes = ipAddress.GetAddressBytes();
-        return bytes[0] == 10
-            || (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31)
-            || (bytes[0] == 192 && bytes[1] == 168);
-    }
-}

@@ -31,8 +31,8 @@ export class PanelPageComponent {
   readonly selectedOrderId = signal<string | null>(null);
   readonly availability = signal(DeliveryAvailability.Unavailable);
   readonly availabilityOptions = [
-    { label: 'No disponible', value: DeliveryAvailability.Unavailable },
-    { label: 'Disponible', value: DeliveryAvailability.Available },
+    { label: 'Fuera de jugada', value: DeliveryAvailability.Unavailable },
+    { label: 'Al tiro', value: DeliveryAvailability.Available },
     { label: 'Ocupado', value: DeliveryAvailability.Busy }
   ];
 
@@ -76,7 +76,7 @@ export class PanelPageComponent {
         this.loading.set(false);
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible cargar el panel de reparto.'));
+        this.error.set(getApiErrorMessage(error, 'Se nos calentó el panel... intenta otra vez.'));
         this.loading.set(false);
       }
     });
@@ -87,28 +87,28 @@ export class PanelPageComponent {
       next: (response) => {
         this.profile.set(response.data);
         this.availability.set(response.data.currentAvailability);
-        this.feedback.set(`Disponibilidad actual: ${this.availabilityLabel()}`);
+        this.feedback.set(`Andas ${this.availabilityLabel().toLowerCase()}.`);
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible actualizar la disponibilidad.'));
+        this.error.set(getApiErrorMessage(error, 'No se pudo mover tu disponibilidad.'));
       }
     });
   }
 
   takeOrder(orderId: string): void {
     if (this.availability() !== DeliveryAvailability.Available) {
-      this.error.set('Para tomar un pedido primero cambia tu estado a Disponible.');
+      this.error.set('Primero ponte al tiro para agarrar un pedido.');
       return;
     }
 
     this.deliveryApi.takeOrder(orderId).subscribe({
       next: () => {
-        this.feedback.set('Pedido tomado correctamente.');
+        this.feedback.set('Ya cayó en tu ruta.');
         this.availability.set(DeliveryAvailability.Busy);
         this.load();
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible tomar el pedido.'));
+        this.error.set(getApiErrorMessage(error, 'No se pudo agarrar ese pedido.'));
       }
     });
   }
@@ -116,18 +116,18 @@ export class PanelPageComponent {
   releaseOrder(orderId: string): void {
     const order = this.myOrders().find((item) => item.id === orderId);
     if (order && !this.canRelease(order)) {
-      this.error.set(`El pedido ${this.getOrderStatusLabel(order.status).toLowerCase()} ya no se puede liberar.`);
+      this.error.set(`Ese pedido ${this.getOrderStatusLabel(order.status).toLowerCase()} ya no se puede soltar.`);
       return;
     }
 
     this.deliveryApi.releaseOrder(orderId).subscribe({
       next: () => {
-        this.feedback.set('Pedido liberado correctamente.');
+        this.feedback.set('Pedido liberado para que otro lo tome.');
         this.availability.set(DeliveryAvailability.Available);
         this.load();
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible liberar el pedido.'));
+        this.error.set(getApiErrorMessage(error, 'No se pudo soltar ese pedido.'));
       }
     });
   }
@@ -135,18 +135,18 @@ export class PanelPageComponent {
   markDelivered(orderId: string): void {
     const order = this.myOrders().find((item) => item.id === orderId);
     if (order && !this.canMarkDelivered(order)) {
-      this.error.set(`El pedido ${this.getOrderStatusLabel(order.status).toLowerCase()} ya no se puede marcar como entregado.`);
+      this.error.set(`Ese pedido ${this.getOrderStatusLabel(order.status).toLowerCase()} ya no se puede cerrar como entregado.`);
       return;
     }
 
     this.deliveryApi.markDelivered(orderId).subscribe({
       next: () => {
-        this.feedback.set('Pedido marcado como entregado.');
+        this.feedback.set('Listo, a disfrutar esas frías.');
         this.availability.set(DeliveryAvailability.Available);
         this.load();
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible marcar el pedido como entregado.'));
+        this.error.set(getApiErrorMessage(error, 'No se pudo marcar como entregado.'));
       }
     });
   }
@@ -208,16 +208,20 @@ export class PanelPageComponent {
     return !this.isTerminalStatus(order.status);
   }
 
+  getOrderUnitCount(order: OrderDto): number {
+    return order.items.reduce((total, item) => total + item.quantity, 0);
+  }
+
   getOrderStatusLabel(status: OrderStatus): string {
     switch (status) {
       case OrderStatus.Pending:
-        return 'Pendiente';
+        return 'Ya cayó';
       case OrderStatus.Accepted:
         return 'Aceptado';
       case OrderStatus.Preparing:
-        return 'En preparacion';
+        return 'Se está armando';
       case OrderStatus.Ready:
-        return 'Listo';
+        return 'Bien helodia';
       case OrderStatus.OnTheWay:
         return 'En camino';
       case OrderStatus.Delivered:
@@ -225,7 +229,7 @@ export class PanelPageComponent {
       case OrderStatus.Cancelled:
         return 'Cancelado';
       default:
-        return 'Desconocido';
+        return 'Sin estado';
     }
   }
 
