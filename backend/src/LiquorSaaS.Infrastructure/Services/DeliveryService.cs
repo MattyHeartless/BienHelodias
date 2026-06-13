@@ -48,7 +48,10 @@ public sealed class DeliveryService(
 
         return await dbContext.Orders.AsNoTracking()
             .Include(x => x.Items)
-            .Where(x => x.DeliveryUserId == deliveryProfile.Id)
+            .Where(x =>
+                x.DeliveryUserId == deliveryProfile.Id
+                && x.Status != OrderStatus.Delivered
+                && x.Status != OrderStatus.Cancelled)
             .OrderByDescending(x => x.CreatedAtUtc)
             .Select(x => x.ToDto())
             .ToPagedResultAsync(request, cancellationToken);

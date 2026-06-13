@@ -87,6 +87,22 @@ public sealed class OrderIntegrationTests(TestWebApplicationFactory factory) : I
         secondResponse.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
+    [Fact]
+    public async Task GetMine_ShouldExcludeDeliveredOrders()
+    {
+        var orderId = await CreateOrderAsync();
+        var deliveryClient = await factory.CreateAuthorizedClientAsync("delivery@bienhelodias.local", "Admin123!");
+        await deliveryClient.PatchAsJsonAsync("/api/delivery/availability", new { availability = (int)DeliveryAvailability.Available });
+        await deliveryClient.PostAsync($"/api/orders/{orderId}/take", null);
+        await deliveryClient.PatchAsJsonAsync($"/api/orders/{orderId}/status", new UpdateOrderStatusRequest(OrderStatus.Delivered));
+
+        var response = await deliveryClient.GetAsync("/api/delivery/orders/mine");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await response.Content.ReadFromJsonAsync<ApiResponse<PagedResult<OrderDto>>>();
+        payload!.Data!.Items.Should().NotContain(x => x.Id == orderId);
+    }
+
     private async Task<Guid> CreateOrderAsync()
     {
         var client = factory.CreateStoreClient();
