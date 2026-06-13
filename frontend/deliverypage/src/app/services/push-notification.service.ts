@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { getApiErrorMessage } from '../core/api-error.util';
 import { ApiResponse } from '../core/models';
+import { NotificationUiService } from '../core/notification-ui.service';
 import { environment } from '../../environments/environment';
 
 type PushAvailability = 'supported' | 'unsupported';
@@ -35,6 +36,7 @@ export class PushNotificationService {
   private readonly http = inject(HttpClient);
   private readonly swPush = inject(SwPush);
   private readonly router = inject(Router);
+  private readonly notifications = inject(NotificationUiService);
   private initialized = false;
 
   readonly state = signal<PushRegistrationState>({
@@ -102,6 +104,9 @@ export class PushNotificationService {
         permission: Notification.permission,
         message: 'Falta configurar la VAPID public key antes de activar avisos en este dispositivo.'
       }));
+      this.notifications.warning({
+        summary: 'Falta configurar la VAPID key'
+      });
       return;
     }
 
@@ -133,14 +138,21 @@ export class PushNotificationService {
           ? 'Listo, este dispositivo ya quedó pendiente de nuevos pedidos.'
           : 'El navegador ya quedó listo, pero todavía falta amarrar este dispositivo.'
       });
+      this.notifications.success({
+        summary: backendSynchronized ? 'Avisos activados' : 'Avisos activados con detalle pendiente'
+      });
     } catch (error) {
+      const detail = getApiErrorMessage(error, 'Se nos calentaron los avisos... intenta otra vez.');
       this.state.set({
         availability: 'supported',
         permission: Notification.permission,
         isSubscribed: false,
         isRegistering: false,
         backendSynchronized: false,
-        message: getApiErrorMessage(error, 'Se nos calentaron los avisos... intenta otra vez.')
+        message: detail
+      });
+      this.notifications.error({
+        summary: detail
       });
     }
   }
@@ -174,14 +186,21 @@ export class PushNotificationService {
         backendSynchronized: false,
         message: 'Listo, este dispositivo ya no recibirá avisos.'
       });
+      this.notifications.info({
+        summary: 'Avisos desactivados'
+      });
     } catch (error) {
+      const detail = getApiErrorMessage(error, 'No se pudieron apagar los avisos de este dispositivo.');
       this.state.set({
         availability: 'supported',
         permission: Notification.permission,
         isSubscribed: true,
         isRegistering: false,
         backendSynchronized: false,
-        message: getApiErrorMessage(error, 'No se pudieron apagar los avisos de este dispositivo.')
+        message: detail
+      });
+      this.notifications.error({
+        summary: detail
       });
     }
   }

@@ -1,10 +1,11 @@
-import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { CommonModule, CurrencyPipe, DatePipe, DOCUMENT } from '@angular/common';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { DeliveryAvailability, DeliveryUserDto, OrderDto, OrderStatus } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
 import { DeliverySessionService } from '../core/delivery-session.service';
+import { NotificationUiService } from '../core/notification-ui.service';
 import { DeliveryApiService } from '../services/delivery-api.service';
 import { PushNotificationService } from '../services/push-notification.service';
 
@@ -16,15 +17,15 @@ import { PushNotificationService } from '../services/push-notification.service';
   styleUrl: './panel-page.component.css'
 })
 export class PanelPageComponent {
+  private readonly document = inject(DOCUMENT);
   private readonly deliveryApi = inject(DeliveryApiService);
   private readonly pushNotifications = inject(PushNotificationService);
   private readonly session = inject(DeliverySessionService);
+  private readonly notifications = inject(NotificationUiService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
   readonly loading = signal(true);
-  readonly error = signal<string | null>(null);
-  readonly feedback = signal<string | null>(null);
   readonly profile = signal<DeliveryUserDto | null>(null);
   readonly availableOrders = signal<OrderDto[]>([]);
   readonly myOrders = signal<OrderDto[]>([]);
@@ -51,6 +52,10 @@ export class PanelPageComponent {
   );
 
   constructor() {
+    effect(() => {
+      this.document.body.classList.toggle('modal-open', Boolean(this.selectedOrder()));
+    });
+
     this.pushNotifications.initialize();
 
     this.route.queryParamMap.subscribe((params) => {
@@ -62,8 +67,6 @@ export class PanelPageComponent {
 
   load(): void {
     this.loading.set(true);
-    this.error.set(null);
-    this.feedback.set(null);
 
     forkJoin({
       profile: this.deliveryApi.getCurrentProfile(),
@@ -79,7 +82,9 @@ export class PanelPageComponent {
         this.loading.set(false);
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'Se nos calentó el panel... intenta otra vez.'));
+        this.notifications.error({
+          summary: getApiErrorMessage(error, 'No se pudo cargar el panel')
+        });
         this.loading.set(false);
       }
     });
@@ -90,27 +95,37 @@ export class PanelPageComponent {
       next: (response) => {
         this.profile.set(response.data);
         this.availability.set(response.data.currentAvailability);
-        this.feedback.set(`Andas ${this.availabilityLabel().toLowerCase()}.`);
+        this.notifications.info({
+          summary: `Andas ${this.availabilityLabel().toLowerCase()}`
+        });
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No se pudo mover tu disponibilidad.'));
+        this.notifications.error({
+          summary: getApiErrorMessage(error, 'No se pudo mover tu disponibilidad')
+        });
       }
     });
   }
 
   takeOrder(orderId: string): void {
     if (this.availability() !== DeliveryAvailability.Available) {
-      this.error.set('Primero ponte al tiro para agarrar un pedido.');
+      this.notifications.warning({
+        summary: 'Primero ponte disponible'
+      });
       return;
     }
 
     this.deliveryApi.takeOrder(orderId).subscribe({
       next: () => {
-        this.feedback.set('Ya cayó en tu ruta.');
+        this.notifications.success({
+          summary: 'Pedido asignado'
+        });
         this.load();
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No se pudo agarrar ese pedido.'));
+        this.notifications.error({
+          summary: getApiErrorMessage(error, 'No se pudo tomar el pedido')
+        });
       }
     });
   }
@@ -118,17 +133,23 @@ export class PanelPageComponent {
   releaseOrder(orderId: string): void {
     const order = this.myOrders().find((item) => item.id === orderId);
     if (order && !this.canRelease(order)) {
-      this.error.set(`Ese pedido ${this.getOrderStatusLabel(order.status).toLowerCase()} ya no se puede soltar.`);
+      this.notifications.warning({
+        summary: 'Ese pedido ya no se puede soltar'
+      });
       return;
     }
 
     this.deliveryApi.releaseOrder(orderId).subscribe({
       next: () => {
-        this.feedback.set('Pedido liberado para que otro lo tome.');
+        this.notifications.info({
+          summary: 'Pedido liberado'
+        });
         this.load();
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No se pudo soltar ese pedido.'));
+        this.notifications.error({
+          summary: getApiErrorMessage(error, 'No se pudo liberar el pedido')
+        });
       }
     });
   }
@@ -136,17 +157,23 @@ export class PanelPageComponent {
   markDelivered(orderId: string): void {
     const order = this.myOrders().find((item) => item.id === orderId);
     if (order && !this.canMarkDelivered(order)) {
-      this.error.set(`Ese pedido ${this.getOrderStatusLabel(order.status).toLowerCase()} ya no se puede cerrar como entregado.`);
+      this.notifications.warning({
+        summary: 'Ese pedido ya no se puede cerrar'
+      });
       return;
     }
 
     this.deliveryApi.markDelivered(orderId).subscribe({
       next: () => {
-        this.feedback.set('Listo, a disfrutar esas frías.');
+        this.notifications.success({
+          summary: 'Pedido entregado'
+        });
         this.load();
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No se pudo marcar como entregado.'));
+        this.notifications.error({
+          summary: getApiErrorMessage(error, 'No se pudo cerrar el pedido')
+        });
       }
     });
   }

@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { AppRole } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
 import { DeliverySessionService } from '../core/delivery-session.service';
+import { NotificationUiService } from '../core/notification-ui.service';
 import { AuthApiService } from '../services/auth-api.service';
 
 @Component({
@@ -18,10 +19,10 @@ export class LoginPageComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authApi = inject(AuthApiService);
   private readonly session = inject(DeliverySessionService);
+  private readonly notifications = inject(NotificationUiService);
   private readonly router = inject(Router);
 
   readonly submitting = signal(false);
-  readonly error = signal<string | null>(null);
   readonly form = this.formBuilder.nonNullable.group({
     email: ['delivery@bienhelodias.local', [Validators.required, Validators.email]],
     password: ['Admin123!', [Validators.required]]
@@ -34,13 +35,14 @@ export class LoginPageComponent {
     }
 
     this.submitting.set(true);
-    this.error.set(null);
 
     this.authApi.login(this.form.getRawValue().email, this.form.getRawValue().password).subscribe({
       next: (response) => {
         this.session.setSession(response.data);
         if (response.data.role !== AppRole.DeliveryUser) {
-          this.error.set('Este acceso es solo para la banda de reparto.');
+          this.notifications.warning({
+            summary: 'Acceso solo para reparto'
+          });
           this.session.clear();
           this.submitting.set(false);
           return;
@@ -50,7 +52,9 @@ export class LoginPageComponent {
         void this.router.navigate(['/panel']);
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'Se nos calento el acceso... intenta otra vez.'));
+        this.notifications.error({
+          summary: getApiErrorMessage(error, 'No se pudo entrar')
+        });
         this.submitting.set(false);
       }
     });

@@ -21,18 +21,6 @@
       </div>
     </header>
 
-    @if (error()) {
-      <div class="mb-6 rounded-[1.25rem] border border-error/30 bg-error/10 px-4 py-3 text-sm text-white">
-        {{ error() }}
-      </div>
-    }
-
-    @if (feedback()) {
-      <div class="mb-6 rounded-[1.25rem] border border-primary/24 bg-primary/10 px-4 py-3 text-sm text-white">
-        {{ feedback() }}
-      </div>
-    }
-
     <section class="mb-8">
       <article class="relative overflow-hidden rounded-[2.2rem] bg-surface-container-low px-8 py-10 shadow-[0_35px_110px_rgba(0,0,0,0.38)]">
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_60%_50%,rgba(210,253,110,0.12),transparent_45%)]"></div>
@@ -73,11 +61,7 @@
       <article class="glass-panel overflow-hidden p-6">
         <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div class="max-w-2xl">
-            <p class="eyebrow">Notificaciones push</p>
             <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Avisos cuando cae pedido</h2>
-            <p class="mt-3 text-sm leading-7 text-on-surface-variant">
-              Activalas para enterarte en corto cuando entren nuevas frías y ganarle tiempo a la salida.
-            </p>
             <div class="mt-4 inline-flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.22em]">
               <span
                 class="rounded-full border px-4 py-2"
@@ -131,12 +115,6 @@
             </button>
           </div>
         </div>
-
-        @if (pushState().message) {
-          <div class="mt-5 rounded-[1.25rem] border border-white/8 bg-white/4 px-4 py-3 text-sm leading-7 text-on-surface-variant">
-            {{ pushState().message }}
-          </div>
-        }
       </article>
     </section>
 
@@ -260,12 +238,12 @@
   </div>
 
   @if (selectedOrder(); as order) {
-    <div class="fixed inset-0 z-50 bg-black/70 px-4 py-6 backdrop-blur-sm sm:px-6 lg:px-8" (click)="closeOrderDetail()">
+    <div class="fixed inset-0 z-50 overflow-hidden bg-black/70 px-4 py-6 backdrop-blur-sm sm:px-6 lg:px-8" (click)="closeOrderDetail()">
       <div
         class="mx-auto flex h-full max-w-4xl items-center justify-center"
       >
         <div
-          class="glass-panel max-h-full w-full overflow-hidden rounded-[2rem] border border-white/10 bg-surface-container-low shadow-[0_40px_120px_rgba(0,0,0,0.48)]"
+          class="glass-panel flex max-h-full w-full flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-surface-container-low shadow-[0_40px_120px_rgba(0,0,0,0.48)]"
           (click)="$event.stopPropagation()"
         >
           <div class="flex items-start justify-between gap-4 border-b border-white/8 px-6 py-5 sm:px-8">
@@ -285,7 +263,7 @@
             </div>
           </div>
 
-          <div class="max-h-[calc(100vh-9rem)] overflow-y-auto px-6 py-6 sm:px-8">
+          <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-6 sm:px-8 sm:pb-8">
             <div class="grid gap-4 sm:grid-cols-2">
               <div class="rounded-[1.4rem] bg-white/4 p-4">
                 <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Cliente</p>
@@ -388,7 +366,7 @@
               </div>
             </div>
 
-            <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            <div class="mt-4 grid gap-4 pb-6 sm:grid-cols-2 sm:pb-8">
               <div class="rounded-[1.4rem] bg-white/4 p-4">
                 <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Creado</p>
                 <p class="mt-3 text-sm text-on-surface">{{ order.createdAtUtc | date:'medium' }}</p>
