@@ -11,6 +11,13 @@ namespace LiquorSaaS.Api.Controllers;
 [Route("api/delivery")]
 public sealed class DeliveryController(IDeliveryService deliveryService) : ControllerBase
 {
+    [HttpGet("me")]
+    public async Task<ActionResult<ApiResponse<DeliveryUserDto>>> GetCurrent(CancellationToken cancellationToken)
+    {
+        var result = await deliveryService.GetCurrentAsync(cancellationToken);
+        return Ok(ApiResponse<DeliveryUserDto>.Ok(result, "Delivery profile retrieved successfully."));
+    }
+
     [HttpGet("orders/available")]
     public async Task<ActionResult<ApiResponse<PagedResult<OrderDto>>>> GetAvailableOrders([FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken cancellationToken = default)
     {

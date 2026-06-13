@@ -17,6 +17,10 @@ export class DeliveryApiService {
   private readonly deliveryUrl = `${environment.apiBaseUrl}/delivery`;
   private readonly ordersUrl = `${environment.apiBaseUrl}/orders`;
 
+  getCurrentProfile(): Observable<ApiResponse<DeliveryUserDto>> {
+    return this.http.get<ApiResponse<DeliveryUserDto>>(`${this.deliveryUrl}/me`);
+  }
+
   getAvailableOrders(): Observable<ApiResponse<PagedResult<OrderDto>>> {
     return this.http.get<ApiResponse<PagedResult<OrderDto>>>(`${this.deliveryUrl}/orders/available`, {
       params: { page: 1, pageSize: 20 }

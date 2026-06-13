@@ -33,6 +33,15 @@ public sealed class AuthService(
             .Select(x => (Guid?)x.Id)
             .SingleOrDefaultAsync(cancellationToken);
 
+        if (user.Role == UserRole.DeliveryUser)
+        {
+            var deliveryUser = await dbContext.DeliveryUsers.SingleOrDefaultAsync(x => x.UserId == user.Id, cancellationToken)
+                ?? throw new UnauthorizedAppException("Delivery profile not found.");
+
+            deliveryUser.UpdateAvailability(DeliveryAvailability.Unavailable);
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+
         logger.LogInformation("Successful login for user {Email}", user.Email);
         return jwtTokenGenerator.Generate(user, deliveryUserId);
     }

@@ -3,6 +3,8 @@ using System.Net.Http.Json;
 using FluentAssertions;
 using LiquorSaaS.Application.Auth;
 using LiquorSaaS.Application.Common;
+using LiquorSaaS.Application.Delivery;
+using LiquorSaaS.Domain.Enums;
 using LiquorSaaS.IntegrationTests.Infrastructure;
 
 namespace LiquorSaaS.IntegrationTests.Auth;
@@ -20,5 +22,17 @@ public sealed class AuthIntegrationTests(TestWebApplicationFactory factory) : IC
         var payload = await response.Content.ReadFromJsonAsync<ApiResponse<AuthTokenDto>>();
         payload!.Data!.AccessToken.Should().NotBeNullOrWhiteSpace();
         payload.Data.StoreId.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task DeliveryLogin_ShouldForceUnavailableAvailability()
+    {
+        var deliveryClient = await factory.CreateAuthorizedClientAsync("delivery@bienhelodias.local", "Admin123!");
+
+        var response = await deliveryClient.GetAsync("/api/delivery/me");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await response.Content.ReadFromJsonAsync<ApiResponse<DeliveryUserDto>>();
+        payload!.Data!.CurrentAvailability.Should().Be(DeliveryAvailability.Unavailable);
     }
 }

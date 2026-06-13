@@ -15,6 +15,12 @@ public sealed class DeliveryService(
     ITenantProvider tenantProvider,
     ICurrentUserService currentUserService) : IDeliveryService
 {
+    public async Task<DeliveryUserDto> GetCurrentAsync(CancellationToken cancellationToken)
+    {
+        var deliveryUser = await GetCurrentDeliveryUserAsync(cancellationToken);
+        return deliveryUser.ToDto();
+    }
+
     public async Task<PagedResult<Application.Orders.OrderDto>> GetAvailableOrdersAsync(PaginationRequest request, CancellationToken cancellationToken)
     {
         EnsureDeliveryUser();
@@ -50,15 +56,7 @@ public sealed class DeliveryService(
 
     public async Task<DeliveryUserDto> UpdateAvailabilityAsync(UpdateAvailabilityRequest request, CancellationToken cancellationToken)
     {
-        EnsureDeliveryUser();
-        if (currentUserService.UserId is null)
-        {
-            throw new UnauthorizedAppException("Authenticated user is required.");
-        }
-
-        var entity = await dbContext.DeliveryUsers.SingleOrDefaultAsync(x => x.UserId == currentUserService.UserId.Value, cancellationToken)
-            ?? throw new NotFoundException("Delivery profile not found.");
-
+        var entity = await GetCurrentDeliveryUserAsync(cancellationToken);
         entity.UpdateAvailability(request.Availability);
         await dbContext.SaveChangesAsync(cancellationToken);
         return entity.ToDto();
@@ -70,5 +68,17 @@ public sealed class DeliveryService(
         {
             throw new ForbiddenException("Delivery user role is required.");
         }
+    }
+
+    private async Task<Domain.Entities.DeliveryUser> GetCurrentDeliveryUserAsync(CancellationToken cancellationToken)
+    {
+        EnsureDeliveryUser();
+        if (currentUserService.UserId is null)
+        {
+            throw new UnauthorizedAppException("Authenticated user is required.");
+        }
+
+        return await dbContext.DeliveryUsers.SingleOrDefaultAsync(x => x.UserId == currentUserService.UserId.Value, cancellationToken)
+            ?? throw new NotFoundException("Delivery profile not found.");
     }
 }

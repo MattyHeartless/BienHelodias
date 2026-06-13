@@ -174,8 +174,6 @@ public sealed class OrderService(
 
         await dbContext.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
         {
-            await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
-
             var affectedRows = await dbContext.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE Orders
 SET DeliveryUserId = {deliveryUser.Id},
@@ -191,10 +189,6 @@ WHERE Id = {id}
                 logger.LogWarning("Delivery user {DeliveryUserId} hit a take-order concurrency conflict on order {OrderId}", deliveryUser.Id, id);
                 throw new ConflictException("Order is no longer available.");
             }
-
-            deliveryUser.UpdateAvailability(DeliveryAvailability.Busy);
-            await dbContext.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
         });
 
         logger.LogInformation("Order {OrderId} was taken by delivery user {DeliveryUserId}", id, deliveryUser.Id);
@@ -247,12 +241,6 @@ WHERE Id = {id}
             if (affectedRows == 0)
             {
                 throw new ConflictException("Order could not be released.");
-            }
-
-            if (deliveryUser is not null)
-            {
-                deliveryUser.UpdateAvailability(DeliveryAvailability.Available);
-                await dbContext.SaveChangesAsync(cancellationToken);
             }
 
             await transaction.CommitAsync(cancellationToken);

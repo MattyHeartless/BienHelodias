@@ -17,6 +17,7 @@ public sealed record DeliveryUserDto(
 
 public interface IDeliveryService
 {
+    Task<DeliveryUserDto> GetCurrentAsync(CancellationToken cancellationToken);
     Task<PagedResult<Orders.OrderDto>> GetAvailableOrdersAsync(PaginationRequest request, CancellationToken cancellationToken);
     Task<PagedResult<Orders.OrderDto>> GetMineAsync(PaginationRequest request, CancellationToken cancellationToken);
     Task<DeliveryUserDto> UpdateAvailabilityAsync(UpdateAvailabilityRequest request, CancellationToken cancellationToken);

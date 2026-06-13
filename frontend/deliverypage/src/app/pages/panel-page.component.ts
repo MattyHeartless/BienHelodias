@@ -66,10 +66,13 @@ export class PanelPageComponent {
     this.feedback.set(null);
 
     forkJoin({
+      profile: this.deliveryApi.getCurrentProfile(),
       available: this.deliveryApi.getAvailableOrders(),
       mine: this.deliveryApi.getMyOrders()
     }).subscribe({
       next: (response) => {
+        this.profile.set(response.profile.data);
+        this.availability.set(response.profile.data.currentAvailability);
         this.availableOrders.set(response.available.data.items);
         this.myOrders.set(response.mine.data.items);
         this.syncSelectedOrder();
@@ -104,7 +107,6 @@ export class PanelPageComponent {
     this.deliveryApi.takeOrder(orderId).subscribe({
       next: () => {
         this.feedback.set('Ya cayó en tu ruta.');
-        this.availability.set(DeliveryAvailability.Busy);
         this.load();
       },
       error: (error) => {
@@ -123,7 +125,6 @@ export class PanelPageComponent {
     this.deliveryApi.releaseOrder(orderId).subscribe({
       next: () => {
         this.feedback.set('Pedido liberado para que otro lo tome.');
-        this.availability.set(DeliveryAvailability.Available);
         this.load();
       },
       error: (error) => {
@@ -142,7 +143,6 @@ export class PanelPageComponent {
     this.deliveryApi.markDelivered(orderId).subscribe({
       next: () => {
         this.feedback.set('Listo, a disfrutar esas frías.');
-        this.availability.set(DeliveryAvailability.Available);
         this.load();
       },
       error: (error) => {

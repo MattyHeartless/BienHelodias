@@ -62,6 +62,7 @@ public sealed class OrderIntegrationTests(TestWebApplicationFactory factory) : I
     {
         var orderId = await CreateOrderAsync();
         var deliveryClient = await factory.CreateAuthorizedClientAsync("delivery@bienhelodias.local", "Admin123!");
+        await deliveryClient.PatchAsJsonAsync("/api/delivery/availability", new { availability = (int)DeliveryAvailability.Available });
 
         var response = await deliveryClient.PostAsync($"/api/orders/{orderId}/take", null);
 
@@ -69,6 +70,21 @@ public sealed class OrderIntegrationTests(TestWebApplicationFactory factory) : I
         var payload = await response.Content.ReadFromJsonAsync<ApiResponse<OrderDto>>();
         payload!.Data!.Status.Should().Be(OrderStatus.OnTheWay);
         payload.Data.DeliveryUserId.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task TakeOrder_ShouldAllowMultipleOrdersWhileAvailable()
+    {
+        var firstOrderId = await CreateOrderAsync();
+        var secondOrderId = await CreateOrderAsync();
+        var deliveryClient = await factory.CreateAuthorizedClientAsync("delivery@bienhelodias.local", "Admin123!");
+        await deliveryClient.PatchAsJsonAsync("/api/delivery/availability", new { availability = (int)DeliveryAvailability.Available });
+
+        var firstResponse = await deliveryClient.PostAsync($"/api/orders/{firstOrderId}/take", null);
+        var secondResponse = await deliveryClient.PostAsync($"/api/orders/{secondOrderId}/take", null);
+
+        firstResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        secondResponse.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     private async Task<Guid> CreateOrderAsync()
