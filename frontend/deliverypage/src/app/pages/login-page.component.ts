@@ -25,8 +25,13 @@ export class LoginPageComponent {
   readonly submitting = signal(false);
   readonly form = this.formBuilder.nonNullable.group({
     email: ['delivery@bienhelodias.local', [Validators.required, Validators.email]],
-    password: ['Admin123!', [Validators.required]]
+    password: ['Admin123!', [Validators.required]],
+    rememberMe: [true]
   });
+
+  constructor() {
+    void this.redirectIfAuthenticated();
+  }
 
   submit(): void {
     this.form.markAllAsTouched();
@@ -36,7 +41,9 @@ export class LoginPageComponent {
 
     this.submitting.set(true);
 
-    this.authApi.login(this.form.getRawValue().email, this.form.getRawValue().password).subscribe({
+    this.authApi
+      .login(this.form.getRawValue().email, this.form.getRawValue().password, this.form.getRawValue().rememberMe)
+      .subscribe({
       next: (response) => {
         this.session.setSession(response.data);
         if (response.data.role !== AppRole.DeliveryUser) {
@@ -58,5 +65,11 @@ export class LoginPageComponent {
         this.submitting.set(false);
       }
     });
+  }
+
+  private async redirectIfAuthenticated(): Promise<void> {
+    if ((await this.session.ensureSession()) && this.session.role() === AppRole.DeliveryUser) {
+      await this.router.navigate(['/panel']);
+    }
   }
 }

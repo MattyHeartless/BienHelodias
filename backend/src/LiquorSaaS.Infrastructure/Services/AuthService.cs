@@ -3,9 +3,11 @@ using LiquorSaaS.Application.Common.Exceptions;
 using LiquorSaaS.Application.Common.Interfaces;
 using LiquorSaaS.Domain.Entities;
 using LiquorSaaS.Domain.Enums;
+using LiquorSaaS.Infrastructure.Identity;
 using LiquorSaaS.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace LiquorSaaS.Infrastructure.Services;
 
@@ -14,8 +16,11 @@ public sealed class AuthService(
     IPasswordHasher passwordHasher,
     IJwtTokenGenerator jwtTokenGenerator,
     ICurrentUserService currentUserService,
+    IOptions<JwtOptions> jwtOptions,
     ILogger<AuthService> logger) : IAuthService
 {
+    private readonly JwtOptions _jwtOptions = jwtOptions.Value;
+
     public async Task<AuthTokenDto> LoginAsync(LoginRequest request, CancellationToken cancellationToken)
     {
         var user = await dbContext.Users.SingleOrDefaultAsync(
@@ -43,7 +48,10 @@ public sealed class AuthService(
         }
 
         logger.LogInformation("Successful login for user {Email}", user.Email);
-        return jwtTokenGenerator.Generate(user, deliveryUserId);
+        var lifetime = request.RememberMe
+            ? TimeSpan.FromDays(_jwtOptions.RememberMeExpirationDays)
+            : TimeSpan.FromMinutes(_jwtOptions.ExpirationMinutes);
+        return jwtTokenGenerator.Generate(user, deliveryUserId, lifetime);
     }
 
     public async Task<AuthTokenDto> RefreshAsync(CancellationToken cancellationToken)

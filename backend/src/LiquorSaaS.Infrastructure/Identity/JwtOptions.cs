@@ -8,4 +8,5 @@ public sealed class JwtOptions
     public string Audience { get; init; } = "LiquorSaaS.Web";
     public string Key { get; init; } = "super-secret-development-key-change-this-now";
     public int ExpirationMinutes { get; init; } = 120;
+    public int RememberMeExpirationDays { get; init; } = 30;
 }

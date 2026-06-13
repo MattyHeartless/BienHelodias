@@ -13,9 +13,9 @@ public sealed class JwtTokenGenerator(IOptions<JwtOptions> options) : IJwtTokenG
 {
     private readonly JwtOptions _options = options.Value;
 
-    public AuthTokenDto Generate(AppUser user, Guid? deliveryUserId = null)
+    public AuthTokenDto Generate(AppUser user, Guid? deliveryUserId = null, TimeSpan? lifetime = null)
     {
-        var expiresAtUtc = DateTime.UtcNow.AddMinutes(_options.ExpirationMinutes);
+        var expiresAtUtc = DateTime.UtcNow.Add(lifetime ?? TimeSpan.FromMinutes(_options.ExpirationMinutes));
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),

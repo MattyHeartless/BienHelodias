@@ -14,6 +14,7 @@ public sealed class AuthController(IAuthService authService) : ControllerBase
     public async Task<ActionResult<ApiResponse<AuthTokenDto>>> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
         var result = await authService.LoginAsync(request, cancellationToken);
+        Response.Cookies.Append(AuthCookieNames.DeliverySession, result.AccessToken, BuildCookieOptions(result.ExpiresAtUtc, request.RememberMe));
         return Ok(ApiResponse<AuthTokenDto>.Ok(result, "Login successful."));
     }
 
@@ -23,6 +24,13 @@ public sealed class AuthController(IAuthService authService) : ControllerBase
     {
         var result = await authService.RefreshAsync(cancellationToken);
         return Ok(ApiResponse<AuthTokenDto>.Ok(result, "Token refreshed successfully."));
+    }
+
+    [HttpPost("logout")]
+    public ActionResult<ApiResponse<object>> Logout()
+    {
+        Response.Cookies.Delete(AuthCookieNames.DeliverySession, BuildCookieOptions(DateTime.UtcNow, false));
+        return Ok(ApiResponse<object>.Ok(new { success = true }, "Logout successful."));
     }
 
     [Authorize(Policy = "RequireSuperAdmin")]
@@ -39,5 +47,18 @@ public sealed class AuthController(IAuthService authService) : ControllerBase
     {
         var result = await authService.RegisterDeliveryAsync(request, cancellationToken);
         return StatusCode(StatusCodes.Status201Created, ApiResponse<AuthTokenDto>.Ok(result, "Delivery user registered successfully."));
+    }
+
+    private CookieOptions BuildCookieOptions(DateTime expiresAtUtc, bool rememberMe)
+    {
+        return new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = Request.IsHttps,
+            SameSite = SameSiteMode.Lax,
+            Path = "/",
+            Expires = rememberMe ? expiresAtUtc : null,
+            IsEssential = true
+        };
     }
 }

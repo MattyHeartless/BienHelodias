@@ -34,6 +34,7 @@ builder.Services.AddCors(options =>
                 "https://admin.bienhelodias.qzz.io",
                 "https://delivery.bienhelodias.qzz.io"
             )
+            .AllowCredentials()
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -109,4 +110,3 @@ using (var scope = app.Services.CreateScope())
 app.Run();
 
 public partial class Program;
-

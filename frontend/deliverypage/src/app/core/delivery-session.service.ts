@@ -1,49 +1,66 @@
-import { computed, Injectable, signal } from '@angular/core';
-import { jwtDecode } from 'jwt-decode';
-import { AppRole, AuthTokenDto, DecodedToken } from './models';
-
-const STORAGE_KEY = 'bien-helodias-delivery-session';
+import { computed, inject, Injectable, signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
+import { AppRole, AuthTokenDto } from './models';
+import { AuthApiService } from '../services/auth-api.service';
 
 @Injectable({ providedIn: 'root' })
 export class DeliverySessionService {
-  private readonly tokenValue = signal<string | null>(localStorage.getItem(STORAGE_KEY));
-
-  readonly token = computed(() => this.tokenValue());
-  readonly decoded = computed<DecodedToken | null>(() => {
-    const token = this.tokenValue();
-    if (!token) {
-      return null;
-    }
-
-    try {
-      return jwtDecode<DecodedToken>(token);
-    } catch {
-      return null;
-    }
-  });
+  private readonly authApi = inject(AuthApiService);
+  private readonly sessionValue = signal<AuthTokenDto | null>(null);
+  private restoreInFlight: Promise<boolean> | null = null;
 
   readonly role = computed<AppRole | null>(() => {
-    const role = this.decoded()?.role;
-    switch (role) {
-      case '2':
-      case 'DeliveryUser':
+    switch (this.sessionValue()?.role) {
+      case AppRole.DeliveryUser:
         return AppRole.DeliveryUser;
       default:
         return null;
     }
   });
 
-  readonly email = computed(() => this.decoded()?.email ?? null);
-  readonly storeId = computed(() => this.decoded()?.storeId ?? null);
-  readonly isAuthenticated = computed(() => Boolean(this.tokenValue()));
+  readonly email = computed(() => this.sessionValue()?.email ?? null);
+  readonly storeId = computed(() => this.sessionValue()?.storeId ?? null);
+  readonly isAuthenticated = computed(() => Boolean(this.sessionValue()));
 
   setSession(payload: AuthTokenDto): void {
-    localStorage.setItem(STORAGE_KEY, payload.accessToken);
-    this.tokenValue.set(payload.accessToken);
+    this.sessionValue.set(payload);
   }
 
   clear(): void {
-    localStorage.removeItem(STORAGE_KEY);
-    this.tokenValue.set(null);
+    this.sessionValue.set(null);
+  }
+
+  async ensureSession(): Promise<boolean> {
+    if (this.sessionValue()) {
+      return true;
+    }
+
+    if (this.restoreInFlight) {
+      return this.restoreInFlight;
+    }
+
+    this.restoreInFlight = this.restoreSession();
+    const restored = await this.restoreInFlight;
+    this.restoreInFlight = null;
+    return restored;
+  }
+
+  async logout(): Promise<void> {
+    try {
+      await firstValueFrom(this.authApi.logout());
+    } finally {
+      this.clear();
+    }
+  }
+
+  private async restoreSession(): Promise<boolean> {
+    try {
+      const response = await firstValueFrom(this.authApi.refresh());
+      this.setSession(response.data);
+      return true;
+    } catch {
+      this.clear();
+      return false;
+    }
   }
 }

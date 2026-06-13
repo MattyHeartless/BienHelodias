@@ -16,12 +16,26 @@ public sealed class AuthIntegrationTests(TestWebApplicationFactory factory) : IC
     {
         var client = factory.CreateStoreClient();
 
-        var response = await client.PostAsJsonAsync("/api/auth/login", new LoginRequest("admin@bienhelodias.local", "Admin123!"));
+        var response = await client.PostAsJsonAsync("/api/auth/login", new LoginRequest("admin@bienhelodias.local", "Admin123!", false));
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var payload = await response.Content.ReadFromJsonAsync<ApiResponse<AuthTokenDto>>();
         payload!.Data!.AccessToken.Should().NotBeNullOrWhiteSpace();
         payload.Data.StoreId.Should().NotBeNull();
+        response.Headers.TryGetValues("Set-Cookie", out var cookies).Should().BeTrue();
+        cookies!.Should().Contain(x => x.Contains("bh_delivery_session"));
+    }
+
+    [Fact]
+    public async Task Refresh_ShouldWorkUsingCookieSession()
+    {
+        var client = factory.CreateStoreClient();
+        var loginResponse = await client.PostAsJsonAsync("/api/auth/login", new LoginRequest("delivery@bienhelodias.local", "Admin123!", true));
+        loginResponse.EnsureSuccessStatusCode();
+
+        var refreshResponse = await client.PostAsync("/api/auth/refresh", null);
+
+        refreshResponse.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact]

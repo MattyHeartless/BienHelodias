@@ -199,8 +199,7 @@ export class PanelPageComponent {
   }
 
   logout(): void {
-    this.session.clear();
-    void this.router.navigate(['/login']);
+    void this.session.logout().then(() => this.router.navigate(['/login']));
   }
 
   enablePushNotifications(): void {

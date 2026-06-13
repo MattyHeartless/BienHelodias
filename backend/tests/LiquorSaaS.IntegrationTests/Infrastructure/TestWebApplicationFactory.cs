@@ -55,7 +55,7 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>, 
     public async Task<string> LoginAsync(string email, string password, Guid? storeId = null)
     {
         var client = CreateStoreClient(storeId);
-        var response = await client.PostAsJsonAsync("/api/auth/login", new LoginRequest(email, password));
+        var response = await client.PostAsJsonAsync("/api/auth/login", new LoginRequest(email, password, false));
         response.EnsureSuccessStatusCode();
         var payload = await response.Content.ReadFromJsonAsync<ApiResponse<AuthTokenDto>>();
         return payload!.Data!.AccessToken;

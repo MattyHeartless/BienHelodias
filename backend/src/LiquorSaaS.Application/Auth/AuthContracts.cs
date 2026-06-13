@@ -2,7 +2,12 @@ using LiquorSaaS.Domain.Enums;
 
 namespace LiquorSaaS.Application.Auth;
 
-public sealed record LoginRequest(string Email, string Password);
+public sealed record LoginRequest(string Email, string Password, bool RememberMe = false);
+
+public static class AuthCookieNames
+{
+    public const string DeliverySession = "bh_delivery_session";
+}
 
 public sealed record RefreshTokenRequest();
 

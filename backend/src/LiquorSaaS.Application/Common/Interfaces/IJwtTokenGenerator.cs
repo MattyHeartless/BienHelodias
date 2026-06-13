@@ -5,5 +5,5 @@ namespace LiquorSaaS.Application.Common.Interfaces;
 
 public interface IJwtTokenGenerator
 {
-    AuthTokenDto Generate(AppUser user, Guid? deliveryUserId = null);
+    AuthTokenDto Generate(AppUser user, Guid? deliveryUserId = null, TimeSpan? lifetime = null);
 }
