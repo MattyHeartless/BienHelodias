@@ -9,6 +9,7 @@ import { environment } from '../../environments/environment';
 export class StoreAdminApiService {
   private readonly http = inject(HttpClient);
   private readonly session = inject(AdminSessionService);
+    private readonly apiUrl = environment.apiUrl;
   private readonly adminUrl = `${this.apiUrl}/admin/dashboard`;
   private readonly adminBaseUrl = `${this.apiUrl}/admin`;
   private readonly authUrl = `${this.apiUrl}/auth`;
