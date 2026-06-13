@@ -81,7 +81,7 @@ else
 }
 
 app.UseSerilogRequestLogging();
-app.UseCors("LocalFrontend");
+app.UseCors("OpenCors");
 //app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
