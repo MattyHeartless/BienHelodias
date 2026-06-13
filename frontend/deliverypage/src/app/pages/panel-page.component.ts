@@ -50,6 +50,26 @@ export class PanelPageComponent {
   readonly availabilityLabel = computed(
     () => this.availabilityOptions.find((option) => option.value === this.availability())?.label ?? 'Disponible'
   );
+  readonly pushSubscribeDisabled = computed(() => {
+    const state = this.pushState();
+    return state.isRegistering || state.availability !== 'supported' || (state.isSubscribed && state.backendSynchronized);
+  });
+  readonly pushSubscribeLabel = computed(() => {
+    const state = this.pushState();
+    if (state.isRegistering) {
+      return 'Aguanta, se esta armando...';
+    }
+
+    if (state.isSubscribed && state.backendSynchronized) {
+      return 'Avisos activos';
+    }
+
+    if (state.isSubscribed && !state.backendSynchronized) {
+      return 'Terminar activacion';
+    }
+
+    return 'Quiero que me avisen';
+  });
 
   constructor() {
     effect(() => {
@@ -184,6 +204,10 @@ export class PanelPageComponent {
   }
 
   enablePushNotifications(): void {
+    if (this.pushSubscribeDisabled()) {
+      return;
+    }
+
     void this.pushNotifications.subscribeCourierToPushNotifications();
   }
 

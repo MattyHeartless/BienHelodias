@@ -1,4 +1,5 @@
 import { HttpClient } from '@angular/common/http';
+import { DOCUMENT } from '@angular/common';
 import { inject, Injectable, signal } from '@angular/core';
 import { SwPush } from '@angular/service-worker';
 import { Router } from '@angular/router';
@@ -33,6 +34,7 @@ interface PushSubscriptionDiagnosticDto {
 
 @Injectable({ providedIn: 'root' })
 export class PushNotificationService {
+  private readonly document = inject(DOCUMENT);
   private readonly http = inject(HttpClient);
   private readonly swPush = inject(SwPush);
   private readonly router = inject(Router);
@@ -62,6 +64,10 @@ export class PushNotificationService {
           queryParams: orderId ? { orderId } : undefined
         });
       });
+    }
+
+    if (typeof document !== 'undefined') {
+      this.document.addEventListener('visibilitychange', this.handleVisibilityChange);
     }
 
     void this.refreshState();
@@ -287,4 +293,12 @@ export class PushNotificationService {
   private isSupported(): boolean {
     return typeof window !== 'undefined' && typeof Notification !== 'undefined' && this.swPush.isEnabled;
   }
+
+  private readonly handleVisibilityChange = (): void => {
+    if (this.document.visibilityState !== 'visible') {
+      return;
+    }
+
+    void this.refreshState();
+  };
 }

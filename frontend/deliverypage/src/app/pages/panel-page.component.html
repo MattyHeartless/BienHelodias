@@ -94,13 +94,13 @@
             <button
               class="liquid-button w-full !justify-center"
               type="button"
-              [disabled]="pushState().isRegistering || pushState().availability !== 'supported'"
-              [class.opacity-50]="pushState().isRegistering || pushState().availability !== 'supported'"
-              [class.pointer-events-none]="pushState().isRegistering || pushState().availability !== 'supported'"
+              [disabled]="pushSubscribeDisabled()"
+              [class.opacity-50]="pushSubscribeDisabled()"
+              [class.pointer-events-none]="pushSubscribeDisabled()"
               (click)="enablePushNotifications()"
             >
               <span class="material-symbols-outlined text-base">notifications_active</span>
-              {{ pushState().isRegistering ? 'Aguanta, se esta armando...' : 'Quiero que me avisen' }}
+              {{ pushSubscribeLabel() }}
             </button>
             <button
               class="ghost-button w-full !justify-center"
