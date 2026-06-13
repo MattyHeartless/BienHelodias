@@ -6,6 +6,7 @@ using LiquorSaaS.Application.Common.Interfaces;
 using LiquorSaaS.Application.Delivery;
 using LiquorSaaS.Application.Orders;
 using LiquorSaaS.Application.Products;
+using LiquorSaaS.Application.Promotions;
 using LiquorSaaS.Application.Push;
 using LiquorSaaS.Application.Storefront;
 using LiquorSaaS.Application.Stores;
@@ -48,6 +49,7 @@ public static class DependencyInjection
         services.AddScoped<IStorefrontService, StorefrontService>();
         services.AddScoped<IBannerService, BannerService>();
         services.AddScoped<IProductService, ProductService>();
+        services.AddScoped<IPromotionService, PromotionService>();
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IDeliveryService, DeliveryService>();
         services.AddScoped<IAdminService, AdminService>();

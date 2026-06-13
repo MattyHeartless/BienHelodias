@@ -16,7 +16,9 @@ public sealed class Banner
     public string? Wildcard { get; private set; }
     public DateTime? ExpirationDate { get; private set; }
     public bool Status { get; private set; } = true;
+    public Guid? PromotionId { get; private set; }
     public DateTime Created { get; private set; } = DateTime.UtcNow;
+    public Promotion? Promotion { get; private set; }
 
     public static Banner Create(
         Guid storeId,
@@ -25,7 +27,8 @@ public sealed class Banner
         string description,
         string? wildcard,
         DateTime? expirationDate,
-        bool status = true)
+        bool status = true,
+        Guid? promotionId = null)
     {
         Validate(header, title, description);
 
@@ -38,6 +41,7 @@ public sealed class Banner
             Wildcard = string.IsNullOrWhiteSpace(wildcard) ? null : wildcard.Trim(),
             ExpirationDate = expirationDate,
             Status = status,
+            PromotionId = promotionId,
             Created = DateTime.UtcNow
         };
     }
@@ -48,7 +52,8 @@ public sealed class Banner
         string description,
         string? wildcard,
         DateTime? expirationDate,
-        bool status)
+        bool status,
+        Guid? promotionId)
     {
         Validate(header, title, description);
 
@@ -58,6 +63,7 @@ public sealed class Banner
         Wildcard = string.IsNullOrWhiteSpace(wildcard) ? null : wildcard.Trim();
         ExpirationDate = expirationDate;
         Status = status;
+        PromotionId = promotionId;
     }
 
     private static void Validate(string header, string title, string description)

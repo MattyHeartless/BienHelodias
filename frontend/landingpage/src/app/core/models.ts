@@ -22,6 +22,11 @@ export enum OrderStatus {
   Cancelled = 6
 }
 
+export enum PromotionType {
+  Percentage = 0,
+  BuyXGetY = 1
+}
+
 export interface ProductDto {
   id: string;
   storeId: string;
@@ -63,6 +68,19 @@ export interface BannerDto {
   expirationDate: string | null;
   status: boolean;
   created: string;
+  promotion: PromotionSummaryDto | null;
+}
+
+export interface PromotionSummaryDto {
+  promotionId: string;
+  name: string;
+  code: string;
+  type: PromotionType;
+  percentageValue: number | null;
+  buyQuantity: number | null;
+  freeQuantity: number | null;
+  status: boolean;
+  expirationDate: string | null;
 }
 
 export interface StorefrontContentDto {
@@ -90,6 +108,10 @@ export interface OrderDto {
   notes: string | null;
   status: OrderStatus;
   deliveryUserId: string | null;
+  subtotal: number;
+  discountTotal: number;
+  appliedPromotionId: string | null;
+  appliedPromotionCode: string | null;
   total: number;
   createdAtUtc: string;
   updatedAtUtc: string;
@@ -111,8 +133,29 @@ export interface CreateOrderRequest {
   deliveryLatitude: number | null;
   deliveryLongitude: number | null;
   notes: string | null;
+  promoCode: string | null;
   items: Array<{
     productId: string;
     quantity: number;
   }>;
+}
+
+export interface ValidatePromotionRequest {
+  storeId: string;
+  code: string;
+  items: Array<{
+    productId: string;
+    quantity: number;
+  }>;
+}
+
+export interface PromotionValidationDto {
+  promotionId: string;
+  name: string;
+  code: string;
+  type: PromotionType;
+  subtotal: number;
+  discountTotal: number;
+  total: number;
+  summary: string;
 }

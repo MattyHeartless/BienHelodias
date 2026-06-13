@@ -18,6 +18,7 @@ public sealed class Store : AuditableEntity
     public bool IsActive { get; private set; } = true;
     public SubscriptionStatus SubscriptionStatus { get; private set; } = SubscriptionStatus.Trial;
     public ICollection<Banner> Banners { get; private set; } = [];
+    public ICollection<Promotion> Promotions { get; private set; } = [];
 
     public static Store Create(string name, string slug, SubscriptionStatus subscriptionStatus, string? welcomePhrase = null)
     {

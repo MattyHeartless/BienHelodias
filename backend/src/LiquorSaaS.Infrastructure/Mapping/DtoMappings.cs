@@ -2,6 +2,7 @@ using LiquorSaaS.Application.Banners;
 using LiquorSaaS.Application.Delivery;
 using LiquorSaaS.Application.Orders;
 using LiquorSaaS.Application.Products;
+using LiquorSaaS.Application.Promotions;
 using LiquorSaaS.Application.Stores;
 using LiquorSaaS.Domain.Entities;
 
@@ -19,7 +20,20 @@ internal static class DtoMappings
             entity.Wildcard,
             entity.ExpirationDate,
             entity.Status,
-            entity.Created);
+            entity.Created,
+            entity.Promotion?.ToSummaryDto());
+
+    public static PromotionSummaryDto ToSummaryDto(this Promotion entity) =>
+        new(
+            entity.Id,
+            entity.Name,
+            entity.Code,
+            entity.Type,
+            entity.PercentageValue,
+            entity.BuyQuantity,
+            entity.FreeQuantity,
+            entity.Status,
+            entity.ExpirationDate);
 
     public static StoreDto ToDto(this Store entity) =>
         new(entity.Id, entity.Name, entity.Slug, entity.WelcomePhrase, entity.IsActive, entity.SubscriptionStatus, entity.CreatedAtUtc);
@@ -50,6 +64,10 @@ internal static class DtoMappings
             entity.Notes,
             entity.Status,
             entity.DeliveryUserId,
+            entity.Subtotal,
+            entity.DiscountTotal,
+            entity.AppliedPromotionId,
+            entity.AppliedPromotionCode,
             entity.Total,
             entity.CreatedAtUtc,
             entity.UpdatedAtUtc,

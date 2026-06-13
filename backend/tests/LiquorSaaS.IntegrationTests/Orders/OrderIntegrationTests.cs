@@ -4,6 +4,7 @@ using FluentAssertions;
 using LiquorSaaS.Application.Auth;
 using LiquorSaaS.Application.Common;
 using LiquorSaaS.Application.Orders;
+using LiquorSaaS.Application.Promotions;
 using LiquorSaaS.Domain.Enums;
 using LiquorSaaS.Infrastructure.Persistence.Seed;
 using LiquorSaaS.IntegrationTests.Infrastructure;
@@ -101,6 +102,80 @@ public sealed class OrderIntegrationTests(TestWebApplicationFactory factory) : I
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var payload = await response.Content.ReadFromJsonAsync<ApiResponse<PagedResult<OrderDto>>>();
         payload!.Data!.Items.Should().NotContain(x => x.Id == orderId);
+    }
+
+    [Fact]
+    public async Task CreateOrder_ShouldApplyPercentagePromotion()
+    {
+        var adminClient = await factory.CreateAuthorizedClientAsync("admin@bienhelodias.local", "Admin123!");
+        await adminClient.PostAsJsonAsync(
+            "/api/banners",
+            new LiquorSaaS.Application.Banners.CreateBannerRequest(
+                "Promo",
+                "Descuento tienda",
+                "Ahorra en tu pedido",
+                "20% OFF",
+                null,
+                true,
+                new PromotionConfigurationRequest("Descuento 20", "SAVE20", PromotionType.Percentage, 20m, null, null)));
+
+        var client = factory.CreateStoreClient();
+        var request = new CreateOrderRequest(
+            SeedDataIds.StoreId,
+            "Cliente Test",
+            "55555",
+            "Av Principal 123",
+            19.432608m,
+            -99.133209m,
+            null,
+            new[]
+            {
+                new CreateOrderItemRequest(SeedDataIds.ProductGinId, 1),
+                new CreateOrderItemRequest(SeedDataIds.ProductTonicId, 2)
+            },
+            "SAVE20");
+
+        var response = await client.PostAsJsonAsync("/api/orders", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        var payload = await response.Content.ReadFromJsonAsync<ApiResponse<OrderDto>>();
+        payload!.Data!.Subtotal.Should().Be(70m);
+        payload.Data.DiscountTotal.Should().Be(14m);
+        payload.Data.Total.Should().Be(56m);
+        payload.Data.AppliedPromotionCode.Should().Be("SAVE20");
+    }
+
+    [Fact]
+    public async Task ValidatePromotion_ShouldPreviewBuyXGetYDiscount()
+    {
+        var adminClient = await factory.CreateAuthorizedClientAsync("admin@bienhelodias.local", "Admin123!");
+        await adminClient.PostAsJsonAsync(
+            "/api/banners",
+            new LiquorSaaS.Application.Banners.CreateBannerRequest(
+                "Promo",
+                "2x1",
+                "Doble botella",
+                "2x1",
+                null,
+                true,
+                new PromotionConfigurationRequest("Dos por uno", "DOSXUNO", PromotionType.BuyXGetY, null, 1, 1)));
+
+        var client = factory.CreateStoreClient();
+        var response = await client.PostAsJsonAsync(
+            "/api/promotions/validate",
+            new ValidatePromotionRequest(
+                SeedDataIds.StoreId,
+                "dosxuno",
+                new[]
+                {
+                    new ValidatePromotionItemRequest(SeedDataIds.ProductGinId, 2)
+                }));
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await response.Content.ReadFromJsonAsync<ApiResponse<PromotionValidationDto>>();
+        payload!.Data!.DiscountTotal.Should().Be(45m);
+        payload.Data.Total.Should().Be(45m);
+        payload.Data.Code.Should().Be("DOSXUNO");
     }
 
     private async Task<Guid> CreateOrderAsync()

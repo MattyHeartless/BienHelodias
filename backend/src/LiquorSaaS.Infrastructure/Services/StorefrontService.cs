@@ -32,11 +32,11 @@ public sealed class StorefrontService(
             ?? throw new NotFoundException("Store not found.");
 
         var banners = await dbContext.Banners.AsNoTracking()
+            .Include(x => x.Promotion)
             .Where(x => x.StoreId == storeId && x.Status && (x.ExpirationDate == null || x.ExpirationDate > utcNow))
             .OrderByDescending(x => x.Created)
-            .Select(x => x.ToDto())
             .ToListAsync(cancellationToken);
 
-        return new StorefrontContentDto(store.WelcomePhrase, banners);
+        return new StorefrontContentDto(store.WelcomePhrase, banners.Select(x => x.ToDto()).ToArray());
     }
 }

@@ -122,6 +122,14 @@ export class StoreAdminApiService {
     wildcard: string | null;
     expirationDate: string | null;
     status: boolean;
+    promotion: {
+      name: string | null;
+      code: string | null;
+      type: number;
+      percentageValue: number | null;
+      buyQuantity: number | null;
+      freeQuantity: number | null;
+    } | null;
   }): Observable<ApiResponse<BannerDto>> {
     return this.http.post<ApiResponse<BannerDto>>(this.bannersUrl, request);
   }
@@ -135,6 +143,14 @@ export class StoreAdminApiService {
       wildcard: string | null;
       expirationDate: string | null;
       status: boolean;
+      promotion: {
+        name: string | null;
+        code: string | null;
+        type: number;
+        percentageValue: number | null;
+        buyQuantity: number | null;
+        freeQuantity: number | null;
+      } | null;
     }
   ): Observable<ApiResponse<BannerDto>> {
     return this.http.put<ApiResponse<BannerDto>>(`${this.bannersUrl}/${bannerId}`, request);

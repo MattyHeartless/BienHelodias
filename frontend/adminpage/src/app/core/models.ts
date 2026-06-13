@@ -42,6 +42,11 @@ export enum DeliveryAvailability {
   Busy = 2
 }
 
+export enum PromotionType {
+  Percentage = 0,
+  BuyXGetY = 1
+}
+
 export interface AuthTokenDto {
   accessToken: string;
   expiresAtUtc: string;
@@ -81,6 +86,19 @@ export interface BannerDto {
   expirationDate: string | null;
   status: boolean;
   created: string;
+  promotion: PromotionSummaryDto | null;
+}
+
+export interface PromotionSummaryDto {
+  promotionId: string;
+  name: string;
+  code: string;
+  type: PromotionType;
+  percentageValue: number | null;
+  buyQuantity: number | null;
+  freeQuantity: number | null;
+  status: boolean;
+  expirationDate: string | null;
 }
 
 export interface DeliveryUserDto {
@@ -138,6 +156,10 @@ export interface OrderDto {
   notes: string | null;
   status: OrderStatus;
   deliveryUserId: string | null;
+  subtotal: number;
+  discountTotal: number;
+  appliedPromotionId: string | null;
+  appliedPromotionCode: string | null;
   total: number;
   createdAtUtc: string;
   updatedAtUtc: string;

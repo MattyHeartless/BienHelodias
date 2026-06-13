@@ -112,7 +112,9 @@
 .promo-strip--draggable{cursor:grab;touch-action:pan-y;user-select:none}
 .promo-strip--dragging{cursor:grabbing}
 .promo-strip__offer{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.promo-strip__offer-copy{display:grid;gap:.45rem}
 .promo-strip__badge{border-radius:999px;padding:0.6rem 0.85rem;background:rgb(14 14 14 / 0.52);color:var(--color-primary);font-size:0.8rem;font-weight:800;letter-spacing:0.08em}
+.promo-strip__code{margin:0;font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:rgb(255 255 255 / 0.72)}
 .promo-strip__button{min-height:2.8rem}
 
 .category-tabs {
@@ -518,6 +520,60 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 1.35rem 1.35rem 0 1.35rem;
+}
+
+.checkout-promo {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.checkout-promo__result {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.95rem 1rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgb(210 253 110 / 0.18);
+  background: rgb(210 253 110 / 0.08);
+}
+
+.checkout-promo__title,
+.checkout-promo__summary {
+  margin: 0;
+}
+
+.checkout-promo__title {
+  color: var(--color-primary);
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.checkout-promo__summary {
+  color: rgb(255 255 255 / 0.82);
+  font-size: 0.92rem;
+}
+
+.checkout-total-stack {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.checkout-total-line {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: space-between;
+  color: rgb(255 255 255 / 0.82);
+  font-size: 0.9rem;
+}
+
+.checkout-total-line p {
+  margin: 0;
+}
+
+.checkout-total-line--discount {
+  color: var(--color-primary);
 }
 
 .checkout-modal__form {

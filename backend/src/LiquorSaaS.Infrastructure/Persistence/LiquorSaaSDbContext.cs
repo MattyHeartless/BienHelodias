@@ -7,6 +7,7 @@ public sealed class LiquorSaaSDbContext(DbContextOptions<LiquorSaaSDbContext> op
 {
     public DbSet<Store> Stores => Set<Store>();
     public DbSet<Banner> Banners => Set<Banner>();
+    public DbSet<Promotion> Promotions => Set<Promotion>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
@@ -38,10 +39,33 @@ public sealed class LiquorSaaSDbContext(DbContextOptions<LiquorSaaSDbContext> op
             entity.Property(x => x.Wildcard).HasMaxLength(120);
             entity.Property(x => x.ExpirationDate).HasColumnType("datetime2");
             entity.Property(x => x.Status).IsRequired();
+            entity.Property(x => x.PromotionId);
             entity.Property(x => x.Created).HasColumnType("datetime2");
             entity.HasIndex(x => x.StoreId);
             entity.HasOne<Store>()
                 .WithMany(x => x.Banners)
+                .HasForeignKey(x => x.StoreId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(x => x.Promotion)
+                .WithMany()
+                .HasForeignKey(x => x.PromotionId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<Promotion>(entity =>
+        {
+            entity.ToTable("Promotions");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Name).HasMaxLength(160).IsRequired();
+            entity.Property(x => x.Code).HasMaxLength(80).IsRequired();
+            entity.Property(x => x.Type).HasConversion<int>();
+            entity.Property(x => x.PercentageValue).HasColumnType("decimal(18,2)");
+            entity.Property(x => x.ExpirationDate).HasColumnType("datetime2");
+            entity.Property(x => x.Status).IsRequired();
+            entity.HasIndex(x => x.StoreId);
+            entity.HasIndex(x => new { x.StoreId, x.Code }).IsUnique();
+            entity.HasOne<Store>()
+                .WithMany(x => x.Promotions)
                 .HasForeignKey(x => x.StoreId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
@@ -69,11 +93,15 @@ public sealed class LiquorSaaSDbContext(DbContextOptions<LiquorSaaSDbContext> op
             entity.Property(x => x.DeliveryLatitude).HasColumnType("decimal(9,6)");
             entity.Property(x => x.DeliveryLongitude).HasColumnType("decimal(9,6)");
             entity.Property(x => x.Notes).HasMaxLength(1000);
+            entity.Property(x => x.Subtotal).HasColumnType("decimal(18,2)");
+            entity.Property(x => x.DiscountTotal).HasColumnType("decimal(18,2)");
+            entity.Property(x => x.AppliedPromotionCode).HasMaxLength(80);
             entity.Property(x => x.Total).HasColumnType("decimal(18,2)");
             entity.Property(x => x.Status).HasConversion<int>();
             entity.HasIndex(x => x.StoreId);
             entity.HasIndex(x => x.Status);
             entity.HasIndex(x => x.DeliveryUserId);
+            entity.HasIndex(x => x.AppliedPromotionId);
             entity.HasMany(x => x.Items).WithOne().HasForeignKey(x => x.OrderId).OnDelete(DeleteBehavior.Cascade);
         });
 

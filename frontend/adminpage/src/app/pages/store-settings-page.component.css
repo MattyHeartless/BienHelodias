@@ -127,3 +127,43 @@
   letter-spacing: 0.2em;
   text-transform: uppercase;
 }
+
+.promo-meta {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  background: rgb(210 253 110 / 0.06);
+  border: 1px solid rgb(210 253 110 / 0.12);
+}
+
+.promo-meta__code {
+  margin: 0;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #d2fd6e;
+}
+
+.promo-meta__type {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #f2f2f2;
+}
+
+.promo-editor {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 1.4rem;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  background: rgb(255 255 255 / 0.03);
+}
+
+.promo-static-rule {
+  border-radius: 1.25rem;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  background: rgb(255 255 255 / 0.03);
+  padding: 1rem 1.1rem;
+}

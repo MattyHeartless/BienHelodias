@@ -3,7 +3,9 @@ using System.Net.Http.Json;
 using FluentAssertions;
 using LiquorSaaS.Application.Banners;
 using LiquorSaaS.Application.Common;
+using LiquorSaaS.Application.Promotions;
 using LiquorSaaS.Application.Stores;
+using LiquorSaaS.Domain.Enums;
 using LiquorSaaS.IntegrationTests.Infrastructure;
 
 namespace LiquorSaaS.IntegrationTests.Banners;
@@ -14,7 +16,14 @@ public sealed class BannerIntegrationTests(TestWebApplicationFactory factory) : 
     public async Task CreateBanner_ShouldPersistForStore()
     {
         var adminClient = await factory.CreateAuthorizedClientAsync("admin@bienhelodias.local", "Admin123!");
-        var request = new CreateBannerRequest("Happy Hour", "2x1 en botellas", "Solo por hoy", "2x1", null, true);
+        var request = new CreateBannerRequest(
+            "Happy Hour",
+            "2x1 en botellas",
+            "Solo por hoy",
+            "2x1",
+            null,
+            true,
+            new PromotionConfigurationRequest("Promo principal", "HAPPY2X1", PromotionType.BuyXGetY, null, 1, 1));
 
         var response = await adminClient.PostAsJsonAsync("/api/banners", request);
 
@@ -22,6 +31,8 @@ public sealed class BannerIntegrationTests(TestWebApplicationFactory factory) : 
         var payload = await response.Content.ReadFromJsonAsync<ApiResponse<BannerDto>>();
         payload!.Data!.Header.Should().Be("Happy Hour");
         payload.Data.Status.Should().BeTrue();
+        payload.Data.Promotion.Should().NotBeNull();
+        payload.Data.Promotion!.Code.Should().Be("HAPPY2X1");
     }
 
     [Fact]

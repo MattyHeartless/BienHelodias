@@ -90,6 +90,9 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
                         .HasMaxLength(120)
                         .HasColumnType("nvarchar(120)");
 
+                    b.Property<Guid?>("PromotionId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<bool>("Status")
                         .HasColumnType("bit");
 
@@ -106,6 +109,8 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(120)");
 
                     b.HasKey("BannerId");
+
+                    b.HasIndex("PromotionId");
 
                     b.HasIndex("StoreId");
 
@@ -223,6 +228,13 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("AppliedPromotionCode")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<Guid?>("AppliedPromotionId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime2");
 
@@ -250,6 +262,9 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("DeliveryUserId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal>("DiscountTotal")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("Notes")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
@@ -260,6 +275,9 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("StoreId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal>("Subtotal")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<decimal>("Total")
                         .HasColumnType("decimal(18,2)");
 
@@ -267,6 +285,8 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AppliedPromotionId");
 
                     b.HasIndex("DeliveryUserId");
 
@@ -370,6 +390,59 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
                     b.ToTable("Products", (string)null);
                 });
 
+            modelBuilder.Entity("LiquorSaaS.Domain.Entities.Promotion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("BuyQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ExpirationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("FreeQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("nvarchar(160)");
+
+                    b.Property<decimal?>("PercentageValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("StoreId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StoreId");
+
+                    b.HasIndex("StoreId", "Code")
+                        .IsUnique();
+
+                    b.ToTable("Promotions", (string)null);
+                });
+
             modelBuilder.Entity("LiquorSaaS.Domain.Entities.Store", b =>
                 {
                     b.Property<Guid>("Id")
@@ -414,11 +487,18 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("LiquorSaaS.Domain.Entities.Banner", b =>
                 {
+                    b.HasOne("LiquorSaaS.Domain.Entities.Promotion", "Promotion")
+                        .WithMany()
+                        .HasForeignKey("PromotionId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("LiquorSaaS.Domain.Entities.Store", null)
                         .WithMany("Banners")
                         .HasForeignKey("StoreId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Promotion");
                 });
 
             modelBuilder.Entity("LiquorSaaS.Domain.Entities.OrderItem", b =>
@@ -426,6 +506,15 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
                     b.HasOne("LiquorSaaS.Domain.Entities.Order", null)
                         .WithMany("Items")
                         .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LiquorSaaS.Domain.Entities.Promotion", b =>
+                {
+                    b.HasOne("LiquorSaaS.Domain.Entities.Store", null)
+                        .WithMany("Promotions")
+                        .HasForeignKey("StoreId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -438,6 +527,8 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("LiquorSaaS.Domain.Entities.Store", b =>
                 {
                     b.Navigation("Banners");
+
+                    b.Navigation("Promotions");
                 });
 #pragma warning restore 612, 618
         }

@@ -13,7 +13,8 @@ public sealed record CreateOrderRequest(
     decimal? DeliveryLatitude,
     decimal? DeliveryLongitude,
     string? Notes,
-    IReadOnlyCollection<CreateOrderItemRequest> Items);
+    IReadOnlyCollection<CreateOrderItemRequest> Items,
+    string? PromoCode = null);
 
 public sealed record UpdateOrderStatusRequest(OrderStatus Status);
 
@@ -30,6 +31,10 @@ public sealed record OrderDto(
     string? Notes,
     OrderStatus Status,
     Guid? DeliveryUserId,
+    decimal Subtotal,
+    decimal DiscountTotal,
+    Guid? AppliedPromotionId,
+    string? AppliedPromotionCode,
     decimal Total,
     DateTime CreatedAtUtc,
     DateTime UpdatedAtUtc,

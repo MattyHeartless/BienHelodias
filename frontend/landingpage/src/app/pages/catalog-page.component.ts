@@ -2,7 +2,7 @@ import { CommonModule, CurrencyPipe } from '@angular/common';
 import { Component, ElementRef, OnDestroy, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { DeliveryAddressDraft, ProductDto, BannerDto } from '../core/models';
+import { BannerDto, DeliveryAddressDraft, ProductDto, PromotionValidationDto } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
 import { GooglePlacesService } from '../services/google-places.service';
 import { OrdersApiService } from '../services/orders-api.service';
@@ -46,6 +46,8 @@ export class CatalogPageComponent {
   readonly error = signal<string | null>(null);
   readonly placesLoading = signal(false);
   readonly placesError = signal<string | null>(null);
+  readonly promoError = signal<string | null>(null);
+  readonly applyingPromotion = signal(false);
   readonly selectedAddress = signal<DeliveryAddressDraft | null>(null);
   readonly products = signal<ProductDto[]>([]);
   readonly welcomePhrase = signal('No te compliques, aqui te lo mandamos.');
@@ -61,11 +63,13 @@ export class CatalogPageComponent {
   readonly cart = signal<Record<string, number>>({});
   readonly quickAddFeedback = signal<Record<string, boolean>>({});
   readonly detailQuantity = signal(1);
+  readonly appliedPromotion = signal<PromotionValidationDto | null>(null);
   readonly checkoutForm = this.formBuilder.nonNullable.group({
     customerName: ['', [Validators.required, Validators.minLength(2)]],
     customerPhone: ['', [Validators.required, Validators.minLength(8)]],
     deliveryAddress: ['', [Validators.required, Validators.minLength(10)]],
     notes: [''],
+    promoCode: [''],
     deliveryPlaceId: [''],
     deliveryLatitude: [''],
     deliveryLongitude: ['']
@@ -124,7 +128,18 @@ export class CatalogPageComponent {
     this.cartItems().reduce((total, entry) => total + entry.product.price * entry.quantity, 0)
   );
 
+  readonly discountTotal = computed(() => this.appliedPromotion()?.discountTotal ?? 0);
+
+  readonly checkoutTotal = computed(() => this.appliedPromotion()?.total ?? this.subtotal());
+
   constructor() {
+    this.checkoutForm.controls.promoCode.valueChanges.subscribe((value) => {
+      const normalized = value.trim().toUpperCase();
+      if (this.appliedPromotion()?.code !== normalized) {
+        this.clearAppliedPromotion(false);
+      }
+    });
+
     this.route.queryParamMap.subscribe((params) => {
       const panel = params.get('panel');
       this.cartOpen.set(panel === 'cart');
@@ -195,6 +210,7 @@ export class CatalogPageComponent {
   }
 
   addToCart(product: ProductDto, quantity = 1): void {
+    this.clearAppliedPromotion();
     this.cart.update((current) => ({
       ...current,
       [product.id]: Math.min(product.stock, (current[product.id] ?? 0) + quantity)
@@ -253,6 +269,7 @@ export class CatalogPageComponent {
   }
 
   removeFromCart(productId: string): void {
+    this.clearAppliedPromotion();
     this.cart.update((current) => {
       const nextQuantity = (current[productId] ?? 0) - 1;
       if (nextQuantity <= 0) {
@@ -285,6 +302,7 @@ export class CatalogPageComponent {
         deliveryLatitude: checkoutValues.deliveryLatitude ? Number(checkoutValues.deliveryLatitude) : null,
         deliveryLongitude: checkoutValues.deliveryLongitude ? Number(checkoutValues.deliveryLongitude) : null,
         notes: checkoutValues.notes || null,
+        promoCode: checkoutValues.promoCode.trim() || null,
         items: this.cartItems().map((entry) => ({
           productId: entry.product.id,
           quantity: entry.quantity
@@ -297,6 +315,7 @@ export class CatalogPageComponent {
             localStorage.setItem(this.getLastOrderStorageKey(activeSlug), JSON.stringify(response.data));
           }
           this.cart.set({});
+          this.clearAppliedPromotion();
           this.cartOpen.set(false);
           this.checkoutOpen.set(false);
           this.submitting.set(false);
@@ -376,6 +395,38 @@ export class CatalogPageComponent {
   showBanner(index: number): void {
     this.activeBannerIndex.set(index);
     this.restartBannerRotation();
+  }
+
+  applyPromotionCode(): void {
+    const storeId = this.storefrontTenant.storeId();
+    const code = this.checkoutForm.controls.promoCode.value.trim();
+    if (!storeId || !code || this.cartItems().length === 0 || this.applyingPromotion()) {
+      return;
+    }
+
+    this.applyingPromotion.set(true);
+    this.promoError.set(null);
+
+    this.ordersApi.validatePromotion({
+      storeId,
+      code,
+      items: this.cartItems().map((entry) => ({
+        productId: entry.product.id,
+        quantity: entry.quantity
+      }))
+    }).subscribe({
+      next: (response) => {
+        this.appliedPromotion.set(response.data);
+        this.checkoutForm.patchValue({ promoCode: response.data.code }, { emitEvent: false });
+        this.promoError.set(null);
+        this.applyingPromotion.set(false);
+      },
+      error: (error) => {
+        this.appliedPromotion.set(null);
+        this.promoError.set(getApiErrorMessage(error, 'No fue posible validar el codigo.'));
+        this.applyingPromotion.set(false);
+      }
+    });
   }
 
   handleBannerPointerDown(event: PointerEvent): void {
@@ -509,6 +560,15 @@ export class CatalogPageComponent {
 
   private restartBannerRotation(): void {
     this.startBannerRotation();
+  }
+
+  private clearAppliedPromotion(resetInput = false): void {
+    this.appliedPromotion.set(null);
+    this.promoError.set(null);
+
+    if (resetInput) {
+      this.checkoutForm.patchValue({ promoCode: '' }, { emitEvent: false });
+    }
   }
 
   private triggerQuickAddFeedback(productId: string): void {

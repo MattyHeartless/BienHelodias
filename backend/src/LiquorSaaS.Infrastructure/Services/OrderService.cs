@@ -2,6 +2,7 @@ using LiquorSaaS.Application.Common;
 using LiquorSaaS.Application.Common.Exceptions;
 using LiquorSaaS.Application.Common.Interfaces;
 using LiquorSaaS.Application.Orders;
+using LiquorSaaS.Application.Promotions;
 using LiquorSaaS.Application.Push;
 using LiquorSaaS.Domain.Entities;
 using LiquorSaaS.Domain.Enums;
@@ -18,6 +19,7 @@ public sealed class OrderService(
     LiquorSaaSDbContext dbContext,
     ITenantProvider tenantProvider,
     ICurrentUserService currentUserService,
+    IPromotionService promotionService,
     IPushNotificationService pushNotificationService,
     ILogger<OrderService> logger) : IOrderService
 {
@@ -63,6 +65,12 @@ public sealed class OrderService(
             return OrderItem.Create(product.Id, product.Name, product.Price, itemRequest.Quantity);
         }).ToArray();
 
+        var promotion = await promotionService.EvaluateAsync(
+            storeId,
+            request.PromoCode,
+            orderItems.Select(item => new PromotionCartItemRequest(item.ProductId, item.UnitPrice, item.Quantity)).ToArray(),
+            cancellationToken);
+
         var order = Order.Create(
             storeId,
             request.CustomerName,
@@ -71,7 +79,10 @@ public sealed class OrderService(
             request.DeliveryLatitude,
             request.DeliveryLongitude,
             request.Notes,
-            orderItems);
+            orderItems,
+            promotion?.DiscountTotal ?? 0m,
+            promotion?.Code,
+            promotion?.PromotionId);
 
         await dbContext.Orders.AddAsync(order, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);

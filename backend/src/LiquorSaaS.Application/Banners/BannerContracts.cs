@@ -1,4 +1,5 @@
 using LiquorSaaS.Application.Common;
+using LiquorSaaS.Application.Promotions;
 
 namespace LiquorSaaS.Application.Banners;
 
@@ -8,7 +9,8 @@ public sealed record CreateBannerRequest(
     string Description,
     string? Wildcard,
     DateTime? ExpirationDate,
-    bool Status = true);
+    bool Status = true,
+    PromotionConfigurationRequest? Promotion = null);
 
 public sealed record UpdateBannerRequest(
     string Header,
@@ -16,7 +18,8 @@ public sealed record UpdateBannerRequest(
     string Description,
     string? Wildcard,
     DateTime? ExpirationDate,
-    bool Status);
+    bool Status,
+    PromotionConfigurationRequest? Promotion = null);
 
 public sealed record UpdateBannerStatusRequest(bool Status);
 
@@ -29,7 +32,8 @@ public sealed record BannerDto(
     string? Wildcard,
     DateTime? ExpirationDate,
     bool Status,
-    DateTime Created);
+    DateTime Created,
+    PromotionSummaryDto? Promotion = null);
 
 public interface IBannerService
 {

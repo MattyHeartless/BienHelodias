@@ -2,7 +2,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
-import { BannerDto, DeliveryAvailability, DeliveryUserDto, StoreDto } from '../core/models';
+import { BannerDto, DeliveryAvailability, DeliveryUserDto, PromotionType, StoreDto } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
 import { StoreAdminApiService } from '../services/store-admin-api.service';
 
@@ -30,6 +30,7 @@ export class StoreSettingsPageComponent {
   readonly deliveryUserModalOpen = signal(false);
   readonly editingBannerId = signal<string | null>(null);
   readonly deliveryAvailability = DeliveryAvailability;
+  readonly promotionType = PromotionType;
 
   readonly welcomeForm = this.formBuilder.nonNullable.group({
     welcomePhrase: ['', [Validators.maxLength(280)]]
@@ -41,7 +42,14 @@ export class StoreSettingsPageComponent {
     description: ['', [Validators.required, Validators.minLength(6)]],
     wildcard: [''],
     expirationDate: [''],
-    status: [true, [Validators.required]]
+    status: [true, [Validators.required]],
+    hasPromotion: [false],
+    promotionName: [''],
+    promotionCode: [''],
+    promotionType: [PromotionType.Percentage],
+    percentageValue: [10],
+    buyQuantity: [1],
+    freeQuantity: [1]
   });
 
   readonly deliveryUserForm = this.formBuilder.nonNullable.group({
@@ -157,7 +165,14 @@ export class StoreSettingsPageComponent {
       description: '',
       wildcard: '',
       expirationDate: '',
-      status: true
+      status: true,
+      hasPromotion: false,
+      promotionName: '',
+      promotionCode: '',
+      promotionType: PromotionType.Percentage,
+      percentageValue: 10,
+      buyQuantity: 1,
+      freeQuantity: 1
     });
     this.bannerModalOpen.set(true);
   }
@@ -172,7 +187,14 @@ export class StoreSettingsPageComponent {
       description: banner.description,
       wildcard: banner.wildcard ?? '',
       expirationDate: banner.expirationDate ? banner.expirationDate.slice(0, 10) : '',
-      status: banner.status
+      status: banner.status,
+      hasPromotion: !!banner.promotion,
+      promotionName: banner.promotion?.name ?? '',
+      promotionCode: banner.promotion?.code ?? '',
+      promotionType: banner.promotion?.type ?? PromotionType.Percentage,
+      percentageValue: banner.promotion?.percentageValue ?? 10,
+      buyQuantity: banner.promotion?.buyQuantity ?? 1,
+      freeQuantity: banner.promotion?.freeQuantity ?? 1
     });
     this.bannerModalOpen.set(true);
   }
@@ -186,7 +208,14 @@ export class StoreSettingsPageComponent {
       description: '',
       wildcard: '',
       expirationDate: '',
-      status: true
+      status: true,
+      hasPromotion: false,
+      promotionName: '',
+      promotionCode: '',
+      promotionType: PromotionType.Percentage,
+      percentageValue: 10,
+      buyQuantity: 1,
+      freeQuantity: 1
     });
   }
 
@@ -201,13 +230,32 @@ export class StoreSettingsPageComponent {
     this.feedback.set(null);
 
     const values = this.bannerForm.getRawValue();
+    if (values.hasPromotion && values.promotionType === PromotionType.Percentage) {
+      const percentageValue = Number(values.percentageValue);
+      if (!Number.isFinite(percentageValue) || percentageValue <= 0 || percentageValue > 100) {
+        this.error.set('Captura un porcentaje de descuento entre 1 y 100.');
+        this.submittingBanner.set(false);
+        return;
+      }
+    }
+
     const request = {
-      header: values.header,
-      title: values.title,
-      description: values.description,
+      header: values.header.trim(),
+      title: values.title.trim(),
+      description: values.description.trim(),
       wildcard: values.wildcard.trim() || null,
       expirationDate: values.expirationDate || null,
-      status: values.status
+      status: values.status,
+      promotion: values.hasPromotion
+        ? {
+            name: values.promotionName.trim() || null,
+            code: values.promotionCode.trim() || null,
+            type: Number(values.promotionType),
+            percentageValue: values.promotionType === PromotionType.Percentage ? Number(values.percentageValue) : null,
+            buyQuantity: values.promotionType === PromotionType.BuyXGetY ? 1 : null,
+            freeQuantity: values.promotionType === PromotionType.BuyXGetY ? 1 : null
+          }
+        : null
     };
 
     const operation = this.isEditingBanner()
@@ -341,5 +389,15 @@ export class StoreSettingsPageComponent {
       default:
         return 'No disponible';
     }
+  }
+
+  promotionLabel(banner: BannerDto): string | null {
+    if (!banner.promotion) {
+      return null;
+    }
+
+    return banner.promotion.type === PromotionType.Percentage
+      ? `${banner.promotion.percentageValue ?? 0}% de descuento`
+      : '2x1 con codigo';
   }
 }

@@ -21,6 +21,10 @@ public sealed class Order : AuditableEntity
     public string? Notes { get; private set; }
     public OrderStatus Status { get; private set; } = OrderStatus.Pending;
     public Guid? DeliveryUserId { get; private set; }
+    public decimal Subtotal { get; private set; }
+    public decimal DiscountTotal { get; private set; }
+    public Guid? AppliedPromotionId { get; private set; }
+    public string? AppliedPromotionCode { get; private set; }
     public decimal Total { get; private set; }
     public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
 
@@ -32,7 +36,10 @@ public sealed class Order : AuditableEntity
         decimal? deliveryLatitude,
         decimal? deliveryLongitude,
         string? notes,
-        IEnumerable<OrderItem> items)
+        IEnumerable<OrderItem> items,
+        decimal discountTotal = 0m,
+        string? appliedPromotionCode = null,
+        Guid? appliedPromotionId = null)
     {
         if (string.IsNullOrWhiteSpace(customerName))
         {
@@ -88,7 +95,7 @@ public sealed class Order : AuditableEntity
             order._items.Add(item);
         }
 
-        order.RecalculateTotal();
+        order.RecalculatePricing(discountTotal, appliedPromotionCode, appliedPromotionId);
         return order;
     }
 
@@ -137,9 +144,13 @@ public sealed class Order : AuditableEntity
         Touch();
     }
 
-    public void RecalculateTotal()
+    public void RecalculatePricing(decimal discountTotal, string? appliedPromotionCode, Guid? appliedPromotionId)
     {
-        Total = _items.Sum(item => item.Subtotal);
+        Subtotal = _items.Sum(item => item.Subtotal);
+        DiscountTotal = decimal.Clamp(discountTotal, 0m, Subtotal);
+        AppliedPromotionCode = string.IsNullOrWhiteSpace(appliedPromotionCode) ? null : appliedPromotionCode.Trim().ToUpperInvariant();
+        AppliedPromotionId = AppliedPromotionCode is null ? null : appliedPromotionId;
+        Total = Subtotal - DiscountTotal;
         Touch();
     }
 

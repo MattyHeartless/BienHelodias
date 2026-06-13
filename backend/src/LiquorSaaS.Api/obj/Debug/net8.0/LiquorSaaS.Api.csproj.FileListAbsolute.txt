@@ -477,11 +477,6 @@ C:/Users/Jair/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/obj
 /Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/obj/Debug/net8.0/LiquorSaaS.Api.sourcelink.json
 /Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/obj/Debug/net8.0/staticwebassets.build.json
 /Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/obj/Debug/net8.0/staticwebassets.development.json
-/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/obj/Debug/net8.0/staticwebassets/msbuild.LiquorSaaS.Api.Microsoft.AspNetCore.StaticWebAssets.props
-/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/obj/Debug/net8.0/staticwebassets/msbuild.build.LiquorSaaS.Api.props
-/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/obj/Debug/net8.0/staticwebassets/msbuild.buildMultiTargeting.LiquorSaaS.Api.props
-/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/obj/Debug/net8.0/staticwebassets/msbuild.buildTransitive.LiquorSaaS.Api.props
-/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/obj/Debug/net8.0/staticwebassets.pack.json
 /Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/obj/Debug/net8.0/scopedcss/bundle/LiquorSaaS.Api.styles.css
 /Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/obj/Debug/net8.0/LiquorSa.D10A5694.Up2Date
 /Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/obj/Debug/net8.0/LiquorSaaS.Api.dll
@@ -489,3 +484,11 @@ C:/Users/Jair/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/obj
 /Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/obj/Debug/net8.0/LiquorSaaS.Api.pdb
 /Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/obj/Debug/net8.0/LiquorSaaS.Api.genruntimeconfig.cache
 /Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/obj/Debug/net8.0/ref/LiquorSaaS.Api.dll
+/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/bin/Debug/net8.0/LiquorSaaS.Api.staticwebassets.endpoints.json
+/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/obj/Debug/net8.0/rpswa.dswa.cache.json
+/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/obj/Debug/net8.0/rjimswa.dswa.cache.json
+/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/obj/Debug/net8.0/rjsmrazor.dswa.cache.json
+/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/obj/Debug/net8.0/rjsmcshtml.dswa.cache.json
+/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/obj/Debug/net8.0/staticwebassets.build.json.cache
+/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/obj/Debug/net8.0/staticwebassets.build.endpoints.json
+/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/obj/Debug/net8.0/swae.build.ex.cache

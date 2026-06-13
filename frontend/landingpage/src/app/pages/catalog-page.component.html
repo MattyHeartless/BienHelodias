@@ -54,7 +54,12 @@
             </div>
 
             <div class="promo-strip__offer">
-              <span class="promo-strip__badge">{{ banner.wildcard || 'Promo activa' }}</span>
+              <div class="promo-strip__offer-copy">
+                <span class="promo-strip__badge">{{ banner.wildcard || 'Promo activa' }}</span>
+                @if (banner.promotion) {
+                  <p class="promo-strip__code">Usa codigo {{ banner.promotion.code }}</p>
+                }
+              </div>
               <button class="ghost-button promo-strip__button" type="button" (click)="selectCategory('all')">Ver promo</button>
             </div>
 
@@ -309,6 +314,33 @@
             <textarea class="mt-2 min-h-20 w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none transition focus:border-primary" formControlName="notes"></textarea>
           </div>
 
+          <div class="checkout-promo">
+            <div>
+              <label class="eyebrow">Codigo promocional</label>
+              <input
+                class="mt-2 w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 uppercase text-white outline-none transition focus:border-primary"
+                formControlName="promoCode"
+                placeholder="Ej. HOTSALE20"
+              />
+            </div>
+            <button class="ghost-button !justify-center" type="button" (click)="applyPromotionCode()" [disabled]="applyingPromotion() || !checkoutForm.get('promoCode')?.value?.trim()">
+              {{ applyingPromotion() ? 'Validando...' : 'Aplicar codigo' }}
+            </button>
+          </div>
+
+          @if (appliedPromotion()) {
+            <div class="checkout-promo__result">
+              <p class="checkout-promo__title">{{ appliedPromotion()!.name }}</p>
+              <p class="checkout-promo__summary">{{ appliedPromotion()!.summary }}</p>
+            </div>
+          }
+
+          @if (promoError()) {
+            <div class="rounded-[1.25rem] border border-error/30 bg-error/10 px-4 py-3 text-sm text-white">
+              {{ promoError() }}
+            </div>
+          }
+
           @if (error()) {
             <div class="rounded-[1.25rem] border border-error/30 bg-error/10 px-4 py-3 text-sm text-white">
               {{ error() }}
@@ -316,11 +348,23 @@
           }
 
           <div class="checkout-modal__footer">
-            <div>
-              <p class="text-xs uppercase tracking-[0.24em] text-on-surface-variant">Total actual</p>
-              <p class="font-display text-3xl font-bold text-primary">
-                {{ subtotal() | currency: 'MXN':'symbol-narrow':'1.0-0' }}
-              </p>
+            <div class="checkout-total-stack">
+              <div class="checkout-total-line">
+                <p class="text-xs uppercase tracking-[0.24em] text-on-surface-variant">Subtotal</p>
+                <span>{{ subtotal() | currency: 'MXN':'symbol-narrow':'1.0-0' }}</span>
+              </div>
+              @if (discountTotal() > 0) {
+                <div class="checkout-total-line checkout-total-line--discount">
+                  <p class="text-xs uppercase tracking-[0.24em]">Descuento</p>
+                  <span>-{{ discountTotal() | currency: 'MXN':'symbol-narrow':'1.0-0' }}</span>
+                </div>
+              }
+              <div>
+                <p class="text-xs uppercase tracking-[0.24em] text-on-surface-variant">Total actual</p>
+                <p class="font-display text-3xl font-bold text-primary">
+                  {{ checkoutTotal() | currency: 'MXN':'symbol-narrow':'1.0-0' }}
+                </p>
+              </div>
             </div>
             <button class="liquid-button !justify-center py-4" type="submit" [disabled]="submitting()">
               <span class="material-symbols-outlined text-base">bolt</span>
