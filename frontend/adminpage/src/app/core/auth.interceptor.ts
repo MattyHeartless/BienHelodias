@@ -6,7 +6,7 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const session = inject(AdminSessionService);
   const token = session.token();
 
-  if (!token || !request.url.startsWith('http://localhost:5078/api')) {
+  if (!token || !request.url.startsWith('https://api.bienhelodias.qzz.io/api')) {
     return next(request);
   }
 
