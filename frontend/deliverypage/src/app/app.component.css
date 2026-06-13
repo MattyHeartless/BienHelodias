@@ -22,12 +22,12 @@
 .brand-toast-card {
   position: relative;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 0.9rem;
   overflow: hidden;
   border: 1px solid rgb(255 255 255 / 0.08);
   border-radius: 1.5rem;
-  padding: 1rem 1rem 1rem 0.95rem;
+  padding: 1rem 3.4rem 1rem 0.95rem;
   background:
     radial-gradient(circle at top right, rgb(210 253 110 / 0.14), transparent 38%),
     linear-gradient(135deg, rgb(19 19 19 / 0.96), rgb(14 14 14 / 0.98));
@@ -90,14 +90,15 @@
 }
 
 .brand-toast-card__close {
-  position: relative;
+  position: absolute;
+  top: 0.8rem;
+  right: 0.8rem;
   z-index: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 2.25rem;
   height: 2.25rem;
-  align-self: start;
   border: 0;
   border-radius: 999px;
   background: rgb(255 255 255 / 0.06);
@@ -142,13 +143,6 @@
 
 @media (max-width: 640px) {
   .brand-toast-card {
-    grid-template-columns: auto 1fr;
-    padding-right: 0.85rem;
-  }
-
-  .brand-toast-card__close {
-    grid-column: 2;
-    justify-self: end;
-    margin-top: -0.2rem;
+    padding-right: 3.1rem;
   }
 }
