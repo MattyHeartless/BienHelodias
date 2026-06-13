@@ -49,7 +49,6 @@ export class AdminShellComponent {
 
   logout(): void {
     this.closeMenu();
-    this.session.clear();
-    void this.router.navigate(['/login']);
+    void this.session.logout().then(() => this.router.navigate(['/login']));
   }
 }

@@ -48,6 +48,15 @@
           <input class="mt-2 w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none transition focus:border-primary" formControlName="password" type="password" />
         </div>
 
+        <label class="flex items-center gap-3 rounded-[1.25rem] border border-white/8 bg-white/4 px-4 py-3 text-sm text-on-surface-variant">
+          <input
+            class="h-4 w-4 rounded border-white/20 bg-surface-container-high accent-primary"
+            formControlName="rememberMe"
+            type="checkbox"
+          />
+          <span>Guardar sesion y entrar directo al panel</span>
+        </label>
+
         @if (error()) {
           <div class="rounded-[1.25rem] border border-error/30 bg-error/10 px-4 py-3 text-sm text-white">
             {{ error() }}

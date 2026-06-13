@@ -9,7 +9,15 @@ export class AuthApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/auth`;
 
-  login(email: string, password: string): Observable<ApiResponse<AuthTokenDto>> {
-    return this.http.post<ApiResponse<AuthTokenDto>>(`${this.baseUrl}/login`, { email, password });
+  login(email: string, password: string, rememberMe: boolean): Observable<ApiResponse<AuthTokenDto>> {
+    return this.http.post<ApiResponse<AuthTokenDto>>(`${this.baseUrl}/login`, { email, password, rememberMe });
+  }
+
+  refresh(): Observable<ApiResponse<AuthTokenDto>> {
+    return this.http.post<ApiResponse<AuthTokenDto>>(`${this.baseUrl}/refresh`, {});
+  }
+
+  logout(): Observable<ApiResponse<{ success: boolean }>> {
+    return this.http.post<ApiResponse<{ success: boolean }>>(`${this.baseUrl}/logout`, {});
   }
 }

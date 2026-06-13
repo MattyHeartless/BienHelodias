@@ -24,8 +24,13 @@ export class LoginPageComponent {
   readonly error = signal<string | null>(null);
   readonly form = this.formBuilder.nonNullable.group({
     email: ['admin@bienhelodias.local', [Validators.required, Validators.email]],
-    password: ['Admin123!', [Validators.required]]
+    password: ['Admin123!', [Validators.required]],
+    rememberMe: [true]
   });
+
+  constructor() {
+    void this.redirectIfAuthenticated();
+  }
 
   submit(): void {
     this.form.markAllAsTouched();
@@ -36,7 +41,9 @@ export class LoginPageComponent {
     this.submitting.set(true);
     this.error.set(null);
 
-    this.authApi.login(this.form.getRawValue().email, this.form.getRawValue().password).subscribe({
+    this.authApi
+      .login(this.form.getRawValue().email, this.form.getRawValue().password, this.form.getRawValue().rememberMe)
+      .subscribe({
       next: (response) => {
         this.session.setSession(response.data);
         if (![AppRole.StoreAdmin, AppRole.SuperAdmin].includes(response.data.role)) {
@@ -54,5 +61,11 @@ export class LoginPageComponent {
         this.submitting.set(false);
       }
     });
+  }
+
+  private async redirectIfAuthenticated(): Promise<void> {
+    if ((await this.session.ensureSession()) && [AppRole.StoreAdmin, AppRole.SuperAdmin].includes(this.session.role() ?? AppRole.Customer)) {
+      await this.router.navigate(['/dashboard/overview']);
+    }
   }
 }

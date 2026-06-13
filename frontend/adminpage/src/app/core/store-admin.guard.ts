@@ -7,9 +7,13 @@ export const storeAdminGuard: CanActivateFn = () => {
   const session = inject(AdminSessionService);
   const router = inject(Router);
 
-  if (!session.isAuthenticated()) {
-    return router.createUrlTree(['/login']);
-  }
-
-  return session.role() === AppRole.StoreAdmin ? true : router.createUrlTree(['/dashboard/overview']);
+  return session
+    .ensureSession()
+    .then((isAuthenticated) =>
+      !isAuthenticated
+        ? router.createUrlTree(['/login'])
+        : session.role() === AppRole.StoreAdmin
+          ? true
+          : router.createUrlTree(['/dashboard/overview'])
+    );
 };

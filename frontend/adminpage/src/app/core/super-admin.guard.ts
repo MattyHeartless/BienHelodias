@@ -7,9 +7,13 @@ export const superAdminGuard: CanActivateFn = () => {
   const session = inject(AdminSessionService);
   const router = inject(Router);
 
-  if (!session.isAuthenticated()) {
-    return router.createUrlTree(['/login']);
-  }
-
-  return session.role() === AppRole.SuperAdmin ? true : router.createUrlTree(['/dashboard/overview']);
+  return session
+    .ensureSession()
+    .then((isAuthenticated) =>
+      !isAuthenticated
+        ? router.createUrlTree(['/login'])
+        : session.role() === AppRole.SuperAdmin
+          ? true
+          : router.createUrlTree(['/dashboard/overview'])
+    );
 };
