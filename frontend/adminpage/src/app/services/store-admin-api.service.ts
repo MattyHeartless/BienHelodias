@@ -3,18 +3,19 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiResponse, AuthTokenDto, BannerDto, DashboardDto, DeliveryUserDto, OrderDto, PagedResult, ProductDto, StoreDto } from '../core/models';
 import { AdminSessionService } from '../core/admin-session.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class StoreAdminApiService {
   private readonly http = inject(HttpClient);
   private readonly session = inject(AdminSessionService);
-  private readonly adminUrl = 'http://localhost:5078/api/admin/dashboard';
-  private readonly adminBaseUrl = 'http://localhost:5078/api/admin';
-  private readonly authUrl = 'http://localhost:5078/api/auth';
-  private readonly productsUrl = 'http://localhost:5078/api/products';
-  private readonly ordersUrl = 'http://localhost:5078/api/orders';
-  private readonly storesUrl = 'http://localhost:5078/api/stores';
-  private readonly bannersUrl = 'http://localhost:5078/api/banners';
+  private readonly adminUrl = `${this.apiUrl}/admin/dashboard`;
+  private readonly adminBaseUrl = `${this.apiUrl}/admin`;
+  private readonly authUrl = `${this.apiUrl}/auth`;
+  private readonly productsUrl = `${this.apiUrl}/products`;
+  private readonly ordersUrl = `${this.apiUrl}/orders`;
+  private readonly storesUrl = `${this.apiUrl}/stores`;
+  private readonly bannersUrl = `${this.apiUrl}/banners`;
 
   getDashboard(): Observable<ApiResponse<DashboardDto>> {
     return this.http.get<ApiResponse<DashboardDto>>(this.adminUrl);
