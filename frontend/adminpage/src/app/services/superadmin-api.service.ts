@@ -2,13 +2,16 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiResponse, PagedResult, StoreDto, StoreAdminDto, SubscriptionStatus, AuthTokenDto } from '../core/models';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class SuperadminApiService {
   private readonly http = inject(HttpClient);
-  private readonly storesUrl = 'http://localhost:5078/api/stores';
-  private readonly superadminUrl = 'http://localhost:5078/api/superadmin/stores';
-  private readonly authUrl = 'http://localhost:5078/api/auth';
+  private readonly apiUrl = environment.apiUrl;
+
+  private readonly storesUrl = `${this.apiUrl}/stores`;
+  private readonly superadminUrl = `${this.apiUrl}/superadmin/stores`;
+  private readonly authUrl = `${this.apiUrl}/auth`;
 
   getStores(): Observable<ApiResponse<PagedResult<StoreDto>>> {
     return this.http.get<ApiResponse<PagedResult<StoreDto>>>(this.superadminUrl, {
