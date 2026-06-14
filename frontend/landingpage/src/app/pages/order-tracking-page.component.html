@@ -4,6 +4,9 @@
       <section class="tracking-shell">
         <div class="tracking-shell__header">
           <a [routerLink]="activeSlug() ? ['/', activeSlug()] : ['/']" class="flex items-center gap-3">
+            <div class="tracking-brandmark">
+              <img src="/favicon.svg" alt="Bien Helodias" class="tracking-brandmark__image" />
+            </div>
             <div>
               <h1 class="font-display text-2xl font-black tracking-[-0.05em] text-primary">{{ storeName() }}</h1>
             </div>
@@ -138,7 +141,7 @@
                     </div>
                   </div>
                   <p class="tracking-item__price">
-                    {{ item.subtotal | currency: 'MXN':'symbol-narrow':'1.0-2' }}
+                    {{ item.subtotal | currency: 'MXN':'symbol-narrow':'1.2-2' }}
                   </p>
                 </div>
               }
@@ -152,7 +155,7 @@
                   </div>
                   <span class="tracking-total__label">Total</span>
                 </div>
-                <span class="tracking-total__value">{{ currentOrder.total | currency: 'MXN':'symbol-narrow':'1.0-2' }}</span>
+                <span class="tracking-total__value">{{ currentOrder.total | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span>
               </div>
             </div>
           </section>

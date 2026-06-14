@@ -270,8 +270,7 @@ export class CatalogPageComponent {
 
     try {
       await navigator.clipboard.writeText(code);
-      this.promoCodeCopied.set(true);
-      window.setTimeout(() => this.promoCodeCopied.set(false), 1800);
+      this.closePromotionModal();
     } catch {
       this.promoCodeCopied.set(false);
     }

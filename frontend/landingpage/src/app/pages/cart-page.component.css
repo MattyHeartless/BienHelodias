@@ -41,6 +41,19 @@
   padding: 5.9rem 1.35rem 6.9rem;
 }
 
+.cart-brandmark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cart-brandmark__image {
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 18px rgb(0 0 0 / 0.24));
+}
+
 .cart-card,
 .cart-item,
 .empty-state {

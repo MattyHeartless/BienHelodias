@@ -41,6 +41,19 @@
   padding: 5.9rem 1.35rem 6.9rem;
 }
 
+.checkout-brandmark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkout-brandmark__image {
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 18px rgb(0 0 0 / 0.24));
+}
+
 .checkout-card,
 .checkout-item {
   border-radius: 1.5rem;

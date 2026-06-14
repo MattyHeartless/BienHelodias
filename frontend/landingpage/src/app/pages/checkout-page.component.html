@@ -3,6 +3,9 @@
     <section class="checkout-shell">
       <div class="checkout-shell__header">
         <a [routerLink]="activeSlug() ? ['/', activeSlug()] : ['/']" class="flex items-center gap-3">
+          <div class="checkout-brandmark">
+            <img src="/favicon.svg" alt="Bien Helodias" class="checkout-brandmark__image" />
+          </div>
           <div>
             <h1 class="font-display text-2xl font-black tracking-[-0.05em] text-primary">{{ storeName() }}</h1>
           </div>
@@ -94,7 +97,7 @@
                     <p class="mt-1 text-xs uppercase tracking-[0.24em] text-on-surface-variant">{{ entry.quantity }} piezas</p>
                   </div>
                   <p class="font-display text-xl font-bold text-primary">
-                    {{ entry.product.price * entry.quantity | currency: 'MXN':'symbol-narrow':'1.0-2' }}
+                    {{ entry.product.price * entry.quantity | currency: 'MXN':'symbol-narrow':'1.2-2' }}
                   </p>
                 </div>
               }
@@ -110,17 +113,17 @@
             <div class="checkout-summary mt-6 border-t border-white/8 pt-5">
               <div class="checkout-summary__line">
                 <span>Subtotal</span>
-                <span>{{ subtotal() | currency: 'MXN':'symbol-narrow':'1.0-2' }}</span>
+                <span>{{ subtotal() | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span>
               </div>
               @if (discountTotal() > 0) {
                 <div class="checkout-summary__line checkout-summary__line--discount">
                   <span>Descuento</span>
-                  <span>-{{ discountTotal() | currency: 'MXN':'symbol-narrow':'1.0-2' }}</span>
+                  <span>-{{ discountTotal() | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span>
                 </div>
               }
               <div class="checkout-summary__line checkout-summary__line--total">
                 <span>Total</span>
-                <span>{{ total() | currency: 'MXN':'symbol-narrow':'1.0-2' }}</span>
+                <span>{{ total() | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span>
               </div>
             </div>
           </section>
