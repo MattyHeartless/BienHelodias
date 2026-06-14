@@ -44,6 +44,7 @@ public interface IOrderService
 {
     Task<OrderDto> CreateAsync(CreateOrderRequest request, CancellationToken cancellationToken);
     Task<OrderDto> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+    Task<OrderDto> GetTrackingByIdAsync(Guid id, CancellationToken cancellationToken);
     Task<PagedResult<OrderDto>> GetStoreOrdersAsync(PaginationRequest request, OrderStatus? status, CancellationToken cancellationToken);
     Task<OrderDto> UpdateStatusAsync(Guid id, UpdateOrderStatusRequest request, CancellationToken cancellationToken);
     Task<OrderDto> TakeAsync(Guid id, CancellationToken cancellationToken);

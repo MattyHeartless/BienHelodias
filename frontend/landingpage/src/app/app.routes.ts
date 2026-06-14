@@ -10,6 +10,14 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/order-tracking-page.component').then((m) => m.OrderTrackingPageComponent)
   },
   {
+    path: ':slug/cart',
+    loadComponent: () => import('./pages/cart-page.component').then((m) => m.CartPageComponent)
+  },
+  {
+    path: ':slug/checkout',
+    loadComponent: () => import('./pages/checkout-page.component').then((m) => m.CheckoutPageComponent)
+  },
+  {
     path: ':slug',
     loadComponent: () => import('./pages/catalog-page.component').then((m) => m.CatalogPageComponent)
   },

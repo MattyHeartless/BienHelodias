@@ -14,6 +14,10 @@ export class OrdersApiService {
     return this.http.post<ApiResponse<OrderDto>>(this.baseUrl, request);
   }
 
+  getTracking(orderId: string): Observable<ApiResponse<OrderDto>> {
+    return this.http.get<ApiResponse<OrderDto>>(`${this.baseUrl}/${orderId}/tracking`);
+  }
+
   validatePromotion(request: ValidatePromotionRequest): Observable<ApiResponse<PromotionValidationDto>> {
     return this.http.post<ApiResponse<PromotionValidationDto>>(`${this.promotionsUrl}/validate`, request);
   }

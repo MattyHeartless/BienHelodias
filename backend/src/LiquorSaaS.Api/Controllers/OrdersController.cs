@@ -27,6 +27,14 @@ public sealed class OrdersController(IOrderService orderService) : ControllerBas
     }
 
     [AllowAnonymous]
+    [HttpGet("{id:guid}/tracking")]
+    public async Task<ActionResult<ApiResponse<OrderDto>>> GetTrackingById(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await orderService.GetTrackingByIdAsync(id, cancellationToken);
+        return Ok(ApiResponse<OrderDto>.Ok(result, "Order tracking retrieved successfully."));
+    }
+
+    [AllowAnonymous]
     [HttpPost]
     public async Task<ActionResult<ApiResponse<OrderDto>>> Create([FromBody] CreateOrderRequest request, CancellationToken cancellationToken)
     {

@@ -112,6 +112,17 @@ public sealed class OrderService(
         return order.ToDto();
     }
 
+    public async Task<OrderDto> GetTrackingByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        var storeId = tenantProvider.GetRequiredStoreId();
+        var order = await dbContext.Orders.AsNoTracking()
+            .Include(x => x.Items)
+            .SingleOrDefaultAsync(x => x.Id == id && x.StoreId == storeId, cancellationToken)
+            ?? throw new NotFoundException("Order not found.");
+
+        return order.ToDto();
+    }
+
     public async Task<PagedResult<OrderDto>> GetStoreOrdersAsync(PaginationRequest request, OrderStatus? status, CancellationToken cancellationToken)
     {
         EnsureStoreScopedRole();

@@ -3,7 +3,7 @@ const resolveApiBaseUrl = (): string => {
   const isLoopbackHost = hostname === 'localhost' || hostname === '127.0.0.1';
 
   return isLoopbackHost
-    ? 'https://localhost:7296/api'
+    ? 'http://localhost:5078/api'
     : `http://${hostname}:5078/api`;
 };
 

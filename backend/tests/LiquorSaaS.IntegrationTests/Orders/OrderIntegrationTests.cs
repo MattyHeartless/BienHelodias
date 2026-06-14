@@ -178,6 +178,23 @@ public sealed class OrderIntegrationTests(TestWebApplicationFactory factory) : I
         payload.Data.Code.Should().Be("DOSXUNO");
     }
 
+    [Fact]
+    public async Task TrackingEndpoint_ShouldReturnLatestOrderStatusForStorefront()
+    {
+        var orderId = await CreateOrderAsync();
+        var adminClient = await factory.CreateAuthorizedClientAsync("admin@bienhelodias.local", "Admin123!");
+        await adminClient.PatchAsJsonAsync($"/api/orders/{orderId}/status", new UpdateOrderStatusRequest(OrderStatus.Accepted));
+        await adminClient.PatchAsJsonAsync($"/api/orders/{orderId}/status", new UpdateOrderStatusRequest(OrderStatus.Preparing));
+
+        var client = factory.CreateStoreClient();
+        var response = await client.GetAsync($"/api/orders/{orderId}/tracking");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await response.Content.ReadFromJsonAsync<ApiResponse<OrderDto>>();
+        payload!.Data!.Id.Should().Be(orderId);
+        payload.Data.Status.Should().Be(OrderStatus.Preparing);
+    }
+
     private async Task<Guid> CreateOrderAsync()
     {
         var client = factory.CreateStoreClient();

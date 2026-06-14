@@ -1,12 +1,10 @@
 import { CommonModule, CurrencyPipe } from '@angular/common';
-import { Component, ElementRef, OnDestroy, ViewChild, computed, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BannerDto, DeliveryAddressDraft, ProductDto, PromotionValidationDto } from '../core/models';
+import { BannerDto, ProductDto } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
-import { GooglePlacesService } from '../services/google-places.service';
-import { OrdersApiService } from '../services/orders-api.service';
 import { ProductsApiService } from '../services/products-api.service';
+import { CartSessionService } from '../services/cart-session.service';
 import { StorefrontContentApiService } from '../services/storefront-content-api.service';
 import { StorefrontTenantService } from '../services/storefront-tenant.service';
 import { catchError, forkJoin, of } from 'rxjs';
@@ -14,41 +12,27 @@ import { catchError, forkJoin, of } from 'rxjs';
 @Component({
   selector: 'app-catalog-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe],
+  imports: [CommonModule, CurrencyPipe],
   templateUrl: './catalog-page.component.html',
   styleUrl: './catalog-page.component.css'
 })
 export class CatalogPageComponent {
   private static readonly BANNER_SWIPE_THRESHOLD = 45;
   private readonly productsApi = inject(ProductsApiService);
-  private readonly ordersApi = inject(OrdersApiService);
   private readonly storefrontContentApi = inject(StorefrontContentApiService);
-  private readonly googlePlaces = inject(GooglePlacesService);
-  private readonly formBuilder = inject(FormBuilder);
+  private readonly cartSession = inject(CartSessionService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly storefrontTenant = inject(StorefrontTenantService);
-  private autocomplete: any | null = null;
-  private autocompleteListener: { remove: () => void } | null = null;
-  private autocompleteInput: HTMLInputElement | null = null;
   private bannerRotationHandle: ReturnType<typeof window.setInterval> | null = null;
   private bannerPointerId: number | null = null;
   private bannerPointerStartX: number | null = null;
   private bannerPointerStartY: number | null = null;
   private readonly quickAddFeedbackTimeouts = new Map<string, ReturnType<typeof window.setTimeout>>();
 
-  @ViewChild('deliveryAddressInput')
-  private deliveryAddressInput?: ElementRef<HTMLInputElement>;
-
   readonly tenant = computed(() => this.storefrontTenant.store());
   readonly loading = signal(true);
-  readonly submitting = signal(false);
   readonly error = signal<string | null>(null);
-  readonly placesLoading = signal(false);
-  readonly placesError = signal<string | null>(null);
-  readonly promoError = signal<string | null>(null);
-  readonly applyingPromotion = signal(false);
-  readonly selectedAddress = signal<DeliveryAddressDraft | null>(null);
   readonly products = signal<ProductDto[]>([]);
   readonly welcomePhrase = signal('No te compliques, aqui te lo mandamos.');
   readonly banners = signal<BannerDto[]>([]);
@@ -61,22 +45,10 @@ export class CatalogPageComponent {
   readonly isBannerDragging = signal(false);
   readonly highlightedProductId = signal<string | null>(null);
   readonly detailOpen = signal(false);
-  readonly cartOpen = signal(false);
-  readonly checkoutOpen = signal(false);
-  readonly cart = signal<Record<string, number>>({});
+  readonly cart = computed(() => this.cartSession.items());
+  readonly cartCount = computed(() => this.cartSession.cartCount());
   readonly quickAddFeedback = signal<Record<string, boolean>>({});
   readonly detailQuantity = signal(1);
-  readonly appliedPromotion = signal<PromotionValidationDto | null>(null);
-  readonly checkoutForm = this.formBuilder.nonNullable.group({
-    customerName: ['', [Validators.required, Validators.minLength(2)]],
-    customerPhone: ['', [Validators.required, Validators.minLength(8)]],
-    deliveryAddress: ['', [Validators.required, Validators.minLength(10)]],
-    notes: [''],
-    promoCode: [''],
-    deliveryPlaceId: [''],
-    deliveryLatitude: [''],
-    deliveryLongitude: ['']
-  });
 
   readonly categories = computed(() => {
     const names = new Set(this.products().map((product) => product.category).filter(Boolean));
@@ -114,40 +86,7 @@ export class CatalogPageComponent {
     return banners[this.activeBannerIndex() % banners.length] ?? null;
   });
 
-  readonly cartItems = computed(() =>
-    this.products()
-      .filter((product) => (this.cart()[product.id] ?? 0) > 0)
-      .map((product) => ({
-        product,
-        quantity: this.cart()[product.id]
-      }))
-  );
-
-  readonly cartCount = computed(() =>
-    Object.values(this.cart()).reduce((total, quantity) => total + quantity, 0)
-  );
-
-  readonly subtotal = computed(() =>
-    this.cartItems().reduce((total, entry) => total + entry.product.price * entry.quantity, 0)
-  );
-
-  readonly discountTotal = computed(() => this.appliedPromotion()?.discountTotal ?? 0);
-
-  readonly checkoutTotal = computed(() => this.appliedPromotion()?.total ?? this.subtotal());
-
   constructor() {
-    this.checkoutForm.controls.promoCode.valueChanges.subscribe((value) => {
-      const normalized = value.trim().toUpperCase();
-      if (this.appliedPromotion()?.code !== normalized) {
-        this.clearAppliedPromotion(false);
-      }
-    });
-
-    this.route.queryParamMap.subscribe((params) => {
-      const panel = params.get('panel');
-      this.cartOpen.set(panel === 'cart');
-    });
-
     this.route.paramMap.subscribe((params) => {
       const slug = params.get('slug');
       if (!slug) {
@@ -157,6 +96,7 @@ export class CatalogPageComponent {
         return;
       }
 
+      this.cartSession.loadForSlug(slug);
       this.resolveStorefront(slug);
     });
   }
@@ -213,35 +153,16 @@ export class CatalogPageComponent {
   }
 
   addToCart(product: ProductDto, quantity = 1): void {
-    this.clearAppliedPromotion();
-    this.cart.update((current) => ({
-      ...current,
-      [product.id]: Math.min(product.stock, (current[product.id] ?? 0) + quantity)
-    }));
+    this.cartSession.addItem(product.id, quantity, product.stock);
   }
 
   openCart(): void {
-    this.cartOpen.set(true);
-  }
-
-  closeCart(): void {
-    this.cartOpen.set(false);
-    this.checkoutOpen.set(false);
-  }
-
-  openCheckout(): void {
-    if (this.cartCount() === 0) {
+    const slug = this.storefrontTenant.slug();
+    if (!slug) {
       return;
     }
 
-    this.checkoutOpen.set(true);
-    setTimeout(() => {
-      void this.initializeDeliveryAddressAutocomplete();
-    }, 0);
-  }
-
-  closeCheckout(): void {
-    this.checkoutOpen.set(false);
+    void this.router.navigate(['/', slug, 'cart']);
   }
 
   openPromotionModal(banner: BannerDto): void {
@@ -262,7 +183,6 @@ export class CatalogPageComponent {
   }
 
   ngOnDestroy(): void {
-    this.destroyAutocompleteListener();
     this.stopBannerRotation();
     this.quickAddFeedbackTimeouts.forEach((handle) => window.clearTimeout(handle));
     this.quickAddFeedbackTimeouts.clear();
@@ -286,81 +206,6 @@ export class CatalogPageComponent {
   increaseDetailQuantity(): void {
     const maxQuantity = Math.max(1, this.selectedProduct()?.stock ?? 1);
     this.detailQuantity.update((current) => Math.min(maxQuantity, current + 1));
-  }
-
-  removeFromCart(productId: string): void {
-    this.clearAppliedPromotion();
-    this.cart.update((current) => {
-      const nextQuantity = (current[productId] ?? 0) - 1;
-      if (nextQuantity <= 0) {
-        const { [productId]: _removed, ...rest } = current;
-        return rest;
-      }
-
-      return { ...current, [productId]: nextQuantity };
-    });
-  }
-
-  submitOrder(): void {
-    this.checkoutForm.markAllAsTouched();
-    const storeId = this.storefrontTenant.storeId();
-    if (this.checkoutForm.invalid || this.cartCount() === 0 || !storeId) {
-      return;
-    }
-
-    const checkoutValues = this.checkoutForm.getRawValue();
-
-    this.submitting.set(true);
-    this.error.set(null);
-
-    this.ordersApi
-      .createOrder({
-        storeId,
-        customerName: checkoutValues.customerName,
-        customerPhone: checkoutValues.customerPhone,
-        deliveryAddress: checkoutValues.deliveryAddress,
-        deliveryLatitude: checkoutValues.deliveryLatitude ? Number(checkoutValues.deliveryLatitude) : null,
-        deliveryLongitude: checkoutValues.deliveryLongitude ? Number(checkoutValues.deliveryLongitude) : null,
-        notes: checkoutValues.notes || null,
-        promoCode: checkoutValues.promoCode.trim() || null,
-        items: this.cartItems().map((entry) => ({
-          productId: entry.product.id,
-          quantity: entry.quantity
-        }))
-      })
-      .subscribe({
-        next: (response) => {
-          const activeSlug = this.storefrontTenant.slug();
-          if (activeSlug) {
-            localStorage.setItem(this.getLastOrderStorageKey(activeSlug), JSON.stringify(response.data));
-          }
-          this.cart.set({});
-          this.clearAppliedPromotion();
-          this.cartOpen.set(false);
-          this.checkoutOpen.set(false);
-          this.submitting.set(false);
-          if (activeSlug) {
-            void this.router.navigate(['/', activeSlug, 'order', response.data.id]);
-          }
-        },
-        error: (error) => {
-          this.error.set(getApiErrorMessage(error, 'No fue posible crear tu pedido.'));
-          this.submitting.set(false);
-        }
-      });
-  }
-
-  handleDeliveryAddressInput(rawAddress: string): void {
-    const currentSelection = this.selectedAddress();
-    if (!currentSelection) {
-      return;
-    }
-
-    if (rawAddress.trim() === currentSelection.formattedAddress.trim()) {
-      return;
-    }
-
-    this.clearSelectedAddress();
   }
 
   trackLastOrder(): void {
@@ -432,38 +277,6 @@ export class CatalogPageComponent {
     }
   }
 
-  applyPromotionCode(): void {
-    const storeId = this.storefrontTenant.storeId();
-    const code = this.checkoutForm.controls.promoCode.value.trim();
-    if (!storeId || !code || this.cartItems().length === 0 || this.applyingPromotion()) {
-      return;
-    }
-
-    this.applyingPromotion.set(true);
-    this.promoError.set(null);
-
-    this.ordersApi.validatePromotion({
-      storeId,
-      code,
-      items: this.cartItems().map((entry) => ({
-        productId: entry.product.id,
-        quantity: entry.quantity
-      }))
-    }).subscribe({
-      next: (response) => {
-        this.appliedPromotion.set(response.data);
-        this.checkoutForm.patchValue({ promoCode: response.data.code }, { emitEvent: false });
-        this.promoError.set(null);
-        this.applyingPromotion.set(false);
-      },
-      error: (error) => {
-        this.appliedPromotion.set(null);
-        this.promoError.set(getApiErrorMessage(error, 'No fue posible validar el codigo.'));
-        this.applyingPromotion.set(false);
-      }
-    });
-  }
-
   handleBannerPointerDown(event: PointerEvent): void {
     if (this.banners().length <= 1 || this.isInteractiveBannerTarget(event.target)) {
       return;
@@ -512,68 +325,6 @@ export class CatalogPageComponent {
     this.resetBannerPointerState();
   }
 
-  private async initializeDeliveryAddressAutocomplete(): Promise<void> {
-    const input = this.deliveryAddressInput?.nativeElement;
-    if (!input) {
-      return;
-    }
-
-    if (this.autocomplete && this.autocompleteInput === input) {
-      return;
-    }
-
-    this.placesLoading.set(true);
-    this.placesError.set(null);
-
-    try {
-      this.destroyAutocompleteListener();
-      this.autocompleteInput = input;
-      this.autocomplete = await this.googlePlaces.createAddressAutocomplete(input);
-      this.autocompleteListener = this.googlePlaces.addPlaceChangedListener(this.autocomplete, () => {
-        this.applySelectedAddress();
-      });
-      this.placesLoading.set(false);
-    } catch (error) {
-      this.autocomplete = null;
-      this.autocompleteInput = null;
-      this.placesLoading.set(false);
-      this.placesError.set(getApiErrorMessage(error, 'No fue posible cargar Google Places. Puedes escribir la direccion manualmente.'));
-    }
-  }
-
-  private applySelectedAddress(): void {
-    if (!this.autocomplete) {
-      return;
-    }
-
-    const addressDraft = this.googlePlaces.extractAddressDraft(this.autocomplete);
-    if (!addressDraft?.formattedAddress) {
-      return;
-    }
-
-    this.selectedAddress.set(addressDraft);
-    this.checkoutForm.patchValue({
-      deliveryAddress: addressDraft.formattedAddress,
-      deliveryPlaceId: addressDraft.placeId ?? '',
-      deliveryLatitude: addressDraft.latitude !== null ? String(addressDraft.latitude) : '',
-      deliveryLongitude: addressDraft.longitude !== null ? String(addressDraft.longitude) : ''
-    });
-  }
-
-  private clearSelectedAddress(): void {
-    this.selectedAddress.set(null);
-    this.checkoutForm.patchValue({
-      deliveryPlaceId: '',
-      deliveryLatitude: '',
-      deliveryLongitude: ''
-    });
-  }
-
-  private destroyAutocompleteListener(): void {
-    this.autocompleteListener?.remove();
-    this.autocompleteListener = null;
-  }
-
   private startBannerRotation(): void {
     this.stopBannerRotation();
 
@@ -595,15 +346,6 @@ export class CatalogPageComponent {
 
   private restartBannerRotation(): void {
     this.startBannerRotation();
-  }
-
-  private clearAppliedPromotion(resetInput = false): void {
-    this.appliedPromotion.set(null);
-    this.promoError.set(null);
-
-    if (resetInput) {
-      this.checkoutForm.patchValue({ promoCode: '' }, { emitEvent: false });
-    }
   }
 
   private triggerQuickAddFeedback(productId: string): void {
