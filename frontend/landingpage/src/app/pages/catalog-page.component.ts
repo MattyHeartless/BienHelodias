@@ -53,6 +53,9 @@ export class CatalogPageComponent {
   readonly welcomePhrase = signal('No te compliques, aqui te lo mandamos.');
   readonly banners = signal<BannerDto[]>([]);
   readonly activeBannerIndex = signal(0);
+  readonly promoModalOpen = signal(false);
+  readonly promoModalBanner = signal<BannerDto | null>(null);
+  readonly promoCodeCopied = signal(false);
   readonly activeCategory = signal<string>('all');
   readonly searchQuery = signal('');
   readonly isBannerDragging = signal(false);
@@ -241,6 +244,23 @@ export class CatalogPageComponent {
     this.checkoutOpen.set(false);
   }
 
+  openPromotionModal(banner: BannerDto): void {
+    if (!banner.promotion) {
+      this.selectCategory('all');
+      return;
+    }
+
+    this.promoModalBanner.set(banner);
+    this.promoCodeCopied.set(false);
+    this.promoModalOpen.set(true);
+  }
+
+  closePromotionModal(): void {
+    this.promoModalOpen.set(false);
+    this.promoModalBanner.set(null);
+    this.promoCodeCopied.set(false);
+  }
+
   ngOnDestroy(): void {
     this.destroyAutocompleteListener();
     this.stopBannerRotation();
@@ -395,6 +415,21 @@ export class CatalogPageComponent {
   showBanner(index: number): void {
     this.activeBannerIndex.set(index);
     this.restartBannerRotation();
+  }
+
+  async copyPromotionCode(): Promise<void> {
+    const code = this.promoModalBanner()?.promotion?.code;
+    if (!code) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(code);
+      this.promoCodeCopied.set(true);
+      window.setTimeout(() => this.promoCodeCopied.set(false), 1800);
+    } catch {
+      this.promoCodeCopied.set(false);
+    }
   }
 
   applyPromotionCode(): void {

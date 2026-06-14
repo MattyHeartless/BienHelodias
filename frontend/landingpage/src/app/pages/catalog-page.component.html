@@ -54,13 +54,8 @@
             </div>
 
             <div class="promo-strip__offer">
-              <div class="promo-strip__offer-copy">
-                <span class="promo-strip__badge">{{ banner.wildcard || 'Promo activa' }}</span>
-                @if (banner.promotion) {
-                  <p class="promo-strip__code">Usa codigo {{ banner.promotion.code }}</p>
-                }
-              </div>
-              <button class="ghost-button promo-strip__button" type="button" (click)="selectCategory('all')">Ver promo</button>
+              <span class="promo-strip__badge">{{ banner.wildcard || 'Promo activa' }}</span>
+              <button class="ghost-button promo-strip__button" type="button" (click)="openPromotionModal(banner)">Ver promo</button>
             </div>
 
             @if (banners().length > 1) {
@@ -184,6 +179,35 @@
     </section>
 
   </main>
+
+  @if (promoModalOpen() && promoModalBanner(); as promoBanner) {
+    <div class="promo-modal-overlay" (click)="closePromotionModal()">
+      <section class="promo-modal" (click)="$event.stopPropagation()">
+        <button class="promo-modal__close" type="button" (click)="closePromotionModal()">
+          <span class="material-symbols-outlined text-base">close</span>
+        </button>
+
+        <div class="promo-modal__glow" aria-hidden="true"></div>
+
+        <p class="eyebrow">{{ promoBanner.header }}</p>
+        <h3 class="promo-modal__title">{{ promoBanner.title }}</h3>
+        <p class="promo-modal__description">{{ promoBanner.description }}</p>
+
+        @if (promoBanner.promotion; as promotion) {
+          <div class="promo-modal__code-shell">
+            <p class="promo-modal__label">Codigo de promocion</p>
+            <div class="promo-modal__code-row">
+              <span class="promo-modal__code">{{ promotion.code }}</span>
+              <button class="liquid-button promo-modal__copy" type="button" (click)="copyPromotionCode()">
+                <span class="material-symbols-outlined text-base">{{ promoCodeCopied() ? 'check' : 'content_copy' }}</span>
+                {{ promoCodeCopied() ? 'Copiado' : 'Copiar codigo' }}
+              </button>
+            </div>
+          </div>
+        }
+      </section>
+    </div>
+  }
 
   @if (cartOpen()) {
     <div class="cart-overlay" (click)="closeCart()">
