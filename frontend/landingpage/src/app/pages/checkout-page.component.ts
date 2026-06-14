@@ -31,6 +31,13 @@ export class CheckoutPageComponent implements OnDestroy {
   private autocompleteInput: HTMLInputElement | null = null;
 
   @ViewChild('deliveryAddressInput')
+  set deliveryAddressInputRef(value: ElementRef<HTMLInputElement> | undefined) {
+    this.deliveryAddressInput = value;
+    if (value) {
+      void this.initializeDeliveryAddressAutocomplete();
+    }
+  }
+
   private deliveryAddressInput?: ElementRef<HTMLInputElement>;
 
   readonly loading = signal(true);
@@ -177,7 +184,6 @@ export class CheckoutPageComponent implements OnDestroy {
             }
 
             this.loading.set(false);
-            queueMicrotask(() => void this.initializeDeliveryAddressAutocomplete());
           },
           error: (error) => {
             this.products.set([]);

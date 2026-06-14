@@ -44,7 +44,7 @@
                     <div class="cart-item__copy">
                       <p class="cart-item__name">{{ entry.product.name }}</p>
                       <p class="cart-item__meta">
-                        {{ entry.product.price | currency: 'MXN':'symbol-narrow':'1.0-0' }} c/u
+                        {{ entry.product.price | currency: 'MXN':'symbol-narrow':'1.0-2' }} c/u
                       </p>
                       <div class="cart-item__summary-row">
                         <div class="quantity-stepper cart-item__stepper">
@@ -57,7 +57,7 @@
                           </button>
                         </div>
                         <p class="cart-item__price">
-                          {{ entry.product.price * entry.quantity | currency: 'MXN':'symbol-narrow':'1.0-0' }}
+                          {{ entry.product.price * entry.quantity | currency: 'MXN':'symbol-narrow':'1.0-2' }}
                         </p>
                       </div>
                     </div>
@@ -112,17 +112,17 @@
             <div class="cart-summary mt-5">
               <div class="cart-summary__line">
                 <span>Subtotal</span>
-                <span>{{ subtotal() | currency: 'MXN':'symbol-narrow':'1.0-0' }}</span>
+                <span>{{ subtotal() | currency: 'MXN':'symbol-narrow':'1.0-2' }}</span>
               </div>
               @if (discountTotal() > 0) {
                 <div class="cart-summary__line cart-summary__line--discount">
                   <span>Descuento</span>
-                  <span>-{{ discountTotal() | currency: 'MXN':'symbol-narrow':'1.0-0' }}</span>
+                  <span>-{{ discountTotal() | currency: 'MXN':'symbol-narrow':'1.0-2' }}</span>
                 </div>
               }
               <div class="cart-summary__line cart-summary__line--total">
                 <span>Total</span>
-                <span>{{ total() | currency: 'MXN':'symbol-narrow':'1.0-0' }}</span>
+                <span>{{ total() | currency: 'MXN':'symbol-narrow':'1.0-2' }}</span>
               </div>
             </div>
 

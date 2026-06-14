@@ -113,7 +113,7 @@
 
               <div class="mt-5 flex items-center justify-between gap-4">
                 <div>
-                  <p class="font-display text-3xl font-bold text-primary">{{ product.price | currency: 'MXN':'symbol-narrow':'1.0-0' }}</p>
+                  <p class="font-display text-3xl font-bold text-primary">{{ product.price | currency: 'MXN':'symbol-narrow':'1.0-2' }}</p>
                   <p class="mt-1 text-xs uppercase tracking-[0.24em] text-on-surface-variant">Stock {{ product.stock }}</p>
                 </div>
                 <p class="text-right text-xs uppercase tracking-[0.22em] text-on-surface-variant">
@@ -198,6 +198,8 @@
               class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
               formControlName="price"
               type="number"
+              step="0.01"
+              inputmode="decimal"
               placeholder="Ej. 299"
             />
             <p class="field-help">Precio que vera el cliente.</p>
