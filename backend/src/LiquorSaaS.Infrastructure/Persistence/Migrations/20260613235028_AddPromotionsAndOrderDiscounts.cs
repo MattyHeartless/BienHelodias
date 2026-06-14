@@ -99,7 +99,7 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
                 column: "PromotionId",
                 principalTable: "Promotions",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.SetNull);
+                onDelete: ReferentialAction.NoAction);
         }
 
         /// <inheritdoc />

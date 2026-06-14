@@ -49,7 +49,7 @@ public sealed class LiquorSaaSDbContext(DbContextOptions<LiquorSaaSDbContext> op
             entity.HasOne(x => x.Promotion)
                 .WithMany()
                 .HasForeignKey(x => x.PromotionId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
         modelBuilder.Entity<Promotion>(entity =>

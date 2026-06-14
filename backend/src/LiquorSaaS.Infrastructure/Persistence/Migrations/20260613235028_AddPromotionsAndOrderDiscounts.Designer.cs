@@ -493,7 +493,7 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
                     b.HasOne("LiquorSaaS.Domain.Entities.Promotion", "Promotion")
                         .WithMany()
                         .HasForeignKey("PromotionId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("LiquorSaaS.Domain.Entities.Store", null)
                         .WithMany("Banners")
