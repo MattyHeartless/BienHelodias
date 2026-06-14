@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { BannerDto, DeliveryAvailability, DeliveryUserDto, PromotionType, StoreDto } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
+import { NotificationUiService } from '../core/notification-ui.service';
 import { StoreAdminApiService } from '../services/store-admin-api.service';
 
 @Component({
@@ -16,6 +17,7 @@ import { StoreAdminApiService } from '../services/store-admin-api.service';
 export class StoreSettingsPageComponent {
   private readonly storeAdminApi = inject(StoreAdminApiService);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly notifications = inject(NotificationUiService);
 
   readonly loading = signal(true);
   readonly submittingWelcome = signal(false);
@@ -96,7 +98,9 @@ export class StoreSettingsPageComponent {
         this.loadStoreResources();
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible cargar los datos de la tienda.'));
+        const message = getApiErrorMessage(error, 'No fue posible cargar los datos de la tienda.');
+        this.error.set(message);
+        this.notifications.error({ summary: message });
         this.loading.set(false);
       }
     });
@@ -113,7 +117,9 @@ export class StoreSettingsPageComponent {
         this.loading.set(false);
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible cargar la configuracion de la tienda.'));
+        const message = getApiErrorMessage(error, 'No fue posible cargar la configuracion de la tienda.');
+        this.error.set(message);
+        this.notifications.error({ summary: message });
         this.loading.set(false);
       }
     });
@@ -145,11 +151,15 @@ export class StoreSettingsPageComponent {
         this.welcomeForm.reset({
           welcomePhrase: response.data.welcomePhrase ?? ''
         });
-        this.feedback.set('Frase de bienvenida actualizada.');
+        const message = 'Frase de bienvenida actualizada.';
+        this.feedback.set(message);
+        this.notifications.success({ summary: message });
         this.submittingWelcome.set(false);
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible actualizar la frase de bienvenida.'));
+        const message = getApiErrorMessage(error, 'No fue posible actualizar la frase de bienvenida.');
+        this.error.set(message);
+        this.notifications.error({ summary: message });
         this.submittingWelcome.set(false);
       }
     });
@@ -233,7 +243,9 @@ export class StoreSettingsPageComponent {
     if (values.hasPromotion && values.promotionType === PromotionType.Percentage) {
       const percentageValue = Number(values.percentageValue);
       if (!Number.isFinite(percentageValue) || percentageValue <= 0 || percentageValue > 100) {
-        this.error.set('Captura un porcentaje de descuento entre 1 y 100.');
+        const message = 'Captura un porcentaje de descuento entre 1 y 100.';
+        this.error.set(message);
+        this.notifications.error({ summary: message });
         this.submittingBanner.set(false);
         return;
       }
@@ -264,13 +276,17 @@ export class StoreSettingsPageComponent {
 
     operation.subscribe({
       next: (response) => {
-        this.feedback.set(this.isEditingBanner() ? `Banner actualizado: ${response.data.title}` : `Banner creado: ${response.data.title}`);
+        const message = this.isEditingBanner() ? `Banner actualizado: ${response.data.title}` : `Banner creado: ${response.data.title}`;
+        this.feedback.set(message);
+        this.notifications.success({ summary: message });
         this.closeBannerModal();
         this.loadStoreResources();
         this.submittingBanner.set(false);
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, this.isEditingBanner() ? 'No fue posible actualizar el banner.' : 'No fue posible crear el banner.'));
+        const message = getApiErrorMessage(error, this.isEditingBanner() ? 'No fue posible actualizar el banner.' : 'No fue posible crear el banner.');
+        this.error.set(message);
+        this.notifications.error({ summary: message });
         this.submittingBanner.set(false);
       }
     });
@@ -282,11 +298,15 @@ export class StoreSettingsPageComponent {
 
     this.storeAdminApi.updateBannerStatus(banner.bannerId, !banner.status).subscribe({
       next: (response) => {
-        this.feedback.set(`Estado actualizado: ${response.data.title}`);
+        const message = `Estado actualizado: ${response.data.title}`;
+        this.feedback.set(message);
+        this.notifications.success({ summary: message });
         this.loadStoreResources();
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible actualizar el estado del banner.'));
+        const message = getApiErrorMessage(error, 'No fue posible actualizar el estado del banner.');
+        this.error.set(message);
+        this.notifications.error({ summary: message });
       }
     });
   }
@@ -297,14 +317,18 @@ export class StoreSettingsPageComponent {
 
     this.storeAdminApi.deleteBanner(banner.bannerId).subscribe({
       next: () => {
-        this.feedback.set(`Banner eliminado: ${banner.title}`);
+        const message = `Banner eliminado: ${banner.title}`;
+        this.feedback.set(message);
+        this.notifications.success({ summary: message });
         if (this.editingBannerId() === banner.bannerId) {
           this.closeBannerModal();
         }
         this.loadStoreResources();
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible eliminar el banner.'));
+        const message = getApiErrorMessage(error, 'No fue posible eliminar el banner.');
+        this.error.set(message);
+        this.notifications.error({ summary: message });
       }
     });
   }
@@ -349,13 +373,17 @@ export class StoreSettingsPageComponent {
       password: values.password
     }).subscribe({
       next: () => {
-        this.feedback.set(`Repartidor dado de alta: ${values.name}`);
+        const message = `Repartidor dado de alta: ${values.name}`;
+        this.feedback.set(message);
+        this.notifications.success({ summary: message });
         this.closeDeliveryUserModal();
         this.loadStoreResources();
         this.submittingDeliveryUser.set(false);
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible dar de alta al repartidor.'));
+        const message = getApiErrorMessage(error, 'No fue posible dar de alta al repartidor.');
+        this.error.set(message);
+        this.notifications.error({ summary: message });
         this.submittingDeliveryUser.set(false);
       }
     });
@@ -367,11 +395,15 @@ export class StoreSettingsPageComponent {
 
     this.storeAdminApi.updateDeliveryUserStatus(deliveryUser.id, !deliveryUser.isActive).subscribe({
       next: (response) => {
-        this.feedback.set(`Estado de repartidor actualizado: ${response.data.fullName}`);
+        const message = `Estado de repartidor actualizado: ${response.data.fullName}`;
+        this.feedback.set(message);
+        this.notifications.success({ summary: message });
         this.loadStoreResources();
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible actualizar el estado del repartidor.'));
+        const message = getApiErrorMessage(error, 'No fue posible actualizar el estado del repartidor.');
+        this.error.set(message);
+        this.notifications.error({ summary: message });
       }
     });
   }

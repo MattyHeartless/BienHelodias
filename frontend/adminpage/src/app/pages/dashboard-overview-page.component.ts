@@ -12,6 +12,7 @@ import {
 } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
 import { AdminSessionService } from '../core/admin-session.service';
+import { NotificationUiService } from '../core/notification-ui.service';
 import { StoreAdminApiService } from '../services/store-admin-api.service';
 import { SuperadminApiService } from '../services/superadmin-api.service';
 
@@ -26,6 +27,7 @@ export class DashboardOverviewPageComponent {
   private readonly session = inject(AdminSessionService);
   private readonly storeAdminApi = inject(StoreAdminApiService);
   private readonly superadminApi = inject(SuperadminApiService);
+  private readonly notifications = inject(NotificationUiService);
 
   readonly role = this.session.role;
   readonly loading = signal(true);
@@ -100,7 +102,9 @@ export class DashboardOverviewPageComponent {
           this.loading.set(false);
         },
         error: (error) => {
-          this.error.set(getApiErrorMessage(error, 'No fue posible cargar las tiendas.'));
+          const message = getApiErrorMessage(error, 'No fue posible cargar las tiendas.');
+          this.error.set(message);
+          this.notifications.error({ summary: message });
           this.loading.set(false);
         }
       });
@@ -119,7 +123,9 @@ export class DashboardOverviewPageComponent {
         this.loading.set(false);
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible cargar el dashboard.'));
+        const message = getApiErrorMessage(error, 'No fue posible cargar el dashboard.');
+        this.error.set(message);
+        this.notifications.error({ summary: message });
         this.loading.set(false);
       }
     });

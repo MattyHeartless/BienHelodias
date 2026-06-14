@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { AppRole } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
 import { AdminSessionService } from '../core/admin-session.service';
+import { NotificationUiService } from '../core/notification-ui.service';
 import { AuthApiService } from '../services/auth-api.service';
 
 @Component({
@@ -18,6 +19,7 @@ export class LoginPageComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authApi = inject(AuthApiService);
   private readonly session = inject(AdminSessionService);
+  private readonly notifications = inject(NotificationUiService);
   private readonly router = inject(Router);
 
   readonly submitting = signal(false);
@@ -47,7 +49,9 @@ export class LoginPageComponent {
       next: (response) => {
         this.session.setSession(response.data);
         if (![AppRole.StoreAdmin, AppRole.SuperAdmin].includes(response.data.role)) {
-          this.error.set('Esta aplicacion solo admite StoreAdmin y SuperAdmin.');
+          const message = 'Esta aplicacion solo admite StoreAdmin y SuperAdmin.';
+          this.error.set(message);
+          this.notifications.error({ summary: message });
           this.session.clear();
           this.submitting.set(false);
           return;
@@ -57,7 +61,9 @@ export class LoginPageComponent {
         void this.router.navigate(['/dashboard/overview']);
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible iniciar sesion.'));
+        const message = getApiErrorMessage(error, 'No fue posible iniciar sesion.');
+        this.error.set(message);
+        this.notifications.error({ summary: message });
         this.submitting.set(false);
       }
     });

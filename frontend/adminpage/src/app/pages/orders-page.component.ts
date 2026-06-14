@@ -3,6 +3,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { OrderDto, OrderStatus } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
+import { NotificationUiService } from '../core/notification-ui.service';
 import { StoreAdminApiService } from '../services/store-admin-api.service';
 
 @Component({
@@ -16,6 +17,7 @@ export class OrdersPageComponent {
   private readonly storeAdminApi = inject(StoreAdminApiService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly notifications = inject(NotificationUiService);
 
   readonly loading = signal(true);
   readonly detailLoading = signal(false);
@@ -122,7 +124,9 @@ export class OrdersPageComponent {
         }
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible cargar los pedidos.'));
+        const message = getApiErrorMessage(error, 'No fue posible cargar los pedidos.');
+        this.error.set(message);
+        this.notifications.error({ summary: message });
         this.loading.set(false);
       }
     });
@@ -141,7 +145,9 @@ export class OrdersPageComponent {
         this.detailLoading.set(false);
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible cargar el detalle del pedido.'));
+        const message = getApiErrorMessage(error, 'No fue posible cargar el detalle del pedido.');
+        this.error.set(message);
+        this.notifications.error({ summary: message });
         this.detailLoading.set(false);
       }
     });

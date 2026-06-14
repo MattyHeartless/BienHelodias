@@ -3,6 +3,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ProductDto } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
+import { NotificationUiService } from '../core/notification-ui.service';
 import { StoreAdminApiService } from '../services/store-admin-api.service';
 
 @Component({
@@ -15,6 +16,7 @@ import { StoreAdminApiService } from '../services/store-admin-api.service';
 export class CatalogPageComponent {
   private readonly storeAdminApi = inject(StoreAdminApiService);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly notifications = inject(NotificationUiService);
 
   readonly loading = signal(true);
   readonly submitting = signal(false);
@@ -78,7 +80,9 @@ export class CatalogPageComponent {
         this.loading.set(false);
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible cargar el catalogo.'));
+        const message = getApiErrorMessage(error, 'No fue posible cargar el catalogo.');
+        this.error.set(message);
+        this.notifications.error({ summary: message });
         this.loading.set(false);
       }
     });
@@ -111,13 +115,17 @@ export class CatalogPageComponent {
 
     operation.subscribe({
       next: (response) => {
-        this.feedback.set(this.isEditing() ? `Producto actualizado: ${response.data.name}` : `Producto creado: ${response.data.name}`);
+        const message = this.isEditing() ? `Producto actualizado: ${response.data.name}` : `Producto creado: ${response.data.name}`;
+        this.feedback.set(message);
+        this.notifications.success({ summary: message });
         this.resetForm();
         this.loadProducts();
         this.submitting.set(false);
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, this.isEditing() ? 'No fue posible actualizar el producto.' : 'No fue posible crear el producto.'));
+        const message = getApiErrorMessage(error, this.isEditing() ? 'No fue posible actualizar el producto.' : 'No fue posible crear el producto.');
+        this.error.set(message);
+        this.notifications.error({ summary: message });
         this.submitting.set(false);
       }
     });
@@ -143,14 +151,18 @@ export class CatalogPageComponent {
 
     this.storeAdminApi.deleteProduct(product.id).subscribe({
       next: () => {
-        this.feedback.set(`Producto eliminado: ${product.name}`);
+        const message = `Producto eliminado: ${product.name}`;
+        this.feedback.set(message);
+        this.notifications.success({ summary: message });
         if (this.editingProductId() === product.id) {
           this.resetForm();
         }
         this.loadProducts();
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible eliminar el producto.'));
+        const message = getApiErrorMessage(error, 'No fue posible eliminar el producto.');
+        this.error.set(message);
+        this.notifications.error({ summary: message });
       }
     });
   }
@@ -158,11 +170,15 @@ export class CatalogPageComponent {
   toggleProduct(product: ProductDto): void {
     this.storeAdminApi.updateProductStatus(product.id, !product.isActive).subscribe({
       next: (response) => {
-        this.feedback.set(`Estado actualizado: ${response.data.name}`);
+        const message = `Estado actualizado: ${response.data.name}`;
+        this.feedback.set(message);
+        this.notifications.success({ summary: message });
         this.loadProducts();
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible actualizar el estado del producto.'));
+        const message = getApiErrorMessage(error, 'No fue posible actualizar el estado del producto.');
+        this.error.set(message);
+        this.notifications.error({ summary: message });
       }
     });
   }

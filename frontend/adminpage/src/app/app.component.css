@@ -2,3 +2,148 @@
   display: block;
   min-height: 100vh;
 }
+
+:host ::ng-deep .brand-toast-shell {
+  width: min(26rem, calc(100vw - 1.5rem));
+}
+
+:host ::ng-deep .brand-toast-shell .p-toast-message {
+  margin: 0 0 0.9rem;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+:host ::ng-deep .brand-toast-shell .p-toast-message-content {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.brand-toast-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.9rem;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  border-radius: 1.5rem;
+  padding: 1rem 3.4rem 1rem 0.95rem;
+  background:
+    radial-gradient(circle at top right, rgb(210 253 110 / 0.14), transparent 38%),
+    linear-gradient(135deg, rgb(19 19 19 / 0.96), rgb(14 14 14 / 0.98));
+  box-shadow: 0 24px 48px rgb(0 0 0 / 0.34);
+  backdrop-filter: blur(24px);
+}
+
+.brand-toast-card__glow {
+  position: absolute;
+  inset: auto auto -2.4rem -1.2rem;
+  width: 7rem;
+  height: 7rem;
+  border-radius: 999px;
+  background: rgb(210 253 110 / 0.14);
+  filter: blur(26px);
+  pointer-events: none;
+}
+
+.brand-toast-card__media {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 1rem;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  background: rgb(255 255 255 / 0.05);
+}
+
+.brand-toast-card__media img {
+  width: 1.9rem;
+  height: 1.9rem;
+}
+
+.brand-toast-card__copy {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+
+.brand-toast-card__eyebrow {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #d2fd6e;
+}
+
+.brand-toast-card__title {
+  margin: 0.42rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.brand-toast-card__close {
+  position: absolute;
+  top: 0.8rem;
+  right: 0.8rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.06);
+  color: #f3f1f1;
+  cursor: pointer;
+  transition: background-color 180ms ease, transform 180ms ease;
+}
+
+.brand-toast-card__close:hover {
+  background: rgb(255 255 255 / 0.12);
+  transform: scale(1.04);
+}
+
+.brand-toast-card__close .material-symbols-outlined {
+  font-size: 1.15rem;
+}
+
+.brand-toast-card.bh-toast--success .brand-toast-card__media,
+.brand-toast-card.bh-toast--info .brand-toast-card__media {
+  background: rgb(210 253 110 / 0.12);
+}
+
+.brand-toast-card.bh-toast--error .brand-toast-card__eyebrow {
+  color: #ff8d67;
+}
+
+.brand-toast-card.bh-toast--error .brand-toast-card__media {
+  background: rgb(255 115 81 / 0.14);
+}
+
+.brand-toast-card.bh-toast--error .brand-toast-card__glow {
+  background: rgb(255 115 81 / 0.16);
+}
+
+.brand-toast-card.bh-toast--warning .brand-toast-card__eyebrow {
+  color: #e7e959;
+}
+
+.brand-toast-card.bh-toast--warning .brand-toast-card__media {
+  background: rgb(231 233 89 / 0.14);
+}
+
+@media (max-width: 640px) {
+  .brand-toast-card {
+    padding-right: 3.1rem;
+  }
+}

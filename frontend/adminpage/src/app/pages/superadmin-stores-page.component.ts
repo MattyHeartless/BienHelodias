@@ -3,6 +3,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { StoreAdminDto, StoreDto, SubscriptionStatus } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
+import { NotificationUiService } from '../core/notification-ui.service';
 import { SuperadminApiService } from '../services/superadmin-api.service';
 
 const DEFAULT_ADMIN_PASSWORD = 'Admin123!';
@@ -17,6 +18,7 @@ const DEFAULT_ADMIN_PASSWORD = 'Admin123!';
 export class SuperadminStoresPageComponent {
   private readonly superadminApi = inject(SuperadminApiService);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly notifications = inject(NotificationUiService);
 
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
@@ -139,7 +141,9 @@ export class SuperadminStoresPageComponent {
         this.loading.set(false);
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible cargar las tiendas.'));
+        const message = getApiErrorMessage(error, 'No fue posible cargar las tiendas.');
+        this.error.set(message);
+        this.notifications.error({ summary: message });
         this.loading.set(false);
       }
     });
@@ -153,12 +157,16 @@ export class SuperadminStoresPageComponent {
 
     this.superadminApi.createStore(this.storeForm.getRawValue()).subscribe({
       next: (response) => {
-        this.feedback.set(`Tienda creada: ${response.data.name}`);
+        const message = `Tienda creada: ${response.data.name}`;
+        this.feedback.set(message);
+        this.notifications.success({ summary: message });
         this.closeCreateStoreModal();
         this.load(false);
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible crear la tienda.'));
+        const message = getApiErrorMessage(error, 'No fue posible crear la tienda.');
+        this.error.set(message);
+        this.notifications.error({ summary: message });
       }
     });
   }
@@ -176,12 +184,16 @@ export class SuperadminStoresPageComponent {
 
     this.superadminApi.updateStore(store.id, this.editStoreForm.getRawValue()).subscribe({
       next: (response) => {
-        this.feedback.set(`Licorería actualizada: ${response.data.name}`);
+        const message = `Licorería actualizada: ${response.data.name}`;
+        this.feedback.set(message);
+        this.notifications.success({ summary: message });
         this.closeEditStoreModal();
         this.load(false);
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible actualizar la licorería.'));
+        const message = getApiErrorMessage(error, 'No fue posible actualizar la licorería.');
+        this.error.set(message);
+        this.notifications.error({ summary: message });
       }
     });
   }
@@ -196,7 +208,9 @@ export class SuperadminStoresPageComponent {
     this.feedback.set(null);
     this.adminForm.markAllAsTouched();
     if (this.adminForm.invalid) {
-      this.error.set('Completa nombre, correo valido y una contrasena de al menos 8 caracteres.');
+      const message = 'Completa nombre, correo valido y una contrasena de al menos 8 caracteres.';
+      this.error.set(message);
+      this.notifications.error({ summary: message });
       return;
     }
 
@@ -210,7 +224,9 @@ export class SuperadminStoresPageComponent {
       storeId: store.id
     }).subscribe({
       next: () => {
-        this.feedback.set(`Administrador registrado para ${store.name}.`);
+        const message = `Administrador registrado para ${store.name}.`;
+        this.feedback.set(message);
+        this.notifications.success({ summary: message });
         this.adminForm.reset({
           name: '',
           email: '',
@@ -220,7 +236,9 @@ export class SuperadminStoresPageComponent {
         this.loadStoreAdmins(store.id);
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible registrar el administrador.'));
+        const message = getApiErrorMessage(error, 'No fue posible registrar el administrador.');
+        this.error.set(message);
+        this.notifications.error({ summary: message });
         this.savingAdmin.set(false);
       }
     });
@@ -235,7 +253,9 @@ export class SuperadminStoresPageComponent {
         this.loadingAdmins.set(false);
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible cargar los administradores.'));
+        const message = getApiErrorMessage(error, 'No fue posible cargar los administradores.');
+        this.error.set(message);
+        this.notifications.error({ summary: message });
         this.loadingAdmins.set(false);
       }
     });
@@ -244,11 +264,15 @@ export class SuperadminStoresPageComponent {
   updateSubscription(storeId: string, subscriptionStatus: SubscriptionStatus): void {
     this.superadminApi.updateSubscription(storeId, subscriptionStatus).subscribe({
       next: (response) => {
-        this.feedback.set(`Suscripcion actualizada para ${response.data.name}.`);
+        const message = `Suscripcion actualizada para ${response.data.name}.`;
+        this.feedback.set(message);
+        this.notifications.success({ summary: message });
         this.load(false);
       },
       error: (error) => {
-        this.error.set(getApiErrorMessage(error, 'No fue posible actualizar la suscripcion.'));
+        const message = getApiErrorMessage(error, 'No fue posible actualizar la suscripcion.');
+        this.error.set(message);
+        this.notifications.error({ summary: message });
       }
     });
   }
