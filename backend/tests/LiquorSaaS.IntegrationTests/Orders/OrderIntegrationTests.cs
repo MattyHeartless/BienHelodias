@@ -117,7 +117,7 @@ public sealed class OrderIntegrationTests(TestWebApplicationFactory factory) : I
                 "20% OFF",
                 null,
                 true,
-                new PromotionConfigurationRequest("Descuento 20", "SAVE20", PromotionType.Percentage, 20m, null, null)));
+                new PromotionConfigurationRequest("Descuento 20", "SAVE20", PromotionType.Percentage, 20m, null, null, null)));
 
         var client = factory.CreateStoreClient();
         var request = new CreateOrderRequest(
@@ -158,7 +158,7 @@ public sealed class OrderIntegrationTests(TestWebApplicationFactory factory) : I
                 "2x1",
                 null,
                 true,
-                new PromotionConfigurationRequest("Dos por uno", "DOSXUNO", PromotionType.BuyXGetY, null, 1, 1)));
+                new PromotionConfigurationRequest("Dos por uno", "DOSXUNO", PromotionType.BuyXGetY, null, 1, 1, SeedDataIds.ProductGinId)));
 
         var client = factory.CreateStoreClient();
         var response = await client.PostAsJsonAsync(
@@ -176,6 +176,35 @@ public sealed class OrderIntegrationTests(TestWebApplicationFactory factory) : I
         payload!.Data!.DiscountTotal.Should().Be(45m);
         payload.Data.Total.Should().Be(45m);
         payload.Data.Code.Should().Be("DOSXUNO");
+    }
+
+    [Fact]
+    public async Task ValidatePromotion_ShouldRejectBuyXGetYWhenTargetProductIsNotInCart()
+    {
+        var adminClient = await factory.CreateAuthorizedClientAsync("admin@bienhelodias.local", "Admin123!");
+        await adminClient.PostAsJsonAsync(
+            "/api/banners",
+            new LiquorSaaS.Application.Banners.CreateBannerRequest(
+                "Promo",
+                "2x1",
+                "Doble botella",
+                "2x1",
+                null,
+                true,
+                new PromotionConfigurationRequest("Dos por uno", "DOSXUNO2", PromotionType.BuyXGetY, null, 1, 1, SeedDataIds.ProductGinId)));
+
+        var client = factory.CreateStoreClient();
+        var response = await client.PostAsJsonAsync(
+            "/api/promotions/validate",
+            new ValidatePromotionRequest(
+                SeedDataIds.StoreId,
+                "dosxuno2",
+                new[]
+                {
+                    new ValidatePromotionItemRequest(SeedDataIds.ProductTonicId, 2)
+                }));
+
+        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
     }
 
     [Fact]

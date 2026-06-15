@@ -32,6 +32,8 @@ internal static class DtoMappings
             entity.PercentageValue,
             entity.BuyQuantity,
             entity.FreeQuantity,
+            entity.TargetProductId,
+            entity.TargetProduct?.Name,
             entity.Status,
             entity.ExpirationDate);
 
@@ -53,6 +55,9 @@ internal static class DtoMappings
             entity.UpdatedAtUtc);
 
     public static OrderDto ToDto(this Order entity) =>
+        entity.ToDto(null);
+
+    public static OrderDto ToDto(this Order entity, DeliveryUser? deliveryAssignee) =>
         new(
             entity.Id,
             entity.StoreId,
@@ -77,7 +82,16 @@ internal static class DtoMappings
                 item.ProductNameSnapshot,
                 item.UnitPrice,
                 item.Quantity,
-                item.Subtotal)).ToArray());
+                item.Subtotal)).ToArray(),
+            deliveryAssignee is null
+                ? null
+                : new OrderDeliveryAssigneeDto(
+                    deliveryAssignee.Id,
+                    deliveryAssignee.FullName,
+                    deliveryAssignee.Phone,
+                    deliveryAssignee.Email,
+                    deliveryAssignee.IsActive,
+                    (int)deliveryAssignee.CurrentAvailability));
 
     public static DeliveryUserDto ToDto(this DeliveryUser entity) =>
         new(

@@ -32,7 +32,7 @@ export class AdminShellComponent {
       items.push(
         { label: 'Mi tienda', route: '/dashboard/store', icon: 'storefront' },
         { label: 'Pedidos', route: '/dashboard/orders', icon: 'receipt_long' },
-        { label: 'Catalogo', route: '/dashboard/catalog', icon: 'inventory_2' }
+        { label: 'Catálogo', route: '/dashboard/catalog', icon: 'inventory_2' }
       );
     }
 

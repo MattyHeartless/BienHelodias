@@ -109,7 +109,7 @@ public sealed class OrderService(
             ?? throw new NotFoundException("Order not found.");
 
         EnsureOrderAccess(order);
-        return order.ToDto();
+        return await MapOrderAsync(order, cancellationToken);
     }
 
     public async Task<OrderDto> GetTrackingByIdAsync(Guid id, CancellationToken cancellationToken)
@@ -120,7 +120,7 @@ public sealed class OrderService(
             .SingleOrDefaultAsync(x => x.Id == id && x.StoreId == storeId, cancellationToken)
             ?? throw new NotFoundException("Order not found.");
 
-        return order.ToDto();
+        return await MapOrderAsync(order, cancellationToken);
     }
 
     public async Task<PagedResult<OrderDto>> GetStoreOrdersAsync(PaginationRequest request, OrderStatus? status, CancellationToken cancellationToken)
@@ -137,10 +137,19 @@ public sealed class OrderService(
             query = query.Where(x => x.Status == status.Value);
         }
 
-        return await query
+        var paged = await query
             .OrderByDescending(x => x.CreatedAtUtc)
-            .Select(x => x.ToDto())
             .ToPagedResultAsync(request, cancellationToken);
+
+        var items = await MapOrdersAsync(paged.Items, cancellationToken);
+
+        return new PagedResult<OrderDto>
+        {
+            Page = paged.Page,
+            PageSize = paged.PageSize,
+            Total = paged.Total,
+            Items = items
+        };
     }
 
     public async Task<OrderDto> UpdateStatusAsync(Guid id, UpdateOrderStatusRequest request, CancellationToken cancellationToken)
@@ -175,7 +184,7 @@ public sealed class OrderService(
 
         await dbContext.SaveChangesAsync(cancellationToken);
         logger.LogInformation("Order {OrderId} changed status to {Status}", order.Id, order.Status);
-        return order.ToDto();
+        return await MapOrderAsync(order, cancellationToken);
     }
 
     public async Task<OrderDto> TakeAsync(Guid id, CancellationToken cancellationToken)
@@ -280,6 +289,43 @@ WHERE Id = {id}
 
         return await dbContext.DeliveryUsers.SingleOrDefaultAsync(x => x.UserId == currentUserService.UserId.Value, cancellationToken)
             ?? throw new NotFoundException("Delivery profile not found.");
+    }
+
+    private async Task<OrderDto> MapOrderAsync(Order order, CancellationToken cancellationToken)
+    {
+        DeliveryUser? deliveryAssignee = null;
+
+        if (order.DeliveryUserId.HasValue)
+        {
+            deliveryAssignee = await dbContext.DeliveryUsers.AsNoTracking()
+                .SingleOrDefaultAsync(x => x.Id == order.DeliveryUserId.Value, cancellationToken);
+        }
+
+        return order.ToDto(deliveryAssignee);
+    }
+
+    private async Task<IReadOnlyCollection<OrderDto>> MapOrdersAsync(IReadOnlyCollection<Order> orders, CancellationToken cancellationToken)
+    {
+        var deliveryUserIds = orders
+            .Where(order => order.DeliveryUserId.HasValue)
+            .Select(order => order.DeliveryUserId!.Value)
+            .Distinct()
+            .ToArray();
+
+        var deliveryUsers = deliveryUserIds.Length == 0
+            ? []
+            : await dbContext.DeliveryUsers.AsNoTracking()
+                .Where(x => deliveryUserIds.Contains(x.Id))
+                .ToListAsync(cancellationToken);
+
+        var deliveryUsersById = deliveryUsers.ToDictionary(x => x.Id);
+
+        return orders
+            .Select(order => order.ToDto(
+                order.DeliveryUserId.HasValue && deliveryUsersById.TryGetValue(order.DeliveryUserId.Value, out var deliveryUser)
+                    ? deliveryUser
+                    : null))
+            .ToArray();
     }
 
     private void EnsureStoreScopedRole()

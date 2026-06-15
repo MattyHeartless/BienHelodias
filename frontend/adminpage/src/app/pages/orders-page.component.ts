@@ -32,9 +32,9 @@ export class OrdersPageComponent {
   }));
 
   private readonly orderFlow = [
-    { status: OrderStatus.Pending, label: 'Pedido recibido', description: 'El pedido entro al sistema.' },
-    { status: OrderStatus.Accepted, label: 'Pedido aceptado', description: 'La tienda confirmo la preparacion.' },
-    { status: OrderStatus.Preparing, label: 'En preparacion', description: 'El equipo esta armando el pedido.' },
+    { status: OrderStatus.Pending, label: 'Pedido recibido', description: 'El pedido entró al sistema.' },
+    { status: OrderStatus.Accepted, label: 'Pedido aceptado', description: 'La tienda confirmó la preparación.' },
+    { status: OrderStatus.Preparing, label: 'En preparación', description: 'El equipo está armando el pedido.' },
     { status: OrderStatus.Ready, label: 'Listo para salir', description: 'El pedido ya puede despacharse.' },
     { status: OrderStatus.OnTheWay, label: 'En camino', description: 'El pedido va rumbo al cliente.' },
     { status: OrderStatus.Delivered, label: 'Entregado', description: 'La entrega fue completada.' }
@@ -64,6 +64,16 @@ export class OrdersPageComponent {
     );
   }
 
+  deliveryAvailabilityLabel(availability: number): string {
+    return (
+      {
+        0: 'No disponible',
+        1: 'Disponible',
+        2: 'Ocupado'
+      }[availability] ?? 'Sin estado'
+    );
+  }
+
   orderTimeline(order: OrderDto): Array<{
     label: string;
     description: string;
@@ -74,13 +84,13 @@ export class OrdersPageComponent {
       return [
         {
           label: 'Pedido recibido',
-          description: 'El pedido entro al sistema.',
+          description: 'El pedido entró al sistema.',
           state: 'complete',
           timestamp: order.createdAtUtc
         },
         {
           label: 'Pedido cancelado',
-          description: 'La operacion fue detenida antes de completarse.',
+          description: 'La operación fue detenida antes de completarse.',
           state: 'cancelled',
           timestamp: order.updatedAtUtc
         }

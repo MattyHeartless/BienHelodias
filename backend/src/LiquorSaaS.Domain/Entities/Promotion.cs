@@ -17,8 +17,10 @@ public sealed class Promotion : AuditableEntity
     public decimal? PercentageValue { get; private set; }
     public int? BuyQuantity { get; private set; }
     public int? FreeQuantity { get; private set; }
+    public Guid? TargetProductId { get; private set; }
     public DateTime? ExpirationDate { get; private set; }
     public bool Status { get; private set; } = true;
+    public Product? TargetProduct { get; private set; }
 
     public static Promotion Create(
         Guid storeId,
@@ -28,10 +30,11 @@ public sealed class Promotion : AuditableEntity
         decimal? percentageValue,
         int? buyQuantity,
         int? freeQuantity,
+        Guid? targetProductId,
         DateTime? expirationDate,
         bool status = true)
     {
-        Validate(name, code, type, percentageValue, buyQuantity, freeQuantity);
+        Validate(name, code, type, percentageValue, buyQuantity, freeQuantity, targetProductId);
 
         return new Promotion
         {
@@ -42,6 +45,7 @@ public sealed class Promotion : AuditableEntity
             PercentageValue = type == PromotionType.Percentage ? percentageValue!.Value : null,
             BuyQuantity = type == PromotionType.BuyXGetY ? buyQuantity!.Value : null,
             FreeQuantity = type == PromotionType.BuyXGetY ? freeQuantity!.Value : null,
+            TargetProductId = type == PromotionType.BuyXGetY ? targetProductId!.Value : null,
             ExpirationDate = expirationDate,
             Status = status
         };
@@ -54,10 +58,11 @@ public sealed class Promotion : AuditableEntity
         decimal? percentageValue,
         int? buyQuantity,
         int? freeQuantity,
+        Guid? targetProductId,
         DateTime? expirationDate,
         bool status)
     {
-        Validate(name, code, type, percentageValue, buyQuantity, freeQuantity);
+        Validate(name, code, type, percentageValue, buyQuantity, freeQuantity, targetProductId);
 
         Name = name.Trim();
         Code = NormalizeCode(code);
@@ -65,6 +70,7 @@ public sealed class Promotion : AuditableEntity
         PercentageValue = type == PromotionType.Percentage ? percentageValue!.Value : null;
         BuyQuantity = type == PromotionType.BuyXGetY ? buyQuantity!.Value : null;
         FreeQuantity = type == PromotionType.BuyXGetY ? freeQuantity!.Value : null;
+        TargetProductId = type == PromotionType.BuyXGetY ? targetProductId!.Value : null;
         ExpirationDate = expirationDate;
         Status = status;
         Touch();
@@ -81,7 +87,8 @@ public sealed class Promotion : AuditableEntity
         PromotionType type,
         decimal? percentageValue,
         int? buyQuantity,
-        int? freeQuantity)
+        int? freeQuantity,
+        Guid? targetProductId)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -100,6 +107,11 @@ public sealed class Promotion : AuditableEntity
                 throw new DomainRuleException("Percentage promotions require a value between 0 and 100.");
             }
 
+            if (targetProductId.HasValue)
+            {
+                throw new DomainRuleException("Percentage promotions cannot target a specific product.");
+            }
+
             return;
         }
 
@@ -111,6 +123,11 @@ public sealed class Promotion : AuditableEntity
         if (!freeQuantity.HasValue || freeQuantity <= 0)
         {
             throw new DomainRuleException("Buy X Get Y promotions require a free quantity greater than zero.");
+        }
+
+        if (!targetProductId.HasValue || targetProductId.Value == Guid.Empty)
+        {
+            throw new DomainRuleException("Buy X Get Y promotions require a target product.");
         }
     }
 }

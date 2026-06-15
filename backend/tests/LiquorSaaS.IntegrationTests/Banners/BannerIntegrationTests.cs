@@ -6,6 +6,7 @@ using LiquorSaaS.Application.Common;
 using LiquorSaaS.Application.Promotions;
 using LiquorSaaS.Application.Stores;
 using LiquorSaaS.Domain.Enums;
+using LiquorSaaS.Infrastructure.Persistence.Seed;
 using LiquorSaaS.IntegrationTests.Infrastructure;
 
 namespace LiquorSaaS.IntegrationTests.Banners;
@@ -23,7 +24,7 @@ public sealed class BannerIntegrationTests(TestWebApplicationFactory factory) : 
             "2x1",
             null,
             true,
-            new PromotionConfigurationRequest("Promo principal", "HAPPY2X1", PromotionType.BuyXGetY, null, 1, 1));
+            new PromotionConfigurationRequest("Promo principal", "HAPPY2X1", PromotionType.BuyXGetY, null, 1, 1, SeedDataIds.ProductGinId));
 
         var response = await adminClient.PostAsJsonAsync("/api/banners", request);
 
@@ -33,6 +34,43 @@ public sealed class BannerIntegrationTests(TestWebApplicationFactory factory) : 
         payload.Data.Status.Should().BeTrue();
         payload.Data.Promotion.Should().NotBeNull();
         payload.Data.Promotion!.Code.Should().Be("HAPPY2X1");
+        payload.Data.Promotion.TargetProductId.Should().Be(SeedDataIds.ProductGinId);
+    }
+
+    [Fact]
+    public async Task UpdateBanner_ShouldPersistTargetProductForBuyXGetYPromotion()
+    {
+        var adminClient = await factory.CreateAuthorizedClientAsync("admin@bienhelodias.local", "Admin123!");
+        var createResponse = await adminClient.PostAsJsonAsync(
+            "/api/banners",
+            new CreateBannerRequest("Promo", "Banner base", "Descripcion", null, null, true));
+
+        createResponse.StatusCode.Should().Be(HttpStatusCode.Created);
+        var createdPayload = await createResponse.Content.ReadFromJsonAsync<ApiResponse<BannerDto>>();
+        var bannerId = createdPayload!.Data!.BannerId;
+
+        var updateResponse = await adminClient.PutAsJsonAsync(
+            $"/api/banners/{bannerId}",
+            new UpdateBannerRequest(
+                "Promo",
+                "Banner 2x1",
+                "Descripcion",
+                null,
+                null,
+                true,
+                new PromotionConfigurationRequest("Promo 2x1", "PROMO2X1", PromotionType.BuyXGetY, null, 1, 1, SeedDataIds.ProductGinId)));
+
+        updateResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var updatePayload = await updateResponse.Content.ReadFromJsonAsync<ApiResponse<BannerDto>>();
+        updatePayload!.Data!.Promotion.Should().NotBeNull();
+        updatePayload.Data.Promotion!.TargetProductId.Should().Be(SeedDataIds.ProductGinId);
+
+        var getResponse = await adminClient.GetAsync("/api/banners?page=1&pageSize=20");
+        getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var getPayload = await getResponse.Content.ReadFromJsonAsync<ApiResponse<PagedResult<BannerDto>>>();
+        var updatedBanner = getPayload!.Data!.Items.Single(x => x.BannerId == bannerId);
+        updatedBanner.Promotion.Should().NotBeNull();
+        updatedBanner.Promotion!.TargetProductId.Should().Be(SeedDataIds.ProductGinId);
     }
 
     [Fact]

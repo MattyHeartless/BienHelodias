@@ -42,9 +42,9 @@ export class StoreAdminApiService {
     return this.http.patch<ApiResponse<DeliveryUserDto>>(`${this.adminBaseUrl}/delivery-users/${deliveryUserId}/status`, { isActive });
   }
 
-  getProducts(): Observable<ApiResponse<PagedResult<ProductDto>>> {
+  getProducts(pageSize = 24): Observable<ApiResponse<PagedResult<ProductDto>>> {
     return this.http.get<ApiResponse<PagedResult<ProductDto>>>(this.productsUrl, {
-      params: { page: 1, pageSize: 24 }
+      params: { page: 1, pageSize }
     });
   }
 
@@ -129,6 +129,7 @@ export class StoreAdminApiService {
       percentageValue: number | null;
       buyQuantity: number | null;
       freeQuantity: number | null;
+      targetProductId: string | null;
     } | null;
   }): Observable<ApiResponse<BannerDto>> {
     return this.http.post<ApiResponse<BannerDto>>(this.bannersUrl, request);
@@ -150,6 +151,7 @@ export class StoreAdminApiService {
         percentageValue: number | null;
         buyQuantity: number | null;
         freeQuantity: number | null;
+        targetProductId: string | null;
       } | null;
     }
   ): Observable<ApiResponse<BannerDto>> {

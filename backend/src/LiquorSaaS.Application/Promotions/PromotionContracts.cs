@@ -8,7 +8,8 @@ public sealed record PromotionConfigurationRequest(
     PromotionType Type,
     decimal? PercentageValue,
     int? BuyQuantity,
-    int? FreeQuantity);
+    int? FreeQuantity,
+    Guid? TargetProductId);
 
 public sealed record PromotionSummaryDto(
     Guid PromotionId,
@@ -18,6 +19,8 @@ public sealed record PromotionSummaryDto(
     decimal? PercentageValue,
     int? BuyQuantity,
     int? FreeQuantity,
+    Guid? TargetProductId,
+    string? TargetProductName,
     bool Status,
     DateTime? ExpirationDate);
 

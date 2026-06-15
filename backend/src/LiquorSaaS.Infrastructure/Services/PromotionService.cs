@@ -113,16 +113,21 @@ public sealed class PromotionService(LiquorSaaSDbContext dbContext) : IPromotion
             return 0m;
         }
 
-        var total = 0m;
-        foreach (var item in items)
+        var targetProductId = promotion.TargetProductId;
+        if (!targetProductId.HasValue)
         {
-            var groups = item.Quantity / cycle;
-            var freeUnits = groups * freeQuantity;
-            if (freeUnits > 0)
-            {
-                total += item.UnitPrice * freeUnits;
-            }
+            return 0m;
         }
+
+        var item = items.SingleOrDefault(x => x.ProductId == targetProductId.Value);
+        if (item is null)
+        {
+            return 0m;
+        }
+
+        var groups = item.Quantity / cycle;
+        var freeUnits = groups * freeQuantity;
+        var total = freeUnits > 0 ? item.UnitPrice * freeUnits : 0m;
 
         return RoundMoney(total);
     }

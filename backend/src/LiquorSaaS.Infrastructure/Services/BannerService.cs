@@ -47,6 +47,10 @@ public sealed class BannerService(
         await dbContext.Banners.AddAsync(entity, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
         await dbContext.Entry(entity).Reference(x => x.Promotion).LoadAsync(cancellationToken);
+        if (entity.Promotion is not null)
+        {
+            await dbContext.Entry(entity.Promotion).Reference(x => x.TargetProduct).LoadAsync(cancellationToken);
+        }
         return entity.ToDto();
     }
 
@@ -79,6 +83,10 @@ public sealed class BannerService(
             promotion?.Id);
 
         await dbContext.SaveChangesAsync(cancellationToken);
+        if (entity.Promotion is not null)
+        {
+            await dbContext.Entry(entity.Promotion).Reference(x => x.TargetProduct).LoadAsync(cancellationToken);
+        }
         return entity.ToDto();
     }
 
@@ -106,6 +114,7 @@ public sealed class BannerService(
         var storeId = tenantProvider.GetRequiredStoreId();
         var entity = await dbContext.Banners.AsNoTracking()
             .Include(x => x.Promotion)
+            .ThenInclude(x => x!.TargetProduct)
             .SingleOrDefaultAsync(x => x.BannerId == bannerId && x.StoreId == storeId, cancellationToken)
             ?? throw new NotFoundException("Banner not found.");
 
@@ -124,6 +133,7 @@ public sealed class BannerService(
 
         var query = dbContext.Banners.AsNoTracking()
             .Include(x => x.Promotion)
+            .ThenInclude(x => x!.TargetProduct)
             .Where(x => x.StoreId == storeId)
             .OrderByDescending(x => x.Created);
 
@@ -149,6 +159,7 @@ public sealed class BannerService(
 
         var query = dbContext.Banners.AsNoTracking()
             .Include(x => x.Promotion)
+            .ThenInclude(x => x!.TargetProduct)
             .Where(x => x.StoreId == storeId && x.Status && (x.ExpirationDate == null || x.ExpirationDate > utcNow))
             .OrderByDescending(x => x.Created);
 
@@ -186,6 +197,7 @@ public sealed class BannerService(
                 entity.Promotion.PercentageValue,
                 entity.Promotion.BuyQuantity,
                 entity.Promotion.FreeQuantity,
+                entity.Promotion.TargetProductId,
                 entity.ExpirationDate,
                 request.Status);
         }
@@ -200,6 +212,10 @@ public sealed class BannerService(
             entity.PromotionId);
 
         await dbContext.SaveChangesAsync(cancellationToken);
+        if (entity.Promotion is not null)
+        {
+            await dbContext.Entry(entity.Promotion).Reference(x => x.TargetProduct).LoadAsync(cancellationToken);
+        }
         return entity.ToDto();
     }
 
@@ -247,6 +263,12 @@ public sealed class BannerService(
         var name = string.IsNullOrWhiteSpace(configuration.Name) ? bannerTitle : configuration.Name.Trim();
         int? buyQuantity = configuration.Type == PromotionType.BuyXGetY ? configuration.BuyQuantity ?? 1 : null;
         int? freeQuantity = configuration.Type == PromotionType.BuyXGetY ? configuration.FreeQuantity ?? 1 : null;
+        Guid? targetProductId = configuration.Type == PromotionType.BuyXGetY ? configuration.TargetProductId : null;
+
+        if (targetProductId.HasValue)
+        {
+            await EnsureTargetProductExistsAsync(storeId, targetProductId.Value, cancellationToken);
+        }
 
         await EnsurePromotionCodeAvailableAsync(storeId, code, currentPromotion?.Id, cancellationToken);
 
@@ -262,6 +284,7 @@ public sealed class BannerService(
                     configuration.PercentageValue,
                     buyQuantity,
                     freeQuantity,
+                    targetProductId,
                     expirationDate,
                     status);
 
@@ -276,6 +299,7 @@ public sealed class BannerService(
                 configuration.PercentageValue,
                 buyQuantity,
                 freeQuantity,
+                targetProductId,
                 expirationDate,
                 status);
 
@@ -299,6 +323,17 @@ public sealed class BannerService(
         if (exists)
         {
             throw new ConflictException("Promotion code already exists for this store.");
+        }
+    }
+
+    private async Task EnsureTargetProductExistsAsync(Guid storeId, Guid productId, CancellationToken cancellationToken)
+    {
+        var exists = await dbContext.Products.AsNoTracking()
+            .AnyAsync(x => x.StoreId == storeId && x.Id == productId, cancellationToken);
+
+        if (!exists)
+        {
+            throw new NotFoundException("Target product not found for this store.");
         }
     }
 

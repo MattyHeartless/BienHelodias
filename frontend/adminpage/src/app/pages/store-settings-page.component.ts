@@ -2,7 +2,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
-import { BannerDto, DeliveryAvailability, DeliveryUserDto, PromotionType, StoreDto } from '../core/models';
+import { BannerDto, DeliveryAvailability, DeliveryUserDto, ProductDto, PromotionType, StoreDto } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
 import { NotificationUiService } from '../core/notification-ui.service';
 import { StoreAdminApiService } from '../services/store-admin-api.service';
@@ -27,10 +27,12 @@ export class StoreSettingsPageComponent {
   readonly feedback = signal<string | null>(null);
   readonly store = signal<StoreDto | null>(null);
   readonly banners = signal<BannerDto[]>([]);
+  readonly products = signal<ProductDto[]>([]);
   readonly deliveryUsers = signal<DeliveryUserDto[]>([]);
   readonly bannerModalOpen = signal(false);
   readonly deliveryUserModalOpen = signal(false);
   readonly editingBannerId = signal<string | null>(null);
+  readonly editingPromotionProductName = signal('');
   readonly deliveryAvailability = DeliveryAvailability;
   readonly promotionType = PromotionType;
 
@@ -50,6 +52,7 @@ export class StoreSettingsPageComponent {
     promotionCode: [''],
     promotionType: [PromotionType.Percentage],
     percentageValue: [10],
+    targetProductId: [''],
     buyQuantity: [1],
     freeQuantity: [1]
   });
@@ -80,8 +83,35 @@ export class StoreSettingsPageComponent {
   }));
 
   readonly isEditingBanner = computed(() => this.editingBannerId() !== null);
+  readonly promotionProductSearch = signal('');
+  readonly selectedPromotionProduct = computed(() => {
+    const targetProductId = this.bannerForm.controls.targetProductId.value;
+
+    if (!targetProductId) {
+      return null;
+    }
+
+    return this.products().find((product) => product.id === targetProductId) ?? null;
+  });
+  readonly filteredPromotionProducts = computed(() => {
+    const query = this.promotionProductSearch().trim().toLowerCase();
+    const items = [...this.products()].sort((a, b) => a.name.localeCompare(b.name));
+
+    return items
+      .filter((product) =>
+        !query
+        || product.name.toLowerCase().includes(query)
+        || product.category.toLowerCase().includes(query))
+      .slice(0, 8);
+  });
 
   constructor() {
+    this.bannerForm.controls.promotionType.valueChanges.subscribe((value) => {
+      if (value !== PromotionType.BuyXGetY) {
+        this.clearPromotionProductSelection();
+      }
+    });
+
     this.load();
   }
 
@@ -109,10 +139,12 @@ export class StoreSettingsPageComponent {
   loadStoreResources(): void {
     forkJoin({
       banners: this.storeAdminApi.getBanners(),
+      products: this.storeAdminApi.getProducts(200),
       deliveryUsers: this.storeAdminApi.getDeliveryUsers()
     }).subscribe({
       next: (response) => {
         this.banners.set(response.banners.data.items);
+        this.products.set(response.products.data.items);
         this.deliveryUsers.set(response.deliveryUsers.data);
         this.loading.set(false);
       },
@@ -181,9 +213,12 @@ export class StoreSettingsPageComponent {
       promotionCode: '',
       promotionType: PromotionType.Percentage,
       percentageValue: 10,
+      targetProductId: '',
       buyQuantity: 1,
       freeQuantity: 1
     });
+    this.promotionProductSearch.set('');
+    this.editingPromotionProductName.set('');
     this.bannerModalOpen.set(true);
   }
 
@@ -203,9 +238,24 @@ export class StoreSettingsPageComponent {
       promotionCode: banner.promotion?.code ?? '',
       promotionType: banner.promotion?.type ?? PromotionType.Percentage,
       percentageValue: banner.promotion?.percentageValue ?? 10,
+      targetProductId: banner.promotion?.targetProductId ?? '',
       buyQuantity: banner.promotion?.buyQuantity ?? 1,
       freeQuantity: banner.promotion?.freeQuantity ?? 1
     });
+    this.promotionProductSearch.set(banner.promotion?.targetProductName ?? this.selectedPromotionProductName(banner.promotion?.targetProductId ?? ''));
+    this.editingPromotionProductName.set(banner.promotion?.targetProductName ?? '');
+    if (banner.promotion?.targetProductId) {
+      this.storeAdminApi.getProduct(banner.promotion.targetProductId).subscribe({
+        next: (response) => {
+          const productName = response.data.name;
+          this.editingPromotionProductName.set(productName);
+
+          if (!this.promotionProductSearch().trim()) {
+            this.promotionProductSearch.set(productName);
+          }
+        }
+      });
+    }
     this.bannerModalOpen.set(true);
   }
 
@@ -224,9 +274,12 @@ export class StoreSettingsPageComponent {
       promotionCode: '',
       promotionType: PromotionType.Percentage,
       percentageValue: 10,
+      targetProductId: '',
       buyQuantity: 1,
       freeQuantity: 1
     });
+    this.promotionProductSearch.set('');
+    this.editingPromotionProductName.set('');
   }
 
   saveBanner(): void {
@@ -251,6 +304,14 @@ export class StoreSettingsPageComponent {
       }
     }
 
+    if (values.hasPromotion && values.promotionType === PromotionType.BuyXGetY && !values.targetProductId) {
+      const message = 'Selecciona el producto al que aplica el 2x1.';
+      this.error.set(message);
+      this.notifications.error({ summary: message });
+      this.submittingBanner.set(false);
+      return;
+    }
+
     const request = {
       header: values.header.trim(),
       title: values.title.trim(),
@@ -264,6 +325,7 @@ export class StoreSettingsPageComponent {
             code: values.promotionCode.trim() || null,
             type: Number(values.promotionType),
             percentageValue: values.promotionType === PromotionType.Percentage ? Number(values.percentageValue) : null,
+            targetProductId: values.promotionType === PromotionType.BuyXGetY ? values.targetProductId || null : null,
             buyQuantity: values.promotionType === PromotionType.BuyXGetY ? 1 : null,
             freeQuantity: values.promotionType === PromotionType.BuyXGetY ? 1 : null
           }
@@ -430,6 +492,30 @@ export class StoreSettingsPageComponent {
 
     return banner.promotion.type === PromotionType.Percentage
       ? `${banner.promotion.percentageValue ?? 0}% de descuento`
-      : '2x1 con codigo';
+      : `2x1 en ${banner.promotion.targetProductName ?? 'producto seleccionado'}`;
+  }
+
+  updatePromotionProductSearch(value: string): void {
+    this.promotionProductSearch.set(value);
+
+    if (this.selectedPromotionProduct()?.name !== value.trim()) {
+      this.bannerForm.controls.targetProductId.setValue('');
+    }
+  }
+
+  selectPromotionProduct(product: ProductDto): void {
+    this.bannerForm.controls.targetProductId.setValue(product.id);
+    this.promotionProductSearch.set(product.name);
+    this.editingPromotionProductName.set(product.name);
+  }
+
+  clearPromotionProductSelection(): void {
+    this.bannerForm.controls.targetProductId.setValue('');
+    this.promotionProductSearch.set('');
+    this.editingPromotionProductName.set('');
+  }
+
+  private selectedPromotionProductName(productId: string): string {
+    return this.products().find((product) => product.id === productId)?.name ?? '';
   }
 }

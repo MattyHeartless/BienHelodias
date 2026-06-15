@@ -62,12 +62,17 @@ public sealed class LiquorSaaSDbContext(DbContextOptions<LiquorSaaSDbContext> op
             entity.Property(x => x.PercentageValue).HasColumnType("decimal(18,2)");
             entity.Property(x => x.ExpirationDate).HasColumnType("datetime2");
             entity.Property(x => x.Status).IsRequired();
+            entity.HasIndex(x => x.TargetProductId);
             entity.HasIndex(x => x.StoreId);
             entity.HasIndex(x => new { x.StoreId, x.Code }).IsUnique();
             entity.HasOne<Store>()
                 .WithMany(x => x.Promotions)
                 .HasForeignKey(x => x.StoreId)
                 .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(x => x.TargetProduct)
+                .WithMany()
+                .HasForeignKey(x => x.TargetProductId)
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
         modelBuilder.Entity<Product>(entity =>

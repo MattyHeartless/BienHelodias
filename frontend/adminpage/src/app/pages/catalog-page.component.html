@@ -1,6 +1,6 @@
 <section class="mb-8 flex flex-wrap items-end justify-between gap-4">
   <div>
-    <p class="eyebrow">Catalogo</p>
+    <p class="eyebrow">Catálogo</p>
     <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Administra tus productos e inventario</h2>
   </div>
   <div class="flex flex-wrap gap-3">
@@ -17,15 +17,24 @@
 
 <section class="mb-8 grid gap-6 md:grid-cols-3">
   <article class="glass-panel p-6">
-    <p class="eyebrow">Productos</p>
+    <div class="flex items-center justify-between gap-3">
+      <p class="eyebrow">Productos</p>
+      <span class="material-symbols-outlined text-xl text-primary">inventory_2</span>
+    </div>
     <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">{{ inventorySummary().totalProducts }}</p>
   </article>
   <article class="glass-panel p-6">
-    <p class="eyebrow">Activos</p>
+    <div class="flex items-center justify-between gap-3">
+      <p class="eyebrow">Activos</p>
+      <span class="material-symbols-outlined text-xl text-primary">visibility</span>
+    </div>
     <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">{{ inventorySummary().activeProducts }}</p>
   </article>
   <article class="glass-panel p-6">
-    <p class="eyebrow">Inventario</p>
+    <div class="flex items-center justify-between gap-3">
+      <p class="eyebrow">Inventario</p>
+      <span class="material-symbols-outlined text-xl text-primary">warehouse</span>
+    </div>
     <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">{{ inventorySummary().totalUnits }}</p>
   </article>
 </section>
@@ -42,13 +51,14 @@
           class="catalog-search-input"
           type="search"
           placeholder="Busca por nombre o categoria"
+          
           [value]="searchTerm()"
           (input)="updateSearchTerm($any($event.target).value)"
         />
       </label>
 
       <label class="catalog-category-filter">
-        <span class="eyebrow">Categoria</span>
+        <span class="eyebrow">Categoría</span>
         <select
           class="catalog-category-select"
           [value]="selectedCategory()"
@@ -125,6 +135,7 @@
             <h4 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">No encontramos productos con ese filtro</h4>
             <p class="mt-3 text-sm leading-7 text-on-surface-variant">
               Prueba con otro nombre, otra categoria o limpia los filtros para ver todo el catalogo.
+              
             </p>
           </div>
         }
@@ -143,7 +154,10 @@
             {{ isEditing() ? 'Actualiza datos del inventario' : 'Alta de producto' }}
           </h3>
         </div>
-        <button class="ghost-button" type="button" (click)="resetForm()">Cerrar</button>
+        <button class="ghost-button" type="button" (click)="resetForm()">
+          <span class="material-symbols-outlined text-base">close</span>
+          Cerrar
+        </button>
       </div>
 
       <form class="mt-6 space-y-4" [formGroup]="productForm" (ngSubmit)="saveProduct()">
@@ -158,24 +172,24 @@
         </div>
 
         <div class="field-block">
-          <label class="field-label" for="product-description">Descripcion</label>
+          <label class="field-label" for="product-description">Descripción</label>
           <textarea
             id="product-description"
             class="min-h-[52px] w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
             formControlName="description"
           ></textarea>
-          <p class="field-help">Resume sabor, presentacion o cualquier dato util para vender mejor el producto.</p>
+          <p class="field-help">Resume sabor, presentación o cualquier dato útil para vender mejor el producto.</p>
         </div>
 
         <div class="field-block">
-          <label class="field-label" for="product-category">Categoria</label>
+          <label class="field-label" for="product-category">Categoría</label>
           <input
             id="product-category"
             class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
             formControlName="category"
             placeholder="Ej. Tequila, Whisky, Vodka, Ron"
           />
-          <p class="field-help">Usa la familia comercial del producto para organizar mejor el catalogo.</p>
+          <p class="field-help">Usa la familia comercial del producto para organizar mejor el catálogo.</p>
         </div>
 
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -190,7 +204,7 @@
               inputmode="decimal"
               placeholder="Ej. 299"
             />
-            <p class="field-help">Precio que vera el cliente.</p>
+            <p class="field-help">Precio que verá el cliente.</p>
           </div>
 
           <div class="field-block">
@@ -219,12 +233,16 @@
 
         <label class="flex items-center gap-3 rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-sm text-white">
           <input class="h-4 w-4 accent-primary" formControlName="isActive" type="checkbox" />
-          Producto activo en catalogo
+          Producto activo en catálogo
         </label>
 
         <div class="flex flex-wrap gap-3 pt-2">
-          <button class="ghost-button flex-1" type="button" (click)="resetForm()">Cancelar</button>
+          <button class="ghost-button flex-1" type="button" (click)="resetForm()">
+            <span class="material-symbols-outlined text-base">close</span>
+            Cancelar
+          </button>
           <button class="liquid-button flex-1 !justify-center" type="submit" [disabled]="submitting()">
+            <span class="material-symbols-outlined text-base">{{ isEditing() ? 'save' : 'add_circle' }}</span>
             {{ submitting() ? 'Guardando...' : isEditing() ? 'Actualizar producto' : 'Crear producto' }}
           </button>
         </div>

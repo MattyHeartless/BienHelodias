@@ -97,6 +97,8 @@ export interface PromotionSummaryDto {
   percentageValue: number | null;
   buyQuantity: number | null;
   freeQuantity: number | null;
+  targetProductId: string | null;
+  targetProductName: string | null;
   status: boolean;
   expirationDate: string | null;
 }
@@ -145,6 +147,15 @@ export interface OrderItemDto {
   subtotal: number;
 }
 
+export interface OrderDeliveryAssigneeDto {
+  id: string;
+  fullName: string;
+  phone: string;
+  email: string;
+  isActive: boolean;
+  currentAvailability: DeliveryAvailability;
+}
+
 export interface OrderDto {
   id: string;
   storeId: string;
@@ -164,6 +175,7 @@ export interface OrderDto {
   createdAtUtc: string;
   updatedAtUtc: string;
   items: OrderItemDto[];
+  deliveryAssignee: OrderDeliveryAssigneeDto | null;
 }
 
 export interface DecodedToken {

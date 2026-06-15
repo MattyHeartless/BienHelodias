@@ -39,13 +39,13 @@ export class DashboardOverviewPageComponent {
 
   readonly isSuperAdmin = computed(() => this.role() === AppRole.SuperAdmin);
   readonly storeMetrics = computed(() => [
-    { label: 'Productos', value: this.dashboard()?.totalProducts ?? 0 },
-    { label: 'Activos', value: this.dashboard()?.activeProducts ?? 0 },
-    { label: 'Pedidos', value: this.dashboard()?.totalOrders ?? 0 },
-    { label: 'Pendientes', value: this.dashboard()?.pendingOrders ?? 0 },
-    { label: 'Listos', value: this.dashboard()?.readyOrders ?? 0 },
-    { label: 'En camino', value: this.dashboard()?.onTheWayOrders ?? 0 },
-    { label: 'Revenue', value: this.dashboard()?.revenueInOrders ?? 0, currency: true }
+    { label: 'Productos', value: this.dashboard()?.totalProducts ?? 0, icon: 'inventory_2' },
+    { label: 'Activos', value: this.dashboard()?.activeProducts ?? 0, icon: 'visibility' },
+    { label: 'Pedidos', value: this.dashboard()?.totalOrders ?? 0, icon: 'receipt_long' },
+    { label: 'Pendientes', value: this.dashboard()?.pendingOrders ?? 0, icon: 'schedule' },
+    { label: 'Listos', value: this.dashboard()?.readyOrders ?? 0, icon: 'package_2' },
+    { label: 'En camino', value: this.dashboard()?.onTheWayOrders ?? 0, icon: 'local_shipping' },
+    { label: 'Revenue', value: this.dashboard()?.revenueInOrders ?? 0, currency: true, icon: 'payments' }
   ]);
 
   readonly latestOrders = computed(() => this.orders().slice(0, 5));
@@ -58,10 +58,10 @@ export class DashboardOverviewPageComponent {
     const stores = this.stores();
 
     return [
-      { label: 'Licorerías', value: stores.length },
-      { label: 'Activas', value: stores.filter((store) => store.isActive).length },
-      { label: 'Trial', value: stores.filter((store) => store.subscriptionStatus === SubscriptionStatus.Trial).length },
-      { label: 'Suspendidas', value: stores.filter((store) => store.subscriptionStatus === SubscriptionStatus.Suspended).length }
+      { label: 'Licorerías', value: stores.length, icon: 'storefront' },
+      { label: 'Activas', value: stores.filter((store) => store.isActive).length, icon: 'check_circle' },
+      { label: 'Trial', value: stores.filter((store) => store.subscriptionStatus === SubscriptionStatus.Trial).length, icon: 'rocket_launch' },
+      { label: 'Suspendidas', value: stores.filter((store) => store.subscriptionStatus === SubscriptionStatus.Suspended).length, icon: 'pause_circle' }
     ];
   });
   readonly recentStores = computed(() =>

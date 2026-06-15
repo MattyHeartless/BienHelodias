@@ -29,7 +29,54 @@
     </div>
   } @else {
     @if (store(); as currentStore) {
-      <section class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+      <section class="space-y-6">
+        <div class="store-kpi-grid">
+          <article class="glass-panel p-6">
+            <div class="flex items-center justify-between gap-3">
+              <p class="eyebrow">Banners</p>
+              <span class="material-symbols-outlined text-xl text-primary">photo_library</span>
+            </div>
+            <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">{{ bannerSummary().total }}</p>
+            <p class="mt-2 text-sm text-on-surface-variant">Piezas cargadas para la portada</p>
+          </article>
+
+          <article class="glass-panel p-6">
+            <div class="flex items-center justify-between gap-3">
+              <p class="eyebrow">Activos</p>
+              <span class="material-symbols-outlined text-xl text-primary">visibility</span>
+            </div>
+            <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">{{ bannerSummary().active }}</p>
+            <p class="mt-2 text-sm text-on-surface-variant">Banners encendidos y visibles para el cliente</p>
+          </article>
+
+          <article class="glass-panel p-6">
+            <div class="flex items-center justify-between gap-3">
+              <p class="eyebrow">Programados</p>
+              <span class="material-symbols-outlined text-xl text-primary">event_upcoming</span>
+            </div>
+            <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">{{ bannerSummary().scheduled }}</p>
+            <p class="mt-2 text-sm text-on-surface-variant">Banners con fecha de expiración configurada</p>
+          </article>
+
+          <article class="glass-panel p-6">
+            <div class="flex items-center justify-between gap-3">
+              <p class="eyebrow">Repartidores</p>
+              <span class="material-symbols-outlined text-xl text-primary">delivery_dining</span>
+            </div>
+            <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">{{ deliverySummary().total }}</p>
+            <p class="mt-2 text-sm text-on-surface-variant">Perfiles ligados a esta tienda</p>
+          </article>
+
+          <article class="glass-panel p-6">
+            <div class="flex items-center justify-between gap-3">
+              <p class="eyebrow">Disponibles</p>
+              <span class="material-symbols-outlined text-xl text-primary">verified</span>
+            </div>
+            <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">{{ deliverySummary().available }}</p>
+            <p class="mt-2 text-sm text-on-surface-variant">Repartidores activos y marcados como listos para tomar pedidos</p>
+          </article>
+        </div>
+
         <article class="glass-panel p-6">
           <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
@@ -48,7 +95,8 @@
               <label class="field-label" for="welcome-phrase">Frase de entrada</label>
               <textarea
                 id="welcome-phrase"
-                class="min-h-[128px] w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
+                class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
+                rows="1"
                 formControlName="welcomePhrase"
                 placeholder="Ej. Bienvenido a la mejor selección de licores para tu noche."
               ></textarea>
@@ -61,43 +109,12 @@
               </p>
 
               <button class="liquid-button !justify-center" type="submit" [disabled]="submittingWelcome()">
+                <span class="material-symbols-outlined text-base">save</span>
                 {{ submittingWelcome() ? 'Guardando...' : 'Guardar frase' }}
               </button>
             </div>
           </form>
         </article>
-
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-1">
-          <article class="glass-panel p-6">
-            <p class="eyebrow">Banners</p>
-            <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">{{ bannerSummary().total }}</p>
-            <p class="mt-2 text-sm text-on-surface-variant">Piezas cargadas para la portada</p>
-          </article>
-
-          <article class="glass-panel p-6">
-            <p class="eyebrow">Activos</p>
-            <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">{{ bannerSummary().active }}</p>
-            <p class="mt-2 text-sm text-on-surface-variant">Visibles para el cliente</p>
-          </article>
-
-          <article class="glass-panel p-6">
-            <p class="eyebrow">Programados</p>
-            <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">{{ bannerSummary().scheduled }}</p>
-            <p class="mt-2 text-sm text-on-surface-variant">Con fecha de expiración definida</p>
-          </article>
-
-          <article class="glass-panel p-6">
-            <p class="eyebrow">Repartidores</p>
-            <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">{{ deliverySummary().total }}</p>
-            <p class="mt-2 text-sm text-on-surface-variant">Perfiles ligados a esta tienda</p>
-          </article>
-
-          <article class="glass-panel p-6">
-            <p class="eyebrow">Disponibles</p>
-            <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">{{ deliverySummary().available }}</p>
-            <p class="mt-2 text-sm text-on-surface-variant">Activos y listos para tomar pedidos</p>
-          </article>
-        </div>
       </section>
 
       <section>
@@ -151,7 +168,7 @@
 
                     @if (banner.promotion) {
                       <div class="promo-meta mt-4">
-                        <p class="promo-meta__code">Codigo {{ banner.promotion.code }}</p>
+                        <p class="promo-meta__code">Código {{ banner.promotion.code }}</p>
                         <p class="promo-meta__type">{{ promotionLabel(banner) }}</p>
                       </div>
                     }
@@ -167,11 +184,18 @@
                   </div>
 
                   <div class="mt-5 flex flex-wrap gap-3">
-                    <button class="ghost-button" type="button" (click)="editBanner(banner)">Editar</button>
+                    <button class="ghost-button" type="button" (click)="editBanner(banner)">
+                      <span class="material-symbols-outlined text-base">edit</span>
+                      Editar
+                    </button>
                     <button class="ghost-button" type="button" (click)="toggleBannerStatus(banner)">
+                      <span class="material-symbols-outlined text-base">{{ banner.status ? 'visibility_off' : 'visibility' }}</span>
                       {{ banner.status ? 'Desactivar' : 'Activar' }}
                     </button>
-                    <button class="danger-button" type="button" (click)="deleteBanner(banner)">Eliminar</button>
+                    <button class="danger-button" type="button" (click)="deleteBanner(banner)">
+                      <span class="material-symbols-outlined text-base">delete</span>
+                      Eliminar
+                    </button>
                   </div>
                 </article>
               }
@@ -222,7 +246,7 @@
                     </div>
 
                     <div class="mt-4 grid gap-3 text-sm text-on-surface-variant">
-                      <p>Telefono: <span class="text-white">{{ deliveryUser.phone }}</span></p>
+                      <p>Teléfono: <span class="text-white">{{ deliveryUser.phone }}</span></p>
                       <p>
                         Estado operativo:
                         <span class="text-white">{{ deliveryAvailabilityLabel(deliveryUser) }}</span>
@@ -232,6 +256,7 @@
 
                   <div class="mt-5 flex flex-wrap gap-3">
                     <button class="ghost-button" type="button" (click)="toggleDeliveryUserStatus(deliveryUser)">
+                      <span class="material-symbols-outlined text-base">{{ deliveryUser.isActive ? 'block' : 'check_circle' }}</span>
                       {{ deliveryUser.isActive ? 'Desactivar acceso' : 'Activar acceso' }}
                     </button>
                   </div>
@@ -255,7 +280,10 @@
             {{ isEditingBanner() ? 'Actualiza la campaña visible' : 'Crea un nuevo banner para la portada' }}
           </h3>
         </div>
-        <button class="ghost-button" type="button" (click)="closeBannerModal()">Cerrar</button>
+        <button class="ghost-button" type="button" (click)="closeBannerModal()">
+          <span class="material-symbols-outlined text-base">close</span>
+          Cerrar
+        </button>
       </div>
 
       <form class="mt-6 space-y-4" [formGroup]="bannerForm" (ngSubmit)="saveBanner()">
@@ -270,7 +298,7 @@
         </div>
 
         <div class="field-block">
-          <label class="field-label" for="banner-title">Titulo</label>
+          <label class="field-label" for="banner-title">Título</label>
           <input
             id="banner-title"
             class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
@@ -280,7 +308,7 @@
         </div>
 
         <div class="field-block">
-          <label class="field-label" for="banner-description">Descripcion</label>
+          <label class="field-label" for="banner-description">Descripción</label>
           <textarea
             id="banner-description"
             class="min-h-[110px] w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
@@ -311,15 +339,17 @@
           </div>
         </div>
 
-        <label class="flex items-center gap-3 rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-sm text-white">
-          <input class="h-4 w-4 accent-primary" formControlName="status" type="checkbox" />
-          Banner activo en la portada
-        </label>
+        <div class="banner-check-grid">
+          <label class="flex items-center gap-3 rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-sm text-white">
+            <input class="h-4 w-4 accent-primary" formControlName="status" type="checkbox" />
+            Banner activo en la portada
+          </label>
 
-        <label class="flex items-center gap-3 rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-sm text-white">
-          <input class="h-4 w-4 accent-primary" formControlName="hasPromotion" type="checkbox" />
-          Este banner activa una promocion real con codigo
-        </label>
+          <label class="flex items-center gap-3 rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-sm text-white">
+            <input class="h-4 w-4 accent-primary" formControlName="hasPromotion" type="checkbox" />
+            Activar promocion con codigo
+          </label>
+        </div>
 
         @if (bannerForm.get('hasPromotion')?.value) {
           <div class="promo-editor">
@@ -335,12 +365,12 @@
               </div>
 
               <div class="field-block">
-                <label class="field-label" for="promotion-code">Codigo</label>
+                <label class="field-label" for="promotion-code">Código</label>
                 <input
                   id="promotion-code"
                   class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 uppercase text-white outline-none focus:border-primary"
                   formControlName="promotionCode"
-                  placeholder="Se genera automatico si lo dejas vacio"
+                  placeholder="Se genera automático si lo dejas vacío"
                 />
               </div>
             </div>
@@ -371,22 +401,64 @@
                     type="number"
                   />
                 </div>
-              } @else {
-                <div class="promo-static-rule">
-                  <p class="eyebrow">Regla</p>
-                  <h4 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">2x1 por linea de producto</h4>
-                  <p class="mt-3 text-sm leading-7 text-on-surface-variant">
-                    En esta primera version, el codigo regala una unidad por cada dos del mismo producto dentro del carrito.
-                  </p>
-                </div>
               }
             </div>
+
+            @if (bannerForm.get('promotionType')?.value === promotionType.BuyXGetY) {
+              <div class="field-block">
+                <label class="field-label" for="promotion-target-product">Producto del 2x1</label>
+                <input
+                  id="promotion-target-product"
+                  class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
+                  [value]="promotionProductSearch()"
+                  (input)="updatePromotionProductSearch($any($event.target).value)"
+                  placeholder="Buscar producto del catalogo"
+                />
+                <p class="field-help">El codigo solo se aplicará sobre este producto.</p>
+
+                @if (selectedPromotionProduct(); as selectedProduct) {
+                  <div class="promo-selected-product">
+                    <div>
+                      <p class="promo-selected-product__name">{{ selectedProduct.name }}</p>
+                      <p class="promo-selected-product__meta">{{ selectedProduct.category }} · {{ selectedProduct.price | number: '1.2-2' }}</p>
+                    </div>
+                    <button class="ghost-button" type="button" (click)="clearPromotionProductSelection()">Quitar</button>
+                  </div>
+                }
+
+                <div class="promo-product-results">
+                  @if (filteredPromotionProducts().length) {
+                    @for (product of filteredPromotionProducts(); track product.id) {
+                      <button class="promo-product-option" type="button" (click)="selectPromotionProduct(product)">
+                        <span class="promo-product-option__media">
+                          @if (product.imageUrl) {
+                            <img class="promo-product-option__image" [src]="product.imageUrl" [alt]="product.name" />
+                          } @else {
+                            <span class="material-symbols-outlined promo-product-option__icon">local_bar</span>
+                          }
+                        </span>
+                        <span class="promo-product-option__content">
+                          <span class="promo-product-option__name">{{ product.name }}</span>
+                          <span class="promo-product-option__meta">{{ product.category }}</span>
+                        </span>
+                      </button>
+                    }
+                  } @else {
+                    <p class="field-help">No hay productos que coincidan con la búsqueda.</p>
+                  }
+                </div>
+              </div>
+            }
           </div>
         }
 
         <div class="flex flex-wrap gap-3 pt-2">
-          <button class="ghost-button flex-1" type="button" (click)="closeBannerModal()">Cancelar</button>
+          <button class="ghost-button flex-1" type="button" (click)="closeBannerModal()">
+            <span class="material-symbols-outlined text-base">close</span>
+            Cancelar
+          </button>
           <button class="liquid-button flex-1 !justify-center" type="submit" [disabled]="submittingBanner()">
+            <span class="material-symbols-outlined text-base">{{ isEditingBanner() ? 'save' : 'add_circle' }}</span>
             {{ submittingBanner() ? 'Guardando...' : isEditingBanner() ? 'Actualizar banner' : 'Crear banner' }}
           </button>
         </div>
@@ -403,7 +475,10 @@
           <p class="eyebrow">Nuevo repartidor</p>
           <h3 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">Alta de repartidor para esta tienda</h3>
         </div>
-        <button class="ghost-button" type="button" (click)="closeDeliveryUserModal()">Cerrar</button>
+        <button class="ghost-button" type="button" (click)="closeDeliveryUserModal()">
+          <span class="material-symbols-outlined text-base">close</span>
+          Cerrar
+        </button>
       </div>
 
       <form class="mt-6 space-y-4" [formGroup]="deliveryUserForm" (ngSubmit)="saveDeliveryUser()">
@@ -430,7 +505,7 @@
           </div>
 
           <div class="field-block">
-            <label class="field-label" for="delivery-user-phone">Telefono</label>
+            <label class="field-label" for="delivery-user-phone">Teléfono</label>
             <input
               id="delivery-user-phone"
               class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
@@ -447,14 +522,18 @@
             class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
             formControlName="password"
             type="password"
-            placeholder="Minimo 8 caracteres"
+            placeholder="Mínimo 8 caracteres"
           />
           <p class="field-help">Esta contraseña se entrega al repartidor para su primer acceso a la app de reparto.</p>
         </div>
 
         <div class="flex flex-wrap gap-3 pt-2">
-          <button class="ghost-button flex-1" type="button" (click)="closeDeliveryUserModal()">Cancelar</button>
+          <button class="ghost-button flex-1" type="button" (click)="closeDeliveryUserModal()">
+            <span class="material-symbols-outlined text-base">close</span>
+            Cancelar
+          </button>
           <button class="liquid-button flex-1 !justify-center" type="submit" [disabled]="submittingDeliveryUser()">
+            <span class="material-symbols-outlined text-base">person_add</span>
             {{ submittingDeliveryUser() ? 'Guardando...' : 'Crear repartidor' }}
           </button>
         </div>

@@ -1564,4 +1564,3 @@ C:/Users/Jair/Documents/My Web Sites/BienHelodias/backend/tests/LiquorSaaS.Integ
 /Users/jaiman/Documents/My Web Sites/BienHelodias/backend/tests/LiquorSaaS.IntegrationTests/obj/Debug/net8.0/LiquorSaaS.IntegrationTests.pdb
 /Users/jaiman/Documents/My Web Sites/BienHelodias/backend/tests/LiquorSaaS.IntegrationTests/obj/Debug/net8.0/LiquorSaaS.IntegrationTests.genruntimeconfig.cache
 /Users/jaiman/Documents/My Web Sites/BienHelodias/backend/tests/LiquorSaaS.IntegrationTests/obj/Debug/net8.0/ref/LiquorSaaS.IntegrationTests.dll
-/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/tests/LiquorSaaS.IntegrationTests/bin/Debug/net8.0/LiquorSaaS.Api.staticwebassets.endpoints.json
