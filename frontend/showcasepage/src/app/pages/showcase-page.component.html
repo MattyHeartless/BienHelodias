@@ -1,0 +1,357 @@
+<div class="intro-overlay" #introOverlay [class.is-hidden]="!isIntroActive" aria-hidden="true">
+  <canvas class="intro-overlay__canvas" #introCanvas></canvas>
+  <div class="intro-overlay__glow" #introGlow></div>
+  <div class="intro-overlay__content">
+    <h1 class="intro-overlay__title" #introTitle>
+      <span class="intro-line">
+        <span class="intro-letter" #introLetter *ngFor="let char of introLineOne; trackBy: trackByChar" [class.intro-letter--space]="char === ' '">
+          {{ char === ' ' ? '\u00A0' : char }}
+        </span>
+      </span>
+      <span class="intro-line">
+        <span class="intro-letter" #introLetter *ngFor="let char of introLineTwo; trackBy: trackByChar" [class.intro-letter--space]="char === ' '">
+          {{ char === ' ' ? '\u00A0' : char }}
+        </span>
+      </span>
+    </h1>
+  </div>
+</div>
+
+<div class="page-shell">
+  <header class="floating-nav motion-reveal is-visible">
+    <a class="brand" href="#top">
+      <span class="brand-dot brand-dot--icon material-symbols-outlined" aria-hidden="true">local_bar</span>
+      <span class="brand-wordmark">BIEN HELODIAS</span>
+    </a>
+
+    <nav>
+      <a href="#plataforma"><span class="material-symbols-outlined nav-icon" aria-hidden="true">dashboard</span><span>Plataforma</span></a>
+      <a href="#red"><span class="material-symbols-outlined nav-icon" aria-hidden="true">hub</span><span>Red</span></a>
+      <a href="#afiliate"><span class="material-symbols-outlined nav-icon" aria-hidden="true">storefront</span><span>Afiliación</span></a>
+    </nav>
+
+    <a
+      class="nav-button nav-button--affiliate"
+      href="#afiliate"
+      #affiliateButton
+      (mouseenter)="animateAffiliateCta(true)"
+      (mouseleave)="animateAffiliateCta(false)"
+    >
+      <span class="material-symbols-outlined affiliate-cta__icon" #affiliateIcon aria-hidden="true">add_business</span>
+      <span>Afiliar negocio</span>
+    </a>
+  </header>
+
+  <main id="top">
+    <section class="band hero-band">
+      <div class="band-inner hero-layout">
+        <div class="hero-copy">
+          <h1 class="motion-reveal is-visible hero-delay-1">Tu licorería, viva desde el primer pedido.</h1>
+          <p class="hero-summary motion-reveal is-visible hero-delay-2">
+            Vende, administra y entrega desde una sola plataforma.
+          </p>
+
+          <div class="hero-actions motion-reveal is-visible hero-delay-3">
+            <a class="primary-pill motion-cta" href="#afiliate">Afiliar mi negocio</a>
+            <a class="ghost-pill" href="#plataforma">Ver plataforma</a>
+          </div>
+
+          <div class="hero-marquee">
+            <div class="hero-marquee-track">
+              <span *ngFor="let item of marqueeItems">{{ item }}</span>
+              <span *ngFor="let item of marqueeItems">{{ item }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <div class="hero-wave motion-reveal is-visible hero-delay-4"></div>
+
+          <div class="hero-mockup motion-reveal is-visible hero-delay-4 motion-hover-lift motion-float-slow">
+            <div class="spline-frame">
+              <model-viewer
+                src="/models/bien-helodias-iphone15-front-graphite-cameras.glb"
+                alt="Modelo 3D de iPhone para Bien Helodias"
+                camera-controls
+                orientation="-0.27deg -10.62deg 0.02deg"
+                interaction-prompt="none"
+                shadow-intensity="1"
+                exposure="2.18"
+                camera-orbit="0deg 82deg 110%"
+                field-of-view="26deg"
+              ></model-viewer>
+            </div>
+          </div>
+
+          <article class="floating-card incoming-card motion-reveal is-visible hero-delay-5 motion-hover-lift motion-float-fast">
+            <div class="status-line">
+              <div class="status-dot pulse-dot"></div>
+              <small>Pedido recibido</small>
+            </div>
+            <strong>Corona 12 Pack</strong>
+            <span>$249</span>
+          </article>
+
+          <article class="floating-card rider-card motion-reveal is-visible hero-delay-6 motion-hover-lift motion-float-reverse">
+            <div class="mini-route">
+              <span class="route-icon route-icon--motorbike" aria-hidden="true"></span>
+              <b></b>
+              <span class="route-icon route-icon--customer" aria-hidden="true"></span>
+            </div>
+            <small>Repartidor en camino</small>
+            <strong>Llega en 12 min</strong>
+          </article>
+
+          <article class="floating-card promo-card motion-reveal is-visible hero-delay-7 motion-hover-lift motion-float-medium">
+            <small>Promo activa</small>
+            <strong>2x1 seleccionados</strong>
+            <div class="promo-pill">Hoy</div>
+          </article>
+
+          <article class="bottle-card motion-reveal is-visible hero-delay-8 motion-float-bottle">
+            <model-viewer
+              class="martini-model"
+              src="/models/copa_martini_verde.glb"
+              alt="Modelo 3D de copa martini"
+              camera-controls
+              interaction-prompt="none"
+              shadow-intensity="0.7"
+              exposure="1.85"
+              orientation="0.72deg -90deg -0.6deg"
+              camera-orbit="20deg 78deg 120%"
+              field-of-view="22deg"
+            ></model-viewer>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section #metricsSection class="band section-band trust-band">
+      <div class="band-inner metrics-layout">
+        <div class="section-copy motion-reveal" #revealEl>
+          <p class="eyebrow">Señal de red</p>
+          <h2>Operación real, no promesa.</h2>
+        </div>
+
+        <div class="metrics-grid">
+          <article
+            class="metric-tile motion-reveal motion-hover-lift"
+            #revealEl
+            *ngFor="let metric of metrics; let i = index; trackBy: trackByLabel"
+            [style.transitionDelay.ms]="80 + i * 100"
+          >
+            <strong #counterEl>{{ metric.display }}</strong>
+            <span>{{ metric.label }}</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="band section-band" id="plataforma" #platformSection>
+      <div class="band-inner platform-layout">
+        <div class="section-copy" #platformCopy>
+          <p class="eyebrow">Plataforma</p>
+          <h2>Menos explicación. Más señales vivas.</h2>
+        </div>
+
+        <div class="bento-grid">
+          <article
+            class="bento-tile motion-hover-lift"
+            #platformCard
+            *ngFor="let card of solutions; let i = index; trackBy: trackByTitle"
+            [class.tile-lime]="card.tone === 'lime'"
+            [class.tile-blue]="card.tone === 'blue'"
+            [class.tile-maroon]="card.tone === 'maroon'"
+          >
+            <span class="tile-label">{{ card.eyebrow }}</span>
+            <h3>{{ card.title }}</h3>
+            <div class="tile-mockup">
+              <ng-container [ngSwitch]="card.eyebrow">
+                <div *ngSwitchCase="'Cliente'" #platformScene class="tile-ui tile-ui--storefront scene-client" style="background: transparent;">
+                  <img
+                    src="/imgs/beerbag.png"
+                    alt="Promo 2x1 Bien Helodias"
+                    class="scene-client__image scene-illustration"
+                    #platformIllustration
+                    style="width: auto; max-width: 112%; height: 112%; object-fit: contain; filter: drop-shadow(0 0 18px rgb(210 253 110 / 0.16)) drop-shadow(0 16px 28px rgb(0 0 0 / 0.18)); transform-origin: 50% 58%;"
+                  />
+                </div>
+                <div *ngSwitchCase="'Negocio'" #platformScene class="tile-ui tile-ui--admin scene-admin" style="background: transparent;">
+                  <img
+                    src="/imgs/bussines.png"
+                    alt="Panel de negocio Bien Helodias"
+                    class="scene-admin__image scene-illustration"
+                    #platformIllustration
+                    style="width: auto; max-width: 112%; height: 112%; object-fit: contain; filter: drop-shadow(0 0 18px rgb(210 253 110 / 0.14)) drop-shadow(0 16px 28px rgb(0 0 0 / 0.18)); transform-origin: 50% 56%;"
+                  />
+                  <span class="scene-accent-pulse scene-accent-pulse--admin" #platformPulse aria-hidden="true"></span>
+                </div>
+                <div *ngSwitchDefault #platformScene class="tile-ui tile-ui--delivery scene-delivery" style="background: transparent;">
+                  <img
+                    src="/imgs/route.png"
+                    alt="Ruta de delivery Bien Helodias"
+                    class="scene-delivery__image scene-illustration"
+                    #platformIllustration
+                    style="width: auto; max-width: 112%; height: 112%; object-fit: contain; filter: drop-shadow(0 0 18px rgb(210 253 110 / 0.14)) drop-shadow(0 16px 28px rgb(0 0 0 / 0.18)); transform-origin: 50% 56%;"
+                  />
+                  <span class="scene-accent-pulse scene-accent-pulse--delivery" #platformPulse aria-hidden="true"></span>
+                </div>
+              </ng-container>
+            </div>
+            <div class="tile-chip-row">
+              <span *ngFor="let chip of card.chips">{{ chip }}</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="band blue-band">
+      <div class="band-inner flow-layout">
+        <div class="section-copy on-dark motion-reveal" #revealEl>
+          <p class="eyebrow dark-eyebrow">Cómo funciona</p>
+          <h2>Afíliate. Configura. Vende. Entrega.</h2>
+        </div>
+
+        <div class="timeline-track motion-reveal" #revealEl>
+          <div class="timeline-line"></div>
+          <article class="timeline-step motion-hover-lift">
+            <div class="timeline-node">
+              <span class="material-symbols-outlined timeline-icon timeline-icon--affiliate" aria-hidden="true">storefront</span>
+            </div>
+            <strong>Afíliate</strong>
+            <span>01</span>
+          </article>
+          <article class="timeline-step motion-hover-lift">
+            <div class="timeline-node">
+              <span class="material-symbols-outlined timeline-icon timeline-icon--config" aria-hidden="true">tune</span>
+            </div>
+            <strong>Configura</strong>
+            <span>02</span>
+          </article>
+          <article class="timeline-step motion-hover-lift">
+            <div class="timeline-node">
+              <span class="material-symbols-outlined timeline-icon timeline-icon--sell" aria-hidden="true">point_of_sale</span>
+            </div>
+            <strong>Vende</strong>
+            <span>03</span>
+          </article>
+          <article class="timeline-step motion-hover-lift">
+            <div class="timeline-node">
+              <span class="material-symbols-outlined timeline-icon timeline-icon--delivery" aria-hidden="true">delivery_dining</span>
+            </div>
+            <strong>Entrega</strong>
+            <span>04</span>
+          </article>
+          <article class="timeline-step motion-hover-lift">
+            <div class="timeline-node">
+              <span class="material-symbols-outlined timeline-icon timeline-icon--growth" aria-hidden="true">trending_up</span>
+            </div>
+            <strong>Crece</strong>
+            <span>05</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="band section-band ecosystem-band">
+      <div class="band-inner ecosystem-layout">
+        <div class="section-copy motion-reveal" #revealEl>
+          <p class="eyebrow">Ecosistema</p>
+          <h2>Tres superficies. Un solo pulso.</h2>
+        </div>
+
+        <div class="ecosystem-stage motion-reveal" #revealEl>
+          <div class="ecosystem-wave"></div>
+          <article class="ecosystem-mockup center motion-hover-lift motion-float-slow">
+            <img src="/imgs/eco_tienda.png" alt="Tienda Bien Helodias" class="ecosystem-image ecosystem-image--storefront" />
+          </article>
+          <article class="ecosystem-mockup left motion-hover-lift motion-float-fast">
+            <img src="/imgs/eco_admin.png" alt="Panel administrativo Bien Helodias" class="ecosystem-image ecosystem-image--admin" />
+          </article>
+          <article class="ecosystem-mockup right motion-hover-lift motion-float-medium">
+            <img src="/imgs/eco_envio.png" alt="Aplicación de envíos Bien Helodias" class="ecosystem-image ecosystem-image--delivery" />
+          </article>
+          <div class="ecosystem-chip top-left">Promos</div>
+          <div class="ecosystem-chip bottom-right">Tracking</div>
+          <div class="ecosystem-chip mid-right">Push</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band section-band" id="red">
+      <div class="band-inner affiliates-layout">
+        <div class="section-copy motion-reveal" #revealEl>
+          <p class="eyebrow">Miembros de la red</p>
+          <h2>Negocios impulsados por Bien Helodias.</h2>
+        </div>
+
+        <div class="affiliate-row">
+          <article
+            class="affiliate-tile motion-reveal motion-hover-lift"
+            #revealEl
+            *ngFor="let affiliate of affiliates; let i = index; trackBy: trackByName"
+            [style.transitionDelay.ms]="100 + i * 110"
+          >
+            <div class="affiliate-image">
+              <img [src]="affiliate.imagePath" [alt]="affiliate.imageAlt" class="affiliate-image__asset" />
+            </div>
+            <div class="affiliate-badge">Miembro de la red</div>
+            <h3>{{ affiliate.name }}</h3>
+            <p>{{ affiliate.city }} · {{ affiliate.category }}</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="band maroon-band" id="afiliate">
+      <div class="band-inner cta-layout">
+        <div class="section-copy on-dark motion-reveal" #revealEl>
+          <p class="eyebrow dark-eyebrow">Afiliación</p>
+          <h2>Lleva tu licorería a internet.</h2>
+          <p>Solicita información y arma tu operación sobre una base lista para vender.</p>
+        </div>
+
+        <div class="cta-stage motion-reveal" #revealEl>
+          <form class="mini-form motion-hover-lift">
+            <label class="mini-form__field">
+              <span class="material-symbols-outlined mini-form__icon" aria-hidden="true">person</span>
+              <input #affiliateName type="text" placeholder="Nombre" />
+            </label>
+            <label class="mini-form__field">
+              <span class="material-symbols-outlined mini-form__icon" aria-hidden="true">storefront</span>
+              <input #affiliateBusiness type="text" placeholder="Negocio" />
+            </label>
+            <label class="mini-form__field">
+              <span class="material-symbols-outlined mini-form__icon" aria-hidden="true">call</span>
+              <input #affiliatePhone type="tel" placeholder="Teléfono" />
+            </label>
+            <label class="mini-form__field">
+              <span class="material-symbols-outlined mini-form__icon" aria-hidden="true">mail</span>
+              <input #affiliateEmail type="email" placeholder="Correo" />
+            </label>
+            <a
+              class="white-pill motion-cta mini-form__submit"
+              [href]="buildAffiliateWhatsAppLink(affiliateName.value, affiliateBusiness.value, affiliatePhone.value, affiliateEmail.value)"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span class="material-symbols-outlined mini-form__submit-icon" aria-hidden="true">chat</span>
+              <span>Quiero afiliar mi negocio</span>
+            </a>
+          </form>
+
+          <div class="cta-float-card motion-float-medium">Setup rápido</div>
+          <div class="cta-icon-cluster motion-float-reverse" aria-hidden="true">
+            <span class="material-symbols-outlined cta-icon-cluster__item cta-icon-cluster__item--catalog">inventory_2</span>
+            <span class="material-symbols-outlined cta-icon-cluster__item cta-icon-cluster__item--checkout">point_of_sale</span>
+            <span class="material-symbols-outlined cta-icon-cluster__item cta-icon-cluster__item--delivery">local_shipping</span>
+          </div>
+          <div class="cta-mini-mockup motion-hover-lift motion-float-slow">
+            <span class="material-symbols-outlined cta-mini-mockup__icon" aria-hidden="true">storefront</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>

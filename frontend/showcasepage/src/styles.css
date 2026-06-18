@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Hyperwave";
+  src: url("/Hyperwave.otf") format("opentype");
+  font-display: swap;
+}
+
+@theme {
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body: "Manrope", sans-serif;
+  --font-brand: "Hyperwave", "Space Grotesk", sans-serif;
+
+  --color-primary: #d2fd6e;
+  --color-primary-deep: #87ad26;
+  --color-primary-text: #486100;
+  --color-surface: #0e0e0e;
+  --color-surface-low: #131313;
+  --color-surface-high: #1f2020;
+  --color-surface-highest: #262626;
+  --color-outline: #484848;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #c9c9c9;
+  --color-cobalt-band: #2665d6;
+  --color-maroon-plate: #780016;
+  --color-cobalt-deep: #061492;
+  --color-forest-ink: #254f1a;
+  --color-mustard-pop: #d6a337;
+  --color-lavender-mist: #e9c0e9;
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+    --motion-fast: 180ms;
+    --motion-base: 320ms;
+    --motion-slow: 600ms;
+    --motion-section: 800ms;
+    --motion-float: 7000ms;
+    --motion-float-slow: 11000ms;
+
+    --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+    --ease-spring-soft: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    --reveal-y: 32px;
+    --reveal-y-lg: 56px;
+    --hover-lift: -8px;
+    --float-y: 12px;
+    --float-x: 8px;
+
+    --glow-lime-soft: 0 0 60px rgb(210 253 110 / 0.06);
+    --glow-lime-medium: 0 0 80px rgb(210 253 110 / 0.12);
+    --shadow-card-tonal: 0 24px 80px rgb(0 0 0 / 0.28);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    min-height: 100%;
+  }
+
+  html {
+    touch-action: manipulation;
+  }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(circle at top right, rgb(210 253 110 / 0.12), transparent 26%),
+      radial-gradient(circle at left 80%, rgb(231 233 89 / 0.06), transparent 18%),
+      var(--color-surface);
+    color: var(--color-text-primary);
+    font-family: var(--font-body);
+  }
+
+  a,
+  button,
+  input,
+  textarea {
+    font: inherit;
+  }
+}
+
+@layer components {
+  .eyebrow {
+    margin: 0 0 14px;
+    color: var(--color-primary);
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+  }
+
+  .headline-display {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(3.2rem, 8vw, 6rem);
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    line-height: 0.95;
+  }
+}
