@@ -8,6 +8,10 @@
       <span class="material-symbols-outlined text-base">refresh</span>
       Refrescar
     </button>
+    <button class="ghost-button" type="button" (click)="openInventoryAiModal()">
+      <span class="material-symbols-outlined text-base">photo_camera</span>
+      Inventario con IA
+    </button>
     <button class="liquid-button cursor-pointer" type="button" (click)="openCreateModal()">
       <span class="material-symbols-outlined text-base">add</span>
       Nuevo producto
@@ -51,7 +55,6 @@
           class="catalog-search-input"
           type="search"
           placeholder="Busca por nombre o categoria"
-          
           [value]="searchTerm()"
           (input)="updateSearchTerm($any($event.target).value)"
         />
@@ -135,7 +138,6 @@
             <h4 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">No encontramos productos con ese filtro</h4>
             <p class="mt-3 text-sm leading-7 text-on-surface-variant">
               Prueba con otro nombre, otra categoria o limpia los filtros para ver todo el catalogo.
-              
             </p>
           </div>
         }
@@ -247,6 +249,256 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+}
+
+@if (inventoryAiModalOpen()) {
+  <div class="modal-backdrop" (click)="closeInventoryAiModal()">
+    <div class="modal-panel inventory-ai-modal" (click)="$event.stopPropagation()">
+      @if (inventoryAiLoading()) {
+        <div class="inventory-loading-overlay" #inventoryLoadingOverlay aria-live="polite" aria-busy="true">
+          <div class="inventory-loading-overlay__glow" #inventoryLoadingGlow></div>
+          <div class="inventory-loading-overlay__scan" #inventoryLoadingScan></div>
+          <div class="inventory-loading-overlay__content">
+            <p class="eyebrow inventory-ai-heading">
+              <span class="material-symbols-outlined inventory-ai-heading__icon" aria-hidden="true">liquor</span>
+              <span>Inventario con IA</span>
+            </p>
+            <h4 class="inventory-loading-overlay__title" #inventoryLoadingTitle>Analizando imagen</h4>
+            <p class="inventory-loading-overlay__subtitle" #inventoryLoadingSubtitle>Estamos detectando productos y preparando coincidencias con tu catálogo.</p>
+            <div class="inventory-loading-overlay__dots" #inventoryLoadingDots aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+      }
+
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <p class="eyebrow">Inventario con IA</p>
+          <h3 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">Analiza una foto y decide qué ajustar o agregar</h3>
+        </div>
+        <button class="ghost-button" type="button" (click)="closeInventoryAiModal()">
+          <span class="material-symbols-outlined text-base">close</span>
+          Cerrar
+        </button>
+      </div>
+
+      <div class="inventory-ai-upload mt-6">
+        <input #inventoryFileInput hidden accept="image/*" type="file" (change)="updateInventoryImage($event)" />
+        <input #inventoryCameraInput hidden accept="image/*" capture="environment" type="file" (change)="updateInventoryImage($event)" />
+
+        <div class="inventory-ai-preview">
+          @if (inventoryAiPreviewUrl()) {
+            <img [src]="inventoryAiPreviewUrl()!" alt="Vista previa de inventario" class="inventory-ai-preview__image" />
+          } @else {
+            <div class="inventory-ai-preview__placeholder">
+              <span class="material-symbols-outlined text-4xl text-primary">photo_camera</span>
+              <p class="mt-3 text-sm text-on-surface-variant">Sube una imagen o toma una foto del inventario visible.</p>
+            </div>
+          }
+        </div>
+
+        <div class="inventory-ai-upload__actions">
+          <button class="ghost-button" type="button" (click)="inventoryFileInput.click()">
+            <span class="material-symbols-outlined text-base">upload</span>
+            Subir imagen
+          </button>
+          <button class="ghost-button" type="button" (click)="inventoryCameraInput.click()">
+            <span class="material-symbols-outlined text-base">photo_camera</span>
+            Tomar foto
+          </button>
+          <button class="liquid-button" type="button" [disabled]="!inventoryAiSelectedFile() || inventoryAiLoading()" (click)="analyzeInventoryImage()">
+            <span class="material-symbols-outlined text-base">{{ inventoryAiLoading() ? 'hourglass_top' : 'auto_awesome' }}</span>
+            {{ inventoryAiLoading() ? 'Analizando...' : 'Analizar imagen' }}
+          </button>
+        </div>
+      </div>
+
+      @if (inventoryAiError()) {
+        <div class="inventory-ai-alert inventory-ai-alert--error mt-5">
+          <span class="material-symbols-outlined">error</span>
+          <p>{{ inventoryAiError() }}</p>
+        </div>
+      }
+
+      @if (inventoryAiAnalysis(); as analysis) {
+        <section class="mt-8 space-y-6">
+          <div class="grid gap-4 md:grid-cols-4">
+            <article class="inventory-ai-stat">
+              <p class="eyebrow">Detectados</p>
+              <p class="inventory-ai-stat__value">{{ inventoryAiProgress().totalDetections }}</p>
+            </article>
+            <article class="inventory-ai-stat">
+              <p class="eyebrow">Ajustar</p>
+              <p class="inventory-ai-stat__value">{{ inventoryAiProgress().matchedCount + inventoryAiProgress().reviewCount }}</p>
+            </article>
+            <article class="inventory-ai-stat">
+              <p class="eyebrow">Crear</p>
+              <p class="inventory-ai-stat__value">{{ inventoryAiProgress().createCount }}</p>
+            </article>
+            <article class="inventory-ai-stat">
+              <p class="eyebrow">Ignorar</p>
+              <p class="inventory-ai-stat__value">{{ inventoryAiProgress().ignoredCount }}</p>
+            </article>
+          </div>
+
+          <div class="space-y-4">
+            @for (item of inventoryAiReviewItems(); track item.id) {
+              <article class="inventory-review-card">
+                <div class="inventory-review-card__header">
+                  <div>
+                    <div class="flex flex-wrap items-center gap-2">
+                      <p class="font-display text-2xl font-bold tracking-[-0.04em]">{{ item.rawLabel }}</p>
+                      <span class="inventory-tag inventory-tag--status">{{ getInventoryStatusLabel(item.matchStatus) }}</span>
+                      <span class="inventory-tag" [class.inventory-tag--muted]="item.confidence === 'low'">{{ getInventoryConfidenceLabel(item.confidence) }}</span>
+                    </div>
+                    <div class="mt-3 flex flex-wrap gap-2">
+                      <button class="ghost-button !px-4 !py-2" type="button" (click)="openGoogleImagesSearch(getInventorySearchQuery(item))">
+                        <span class="material-symbols-outlined text-base">image_search</span>
+                        Buscar imágenes
+                      </button>
+                    </div>
+                    @if (item.notes) {
+                      <p class="mt-2 text-sm text-on-surface-variant">{{ item.notes }}</p>
+                    }
+                  </div>
+
+                  <label class="field-block inventory-quantity-field">
+                    <span class="field-label">Cantidad</span>
+                    <input
+                      class="w-full rounded-[1.1rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
+                      type="number"
+                      min="0"
+                      [value]="item.editedQuantity"
+                      (input)="updateInventoryQuantity(item.id, $any($event.target).value)"
+                    />
+                  </label>
+                </div>
+
+                <div class="inventory-action-row">
+                  @if (item.matchStatus === 'matched') {
+                    <button class="inventory-action" type="button" [class.inventory-action--active]="item.selectedAction === 'adjust'" (click)="setInventoryAction(item.id, 'adjust')">Ajustar stock</button>
+                  }
+
+                  @if (item.matchStatus !== 'matched') {
+                    <button class="inventory-action" type="button" [class.inventory-action--active]="item.selectedAction === 'link'" (click)="setInventoryAction(item.id, 'link')">Vincular a existente</button>
+                    <button class="inventory-action" type="button" [class.inventory-action--active]="item.selectedAction === 'create'" (click)="setInventoryAction(item.id, 'create')">Agregar al catálogo</button>
+                  }
+
+                  <button class="inventory-action" type="button" [class.inventory-action--active]="item.selectedAction === 'ignore'" (click)="setInventoryAction(item.id, 'ignore')">Ignorar</button>
+                </div>
+
+                @if (item.selectedAction === 'adjust' || item.selectedAction === 'link') {
+                  <div class="field-block mt-4">
+                    <label class="field-label">Producto del catálogo</label>
+                    <select
+                      class="catalog-category-select"
+                      [value]="item.selectedProductId ?? ''"
+                      (change)="updateInventorySelectedProduct(item.id, $any($event.target).value)"
+                    >
+                      <option value="">Selecciona un producto</option>
+                      @for (product of linkableProducts(); track product.id) {
+                        <option [value]="product.id">{{ product.name }} · {{ product.category }}</option>
+                      }
+                    </select>
+                    <p class="field-help">Usa esta opción para sumar stock a un producto ya existente.</p>
+                  </div>
+                }
+
+                @if (item.selectedAction === 'create') {
+                  <div class="mt-5 grid gap-4 md:grid-cols-2">
+                    <div class="field-block md:col-span-2">
+                      <label class="field-label">Nombre</label>
+                      <input
+                        class="w-full rounded-[1.1rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
+                        [value]="item.createDraft.name"
+                        (input)="updateInventoryCreateDraft(item.id, 'name', $any($event.target).value)"
+                      />
+                    </div>
+
+                    <div class="field-block md:col-span-2">
+                      <label class="field-label">Descripción</label>
+                      <textarea
+                        class="min-h-[88px] w-full rounded-[1.1rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
+                        [value]="item.createDraft.description"
+                        (input)="updateInventoryCreateDraft(item.id, 'description', $any($event.target).value)"
+                      ></textarea>
+                    </div>
+
+                    <div class="field-block">
+                      <label class="field-label">Categoría</label>
+                      <input
+                        class="w-full rounded-[1.1rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
+                        [value]="item.createDraft.category"
+                        (input)="updateInventoryCreateDraft(item.id, 'category', $any($event.target).value)"
+                      />
+                    </div>
+
+                    <div class="field-block">
+                      <label class="field-label">Precio</label>
+                      <input
+                        class="w-full rounded-[1.1rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
+                        [class.inventory-field-error]="hasMissingCreatePrice(item)"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        [value]="item.createDraft.price ?? ''"
+                        (input)="updateInventoryCreateDraft(item.id, 'price', $any($event.target).value)"
+                      />
+                      @if (hasMissingCreatePrice(item)) {
+                        <p class="inventory-field-error__message">Captura el precio antes de confirmar este producto nuevo.</p>
+                      }
+                    </div>
+
+                    <div class="field-block md:col-span-2">
+                      <label class="field-label">URL de imagen</label>
+                      <div class="inventory-inline-input">
+                        <input
+                          class="w-full rounded-[1.1rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
+                          [class.inventory-field-error]="hasBase64ImageUrl(item) || hasImageUrlTooLong(item)"
+                          [value]="item.createDraft.imageUrl"
+                          (input)="updateInventoryCreateDraft(item.id, 'imageUrl', $any($event.target).value)"
+                        />
+                        <button class="ghost-button inventory-inline-input__button" type="button" (click)="pasteInventoryImageUrl(item.id)">
+                          <span class="material-symbols-outlined text-base">content_paste</span>
+                          Pegar
+                        </button>
+                      </div>
+                      @if (hasBase64ImageUrl(item)) {
+                        <p class="inventory-field-error__message">Esta imagen parece estar en formato base64. Usa un link público normal; el campo sólo acepta URLs cortas.</p>
+                      } @else if (hasImageUrlTooLong(item)) {
+                        <p class="inventory-field-error__message">La URL de imagen supera 500 caracteres. Usa otro link más corto.</p>
+                      }
+                    </div>
+
+                    <label class="flex items-center gap-3 rounded-[1.1rem] border border-white/10 bg-surface-container-high px-4 py-3 text-sm text-white md:col-span-2">
+                      <input
+                        class="h-4 w-4 accent-primary"
+                        type="checkbox"
+                        [checked]="item.createDraft.isActive"
+                        (change)="updateInventoryCreateDraft(item.id, 'isActive', $any($event.target).checked)"
+                      />
+                      Crear producto activo en catálogo
+                    </label>
+                  </div>
+                }
+              </article>
+            }
+          </div>
+
+          <div class="flex flex-wrap justify-end gap-3">
+            <button class="ghost-button" type="button" [disabled]="inventoryAiSubmitting()" (click)="closeInventoryAiModal()">Cancelar</button>
+            <button class="liquid-button" type="button" [disabled]="!canCommitInventoryAi()" (click)="applyInventoryAi()">
+              <span class="material-symbols-outlined text-base">{{ inventoryAiSubmitting() ? 'hourglass_top' : 'inventory' }}</span>
+              {{ inventoryAiSubmitting() ? 'Aplicando...' : 'Confirmar cambios' }}
+            </button>
+          </div>
+        </section>
+      }
     </div>
   </div>
 }

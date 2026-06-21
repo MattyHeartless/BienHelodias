@@ -4,6 +4,7 @@ using LiquorSaaS.Application.Admin;
 using LiquorSaaS.Application.Auth;
 using LiquorSaaS.Application.Common.Interfaces;
 using LiquorSaaS.Application.Delivery;
+using LiquorSaaS.Application.InventoryAi;
 using LiquorSaaS.Application.Orders;
 using LiquorSaaS.Application.Products;
 using LiquorSaaS.Application.Promotions;
@@ -38,6 +39,7 @@ public static class DependencyInjection
             }));
 
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services.Configure<OpenAiInventoryOptions>(configuration.GetSection(OpenAiInventoryOptions.SectionName));
         services.Configure<PushNotificationOptions>(configuration.GetSection(PushNotificationOptions.SectionName));
         services.AddScoped<BcryptPasswordHasher>();
         services.AddScoped<IPasswordHasher>(sp => sp.GetRequiredService<BcryptPasswordHasher>());
@@ -53,6 +55,7 @@ public static class DependencyInjection
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IDeliveryService, DeliveryService>();
         services.AddScoped<IAdminService, AdminService>();
+        services.AddHttpClient<IInventoryAiService, InventoryAiService>();
         services.AddScoped<IPushSubscriptionService, PushSubscriptionService>();
         services.AddScoped<IPushNotificationService, PushNotificationService>();
 

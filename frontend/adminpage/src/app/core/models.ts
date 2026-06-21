@@ -128,6 +128,64 @@ export interface ProductDto {
   updatedAtUtc: string;
 }
 
+export interface InventoryAiAnalysisSummaryDto {
+  totalDetections: number;
+  matchedCount: number;
+  needsReviewCount: number;
+  missingCount: number;
+}
+
+export interface InventoryAiDetectedItemDto {
+  rawLabel: string;
+  detectedQuantity: number;
+  confidence: 'high' | 'medium' | 'low';
+  matchStatus: 'matched' | 'needs_review' | 'missing_from_catalog';
+  matchedProductId: string | null;
+  matchedProductName: string | null;
+  suggestedCategory: string | null;
+  suggestedDescription: string | null;
+  suggestedImageUrl: string | null;
+  notes: string | null;
+}
+
+export interface InventoryAiAnalysisDto {
+  scanId: string;
+  detectedItems: InventoryAiDetectedItemDto[];
+  summary: InventoryAiAnalysisSummaryDto;
+}
+
+export interface InventoryAiStockAdjustmentRequest {
+  productId: string;
+  increaseBy: number;
+  sourceLabel: string;
+}
+
+export interface InventoryAiNewProductRequest {
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  category: string;
+  imageUrl: string | null;
+  isActive: boolean;
+  sourceLabel: string;
+}
+
+export interface InventoryAiCommitRequest {
+  scanId: string;
+  stockAdjustments: InventoryAiStockAdjustmentRequest[];
+  newProducts: InventoryAiNewProductRequest[];
+}
+
+export interface InventoryAiCommitResultDto {
+  scanId: string;
+  adjustedProductsCount: number;
+  createdProductsCount: number;
+  totalUnitsAdded: number;
+  adjustedProductNames: string[];
+  createdProductNames: string[];
+}
+
 export interface DashboardDto {
   totalProducts: number;
   activeProducts: number;

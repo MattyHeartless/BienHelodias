@@ -1,7 +1,20 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ApiResponse, AuthTokenDto, BannerDto, DashboardDto, DeliveryUserDto, OrderDto, PagedResult, ProductDto, StoreDto } from '../core/models';
+import {
+  ApiResponse,
+  AuthTokenDto,
+  BannerDto,
+  DashboardDto,
+  DeliveryUserDto,
+  InventoryAiAnalysisDto,
+  InventoryAiCommitRequest,
+  InventoryAiCommitResultDto,
+  OrderDto,
+  PagedResult,
+  ProductDto,
+  StoreDto
+} from '../core/models';
 import { AdminSessionService } from '../core/admin-session.service';
 import { environment } from '../../environments/environment';
 
@@ -17,6 +30,7 @@ export class StoreAdminApiService {
   private readonly ordersUrl = `${this.apiUrl}/orders`;
   private readonly storesUrl = `${this.apiUrl}/stores`;
   private readonly bannersUrl = `${this.apiUrl}/banners`;
+  private readonly inventoryAiUrl = `${this.adminBaseUrl}/inventory-ai`;
 
   getDashboard(): Observable<ApiResponse<DashboardDto>> {
     return this.http.get<ApiResponse<DashboardDto>>(this.adminUrl);
@@ -84,6 +98,16 @@ export class StoreAdminApiService {
 
   updateProductStatus(productId: string, isActive: boolean): Observable<ApiResponse<ProductDto>> {
     return this.http.patch<ApiResponse<ProductDto>>(`${this.productsUrl}/${productId}/status`, { isActive });
+  }
+
+  analyzeInventoryImage(image: File): Observable<ApiResponse<InventoryAiAnalysisDto>> {
+    const formData = new FormData();
+    formData.append('image', image);
+    return this.http.post<ApiResponse<InventoryAiAnalysisDto>>(`${this.inventoryAiUrl}/analyze`, formData);
+  }
+
+  commitInventoryAi(request: InventoryAiCommitRequest): Observable<ApiResponse<InventoryAiCommitResultDto>> {
+    return this.http.post<ApiResponse<InventoryAiCommitResultDto>>(`${this.inventoryAiUrl}/commit`, request);
   }
 
   getOrders(): Observable<ApiResponse<PagedResult<OrderDto>>> {
