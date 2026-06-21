@@ -216,13 +216,7 @@ public sealed class InventoryAiService(
             throw new AppValidationException("La IA no devolvio un resultado util para esta imagen.");
         }
 
-        var parsed = JsonSerializer.Deserialize<OpenAiInventoryAnalysisResult>(outputText, JsonOptions);
-        if (parsed is null || parsed.DetectedItems.Count == 0)
-        {
-            throw new AppValidationException("No se encontraron productos validos en la imagen analizada.");
-        }
-
-        return parsed;
+        return ParseInventoryAnalysisResult(outputText);
     }
 
     private async Task<OpenAiInventoryAnalysisResult> AnalyzeImageWithKimiAsync(
@@ -255,13 +249,7 @@ public sealed class InventoryAiService(
             throw new AppValidationException("La IA no devolvio un resultado util para esta imagen.");
         }
 
-        var parsed = JsonSerializer.Deserialize<OpenAiInventoryAnalysisResult>(outputText, JsonOptions);
-        if (parsed is null || parsed.DetectedItems.Count == 0)
-        {
-            throw new AppValidationException("No se encontraron productos validos en la imagen analizada.");
-        }
-
-        return parsed;
+        return ParseInventoryAnalysisResult(outputText);
     }
 
     private JsonObject BuildOpenAiPayload(AnalyzeInventoryImageRequest request, IReadOnlyList<CatalogProductSnapshot> catalog)
@@ -391,7 +379,7 @@ Catalogo actual de la tienda:
                     }
                 }
             },
-            ["max_completion_tokens"] = 1200,
+            ["max_completion_tokens"] = 2200,
             ["response_format"] = new JsonObject
             {
                 ["type"] = "json_schema",
@@ -708,6 +696,123 @@ Catalogo actual de la tienda:
 
     private static string? CleanNullable(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    private OpenAiInventoryAnalysisResult ParseInventoryAnalysisResult(string outputText)
+    {
+        var normalized = NormalizeJsonPayload(outputText);
+
+        try
+        {
+            var parsed = JsonSerializer.Deserialize<OpenAiInventoryAnalysisResult>(normalized, JsonOptions);
+            if (parsed is null || parsed.DetectedItems.Count == 0)
+            {
+                throw new AppValidationException("No se encontraron productos validos en la imagen analizada.");
+            }
+
+            return parsed;
+        }
+        catch (JsonException exception)
+        {
+            logger.LogWarning(exception, "Inventory AI returned invalid JSON payload: {Payload}", TruncateForLog(normalized));
+            throw new AppValidationException(
+                "La IA devolvio una respuesta incompleta. Intenta con una foto mas cerrada o vuelve a analizar.",
+                "El JSON regresado por el proveedor vino incompleto o mal cerrado.");
+        }
+    }
+
+    private static string NormalizeJsonPayload(string payload)
+    {
+        var trimmed = payload.Trim();
+
+        if (trimmed.StartsWith("```", StringComparison.Ordinal))
+        {
+            var firstLineBreak = trimmed.IndexOf('\n');
+            if (firstLineBreak >= 0)
+            {
+                trimmed = trimmed[(firstLineBreak + 1)..];
+            }
+
+            var closingFence = trimmed.LastIndexOf("```", StringComparison.Ordinal);
+            if (closingFence >= 0)
+            {
+                trimmed = trimmed[..closingFence];
+            }
+
+            trimmed = trimmed.Trim();
+        }
+
+        var extracted = TryExtractBalancedJsonObject(trimmed);
+        return extracted ?? trimmed;
+    }
+
+    private static string? TryExtractBalancedJsonObject(string value)
+    {
+        var start = value.IndexOf('{');
+        if (start < 0)
+        {
+            return null;
+        }
+
+        var depth = 0;
+        var inString = false;
+        var escaped = false;
+
+        for (var i = start; i < value.Length; i++)
+        {
+            var character = value[i];
+
+            if (inString)
+            {
+                if (escaped)
+                {
+                    escaped = false;
+                    continue;
+                }
+
+                if (character == '\\')
+                {
+                    escaped = true;
+                    continue;
+                }
+
+                if (character == '"')
+                {
+                    inString = false;
+                }
+
+                continue;
+            }
+
+            if (character == '"')
+            {
+                inString = true;
+                continue;
+            }
+
+            if (character == '{')
+            {
+                depth++;
+                continue;
+            }
+
+            if (character == '}')
+            {
+                depth--;
+                if (depth == 0)
+                {
+                    return value[start..(i + 1)];
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static string TruncateForLog(string value)
+    {
+        const int maxLength = 700;
+        return value.Length <= maxLength ? value : $"{value[..maxLength]}...";
+    }
 
     private static string? ExtractOpenAiError(string content)
     {
