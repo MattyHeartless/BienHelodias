@@ -14,9 +14,9 @@ const hyperwave = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Bien Helodias | Infraestructura digital para licorerías",
+  title: "BienHelodias | Licorerías al tiro, pedidos bien fríos",
   description:
-    "Bien Helodias es la infraestructura digital especializada para licorerías y negocios de bebidas que quieren vender, coordinar y entregar mejor.",
+    "BienHelodias ayuda a licorerías y negocios de bebidas a vender, coordinar y entregar en corto, sin perder el ritmo.",
 };
 
 export const viewport: Viewport = {

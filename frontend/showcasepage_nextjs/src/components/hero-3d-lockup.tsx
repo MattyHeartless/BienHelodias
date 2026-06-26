@@ -5,7 +5,7 @@ import { createElement, type HTMLAttributes, useEffect } from "react";
 const phoneProps: HTMLAttributes<HTMLElement> & Record<string, unknown> = {
   className: "hero-phone-model",
   src: "/models/bien-helodias-iphone15-front-graphite-cameras.glb",
-  alt: "Modelo 3D de iPhone para Bien Helodias",
+  alt: "Modelo 3D de iPhone para BienHelodias",
   "camera-controls": true,
   "interaction-prompt": "none",
   "shadow-intensity": "1",

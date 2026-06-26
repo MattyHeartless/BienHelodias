@@ -5,18 +5,18 @@ import type { FormEvent } from "react";
 import { MartiniBeamsBackground } from "./MartiniBeamsBackground";
 
 const indicators = [
-  { value: "12k+", label: "pedidos" },
-  { value: "85+", label: "tiendas" },
-  { value: "14", label: "municipios" },
-  { value: "220+", label: "repartidores" },
+  { value: "12k+", label: "pedidos servidos" },
+  { value: "85+", label: "tiendas aliadas" },
+  { value: "14", label: "municipios cubiertos" },
+  { value: "220+", label: "repartidores al tiro" },
 ];
 
-const howSteps = ["Afíliate", "Configura", "Vende", "Entrega", "Crece"];
+const howSteps = ["Afíliate", "Deja todo listo", "Vende", "Manda las frías", "Crece"];
 
 const ecosystemApps = [
-  { src: "/scene/eco_tienda.png", alt: "Sitio de compra Bien Helodias", label: "Sitio de compra" },
-  { src: "/scene/eco_admin.png", alt: "Administrador Bien Helodias", label: "Administrador" },
-  { src: "/scene/eco_envio.png", alt: "Repartidor Bien Helodias", label: "Repartidor" },
+  { src: "/scene/eco_tienda.png", alt: "Sitio de compra de BienHelodias", label: "Tienda para pedir" },
+  { src: "/scene/eco_admin.png", alt: "Administrador de BienHelodias", label: "Admin al tiro" },
+  { src: "/scene/eco_envio.png", alt: "App de reparto de BienHelodias", label: "Reparto en corto" },
 ];
 
 const whatsappPhone = "523318791893";
@@ -36,12 +36,12 @@ function handleAffiliateSubmit(event: FormEvent<HTMLFormElement>) {
   const operation = getFormValue(formData, "operation");
 
   const message = [
-    "Hola Bien Helodias, quiero iniciar mi afiliación.",
+    "Hola BienHelodias, quiero afiliar mi licorería.",
     "",
     `Negocio: ${business || "No especificado"}`,
-    `Ciudad: ${city || "No especificada"}`,
+    `Zona: ${city || "No especificada"}`,
     `Contacto: ${contact || "No especificado"}`,
-    `Operación actual: ${operation || "No especificada"}`,
+    `Cómo vendo hoy: ${operation || "No especificada"}`,
   ].join("\n");
 
   window.open(`https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
@@ -66,31 +66,31 @@ export function MartiniHeroContent() {
           scale={0.2}
           rotation={0}
         />
-        <div className="hero-brand-seal" aria-label="Bien Helodias">
+        <div className="hero-brand-seal" aria-label="BienHelodias">
           <Image
             src="/brand/bh-seal.png"
-            alt="Bien Helodias"
+            alt="BienHelodias"
             width={470}
             height={442}
             priority
           />
         </div>
-        <h2>Convierte tu licorería en una operación digital lista para vender más.</h2>
-        <span>Desliza para que conozcas las Bien Helodias</span>
+        <h2>Pon tu licorería al tiro para vender más, coordinar mejor y entregar en corto.</h2>
+        <span>Desliza y mira cómo se mueven las bien helodias</span>
       </div>
 
       <div className="hero-logo">
-        <span>Bien Helodias</span>
+        <span>BienHelodias</span>
       </div>
 
       <section className="martini-scene martini-scene--main" aria-label="Claim principal">
-        <h1 className="hero-main-copy">Vende, organiza y entrega sin perder el ritmo</h1>
+        <h1 className="hero-main-copy">Vende, organiza y entrega las frías sin perder el ritmo</h1>
       </section>
 
       <section className="martini-scene martini-scene--operation" aria-label="Operación">
         <div className="operation-copy">
-          <p className="scene-kicker">Operación real</p>
-          <h2>Operación real, no promesas</h2>
+          <p className="scene-kicker">Al tiro en la calle</p>
+          <h2>Pedidos reales, frías saliendo y todo bajo control</h2>
         </div>
         <div className="operation-indicators">
           {indicators.map((indicator) => (
@@ -104,24 +104,24 @@ export function MartiniHeroContent() {
 
       <section className="martini-scene martini-scene--platform" aria-label="Plataforma">
         <div className="platform-copy">
-          <p className="scene-kicker">Plataforma</p>
-          <h2>Menos explicación, más señales vivas</h2>
+          <p className="scene-kicker">Todo conectado</p>
+          <h2>Menos vueltas, más señales en vivo</h2>
         </div>
         <div className="platform-visuals">
           <div className="platform-card platform-drinks">
-            <Image src="/scene/beerbag.png" alt="Bebidas dentro de la plataforma" width={500} height={500} />
+            <Image src="/scene/beerbag.png" alt="Bebidas listas para pedir en la plataforma" width={500} height={500} />
           </div>
           <div className="platform-card platform-stonks">
-            <Image src="/scene/business.png" alt="Administración del negocio en la plataforma" width={500} height={500} />
+            <Image src="/scene/business.png" alt="Administración de la licorería en la plataforma" width={500} height={500} />
           </div>
           <div className="platform-card platform-pin">
-            <Image src="/scene/route.png" alt="Seguimiento visible del pedido" width={500} height={500} />
+            <Image src="/scene/route.png" alt="Seguimiento del pedido en camino" width={500} height={500} />
           </div>
         </div>
       </section>
 
       <section className="martini-scene martini-scene--how" aria-label="Cómo funciona">
-        <p className="how-title">CÓMO FUNCIONA</p>
+        <p className="how-title">ASÍ SE ARMA</p>
         <div className="how-steps">
           {howSteps.map((step, index) => (
             <article className="how-step" key={step}>
@@ -130,14 +130,14 @@ export function MartiniHeroContent() {
             </article>
           ))}
         </div>
-        <h2 className="how-reinforce-copy">Afíliate. Configura. Vende. Entrega.</h2>
+        <h2 className="how-reinforce-copy">Afíliate. Deja todo listo. Vende. Manda las frías.</h2>
       </section>
 
       <section className="martini-scene martini-scene--ecosystem" aria-label="Ecosistema">
         <div className="ecosystem-copy">
-          <p className="scene-kicker">Ecosistema</p>
-          <h2>Tres superficies. Un solo pulso.</h2>
-          <span>Todo conectado, sin cambiar de ritmo.</span>
+          <p className="scene-kicker">La jugada completa</p>
+          <h2>Tres lados conectados. Un solo ritmo.</h2>
+          <span>Tienda, admin y reparto jalando parejo.</span>
         </div>
         <div className="ecosystem-apps">
           {ecosystemApps.map((app) => (
@@ -152,27 +152,27 @@ export function MartiniHeroContent() {
       <section className="martini-scene martini-scene--affiliate" aria-label="Afiliación">
         <h2 className="affiliate-title">
           <span className="affiliate-title__plain">Afíliate a</span>
-          <span className="affiliate-title__brand">Bien Helodias</span>
+          <span className="affiliate-title__brand">BienHelodias</span>
         </h2>
         <form className="affiliate-form-panel" onSubmit={handleAffiliateSubmit}>
           <label className="affiliate-field">
-            <span>Negocio</span>
+            <span>Tu negocio</span>
             <input name="business" type="text" placeholder="Nombre de tu licorería" />
           </label>
           <label className="affiliate-field">
-            <span>Ciudad</span>
-            <input name="city" type="text" placeholder="Municipio o zona" />
+            <span>Zona</span>
+            <input name="city" type="text" placeholder="Municipio o zona donde jalas" />
           </label>
           <label className="affiliate-field">
             <span>Contacto</span>
             <input name="contact" type="tel" placeholder="Teléfono o WhatsApp" />
           </label>
           <label className="affiliate-field">
-            <span>Operación actual</span>
-            <textarea name="operation" rows={2} placeholder="Pedidos, cobertura y retos actuales." />
+            <span>Cómo vendes hoy</span>
+            <textarea name="operation" rows={2} placeholder="Pedidos, cobertura y qué quieres mejorar." />
           </label>
           <button className="affiliate-submit" type="submit">
-            <span>Enviar solicitud</span>
+            <span>Va, quiero afiliarme</span>
             <span className="action-icon" aria-hidden="true">→</span>
           </button>
         </form>
@@ -180,10 +180,10 @@ export function MartiniHeroContent() {
 
       <section className="martini-scene martini-scene--final" aria-label="CTA final">
         <div className="final-cta">
-          <p className="scene-kicker">Cierre</p>
-          <h2>Tu licorería puede operar como red desde el primer pedido.</h2>
+          <p className="scene-kicker">Listo para arrancar</p>
+          <h2>Tu licorería puede vender, coordinar y entregar al tiro desde el primer pedido.</h2>
           <button type="button" onClick={handleAffiliateScroll}>
-            <span>Iniciar afiliación</span>
+            <span>Afiliar mi licorería</span>
             <span className="action-icon" aria-hidden="true">→</span>
           </button>
         </div>
