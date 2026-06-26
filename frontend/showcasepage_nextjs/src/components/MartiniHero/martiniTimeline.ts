@@ -69,7 +69,22 @@ export function createMartiniScrollTimeline(root: HTMLElement, glass: Object3D) 
     addAffiliateScene(scrollTl);
     addFinalScene(scrollTl, glass);
 
+    const scrollToAffiliate = () => {
+      const scrollTrigger = scrollTl.scrollTrigger;
+      if (!scrollTrigger) {
+        return;
+      }
+
+      window.scrollTo({
+        top: scrollTrigger.labelToScroll("affiliateHold"),
+        behavior: "smooth",
+      });
+    };
+
+    window.addEventListener("martini:scroll-to-affiliate", scrollToAffiliate);
+
     return () => {
+      window.removeEventListener("martini:scroll-to-affiliate", scrollToAffiliate);
       scrollTl.scrollTrigger?.kill();
       scrollTl.kill();
     };

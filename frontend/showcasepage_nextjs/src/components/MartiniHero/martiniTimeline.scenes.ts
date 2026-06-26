@@ -144,12 +144,22 @@ export function addOperationScene(scrollTl: MartiniTimeline, glass: Object3D) {
     );
 
   scrollTl.addLabel("operationText");
-  scrollTl.fromTo(
-    ".operation-copy",
-    fadeUpFrom,
-    { ...fadeUpTo, duration: SCENE_DURATION.copyIn },
-    "operationText-=0.4"
-  );
+  scrollTl
+    .to(
+      glass.userData,
+      {
+        operationFloatStrength: 1,
+        duration: 0.8,
+        ease: "power2.out",
+      },
+      "operationText-=0.2"
+    )
+    .fromTo(
+      ".operation-copy",
+      fadeUpFrom,
+      { ...fadeUpTo, duration: SCENE_DURATION.copyIn },
+      "operationText-=0.4"
+    );
 
   scrollTl.addLabel("indicatorsIn");
   scrollTl
@@ -172,6 +182,15 @@ export function addOperationScene(scrollTl: MartiniTimeline, glass: Object3D) {
   scrollTl.addLabel("operationOut");
   scrollTl
     .to(".operation-copy", fadeOutUp, "operationOut")
+    .to(
+      glass.userData,
+      {
+        operationFloatStrength: 0,
+        duration: 0.45,
+        ease: "power2.inOut",
+      },
+      "operationOut"
+    )
     .to(
       ".operation-indicators",
       {

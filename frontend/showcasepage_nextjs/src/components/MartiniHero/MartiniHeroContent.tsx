@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import type { FormEvent } from "react";
 import { MartiniBeamsBackground } from "./MartiniBeamsBackground";
 
 const indicators = [
@@ -15,6 +18,38 @@ const ecosystemApps = [
   { src: "/scene/eco_admin.png", alt: "Administrador Bien Helodias", label: "Administrador" },
   { src: "/scene/eco_envio.png", alt: "Repartidor Bien Helodias", label: "Repartidor" },
 ];
+
+const whatsappPhone = "523318791893";
+
+function getFormValue(formData: FormData, key: string) {
+  const value = formData.get(key);
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function handleAffiliateSubmit(event: FormEvent<HTMLFormElement>) {
+  event.preventDefault();
+
+  const formData = new FormData(event.currentTarget);
+  const business = getFormValue(formData, "business");
+  const city = getFormValue(formData, "city");
+  const contact = getFormValue(formData, "contact");
+  const operation = getFormValue(formData, "operation");
+
+  const message = [
+    "Hola Bien Helodias, quiero iniciar mi afiliación.",
+    "",
+    `Negocio: ${business || "No especificado"}`,
+    `Ciudad: ${city || "No especificada"}`,
+    `Contacto: ${contact || "No especificado"}`,
+    `Operación actual: ${operation || "No especificada"}`,
+  ].join("\n");
+
+  window.open(`https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+}
+
+function handleAffiliateScroll() {
+  window.dispatchEvent(new CustomEvent("martini:scroll-to-affiliate"));
+}
 
 export function MartiniHeroContent() {
   return (
@@ -40,7 +75,7 @@ export function MartiniHeroContent() {
             priority
           />
         </div>
-        <h2>Licorerías vivas, pedidos claros y entregas listas para moverse.</h2>
+        <h2>Convierte tu licorería en una operación digital lista para vender más.</h2>
         <span>Desliza para que conozcas las Bien Helodias</span>
       </div>
 
@@ -49,7 +84,7 @@ export function MartiniHeroContent() {
       </div>
 
       <section className="martini-scene martini-scene--main" aria-label="Claim principal">
-        <h1 className="hero-main-copy">Tu licorería viva desde el primer pedido</h1>
+        <h1 className="hero-main-copy">Vende, organiza y entrega sin perder el ritmo</h1>
       </section>
 
       <section className="martini-scene martini-scene--operation" aria-label="Operación">
@@ -74,19 +109,13 @@ export function MartiniHeroContent() {
         </div>
         <div className="platform-visuals">
           <div className="platform-card platform-drinks">
-            <Image src="/scene/beerbag.png" alt="Bebidas dentro de la plataforma" width={520} height={520} />
+            <Image src="/scene/beerbag.png" alt="Bebidas dentro de la plataforma" width={500} height={500} />
           </div>
           <div className="platform-card platform-stonks">
-            <div className="placeholder-chart" aria-hidden="true">
-              <span />
-              <span />
-              <span />
-              <span />
-            </div>
-            <p>Demanda y ventas visibles</p>
+            <Image src="/scene/business.png" alt="Administración del negocio en la plataforma" width={500} height={500} />
           </div>
           <div className="platform-card platform-pin">
-            <Image src="/scene/route.png" alt="Pin y ruta de ubicación" width={640} height={380} />
+            <Image src="/scene/route.png" alt="Seguimiento visible del pedido" width={500} height={500} />
           </div>
         </div>
       </section>
@@ -125,24 +154,27 @@ export function MartiniHeroContent() {
           <span className="affiliate-title__plain">Afíliate a</span>
           <span className="affiliate-title__brand">Bien Helodias</span>
         </h2>
-        <form className="affiliate-form-panel">
-          <label>
+        <form className="affiliate-form-panel" onSubmit={handleAffiliateSubmit}>
+          <label className="affiliate-field">
             <span>Negocio</span>
-            <input type="text" placeholder="Nombre de tu licorería" />
+            <input name="business" type="text" placeholder="Nombre de tu licorería" />
           </label>
-          <label>
+          <label className="affiliate-field">
             <span>Ciudad</span>
-            <input type="text" placeholder="Municipio o zona" />
+            <input name="city" type="text" placeholder="Municipio o zona" />
           </label>
-          <label>
+          <label className="affiliate-field">
             <span>Contacto</span>
-            <input type="tel" placeholder="Teléfono o WhatsApp" />
+            <input name="contact" type="tel" placeholder="Teléfono o WhatsApp" />
           </label>
-          <label>
+          <label className="affiliate-field">
             <span>Operación actual</span>
-            <textarea rows={3} placeholder="Pedidos, cobertura y retos actuales." />
+            <textarea name="operation" rows={2} placeholder="Pedidos, cobertura y retos actuales." />
           </label>
-          <button type="button">Enviar solicitud</button>
+          <button className="affiliate-submit" type="submit">
+            <span>Enviar solicitud</span>
+            <span className="action-icon" aria-hidden="true">→</span>
+          </button>
         </form>
       </section>
 
@@ -150,7 +182,10 @@ export function MartiniHeroContent() {
         <div className="final-cta">
           <p className="scene-kicker">Cierre</p>
           <h2>Tu licorería puede operar como red desde el primer pedido.</h2>
-          <a href="mailto:hola@bienhelodias.com">Iniciar afiliación</a>
+          <button type="button" onClick={handleAffiliateScroll}>
+            <span>Iniciar afiliación</span>
+            <span className="action-icon" aria-hidden="true">→</span>
+          </button>
         </div>
       </section>
     </div>

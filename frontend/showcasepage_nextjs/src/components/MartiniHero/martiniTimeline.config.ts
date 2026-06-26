@@ -99,6 +99,10 @@ export const canvasConfig = {
     fallbackColor: "#84f0a2",
     rotationOffset: { x: degToRad(-90), y: degToRad(2.78), z: degToRad(0) },
   },
+  operationFloat: {
+    positionAmplitude: { x: 0.05, y: 0.07, z: 0.03 },
+    rotationAmplitude: { x: degToRad(1.8), y: degToRad(3.2), z: degToRad(2.4) },
+  },
   lighting: {
     ambientIntensity: 1.1,
     keyIntensity: 4.2,

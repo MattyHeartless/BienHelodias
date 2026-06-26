@@ -21,13 +21,16 @@
   <header class="floating-nav motion-reveal is-visible">
     <a class="brand" href="#top">
       <span class="brand-dot brand-dot--icon material-symbols-outlined" aria-hidden="true">local_bar</span>
-      <span class="brand-wordmark">BIEN HELODIAS</span>
+      <div class="brand-lockup">
+        <span class="brand-wordmark">BIEN HELODIAS</span>
+        <span class="brand-subline">Showcase de plataforma</span>
+      </div>
     </a>
 
     <nav>
       <a href="#plataforma"><span class="material-symbols-outlined nav-icon" aria-hidden="true">dashboard</span><span>Plataforma</span></a>
       <a href="#red"><span class="material-symbols-outlined nav-icon" aria-hidden="true">hub</span><span>Red</span></a>
-      <a href="#afiliate"><span class="material-symbols-outlined nav-icon" aria-hidden="true">storefront</span><span>Afiliación</span></a>
+      <a href="#afiliate"><span class="material-symbols-outlined nav-icon" aria-hidden="true">storefront</span><span>Afiliacion</span></a>
     </nav>
 
     <a
@@ -43,20 +46,36 @@
   </header>
 
   <main id="top">
-    <section class="band hero-band">
+    <section class="band hero-band" #heroSection>
       <div class="band-inner hero-layout">
         <div class="hero-copy">
-          <h1 class="motion-reveal is-visible hero-delay-1">Tu licorería, viva desde el primer pedido.</h1>
-          <p class="hero-summary motion-reveal is-visible hero-delay-2">
-            Vende, administra y entrega desde una sola plataforma.
+          <p class="eyebrow motion-reveal is-visible hero-delay-1">Delivery para licorerias que quieren jugar en grande</p>
+          <h1 class="motion-reveal is-visible hero-delay-2">La noche de tu negocio, dirigida como una marca grande.</h1>
+          <p class="hero-summary motion-reveal is-visible hero-delay-3">
+            Bien Helodias une catalogo, operacion y reparto en una sola experiencia lista para vender desde el primer turno.
           </p>
 
-          <div class="hero-actions motion-reveal is-visible hero-delay-3">
+          <div class="hero-actions motion-reveal is-visible hero-delay-4">
             <a class="primary-pill motion-cta" href="#afiliate">Afiliar mi negocio</a>
-            <a class="ghost-pill" href="#plataforma">Ver plataforma</a>
+            <a class="ghost-pill" href="#plataforma">Explorar plataforma</a>
           </div>
 
-          <div class="hero-marquee">
+          <div class="hero-proof-grid motion-reveal is-visible hero-delay-5">
+            <article class="hero-proof-card">
+              <span class="hero-proof-card__label">Experiencia</span>
+              <strong>Compra, panel y entrega conectados</strong>
+            </article>
+            <article class="hero-proof-card">
+              <span class="hero-proof-card__label">Ritmo</span>
+              <strong>Promos y seguimiento en tiempo real</strong>
+            </article>
+            <article class="hero-proof-card">
+              <span class="hero-proof-card__label">Escala</span>
+              <strong>Hecho para red, no para una sola tienda</strong>
+            </article>
+          </div>
+
+          <div class="hero-marquee motion-reveal is-visible hero-delay-6">
             <div class="hero-marquee-track">
               <span *ngFor="let item of marqueeItems">{{ item }}</span>
               <span *ngFor="let item of marqueeItems">{{ item }}</span>
@@ -64,10 +83,15 @@
           </div>
         </div>
 
-        <div class="hero-visual">
-          <div class="hero-wave motion-reveal is-visible hero-delay-4"></div>
+        <div class="hero-visual" #heroVisual>
+          <div class="hero-wave motion-reveal is-visible hero-delay-4" #heroWave></div>
+          <div class="hero-orbit motion-reveal is-visible hero-delay-5" #heroOrbit aria-hidden="true"></div>
+          <div class="hero-stage-copy motion-reveal is-visible hero-delay-5" #heroStageCopy>
+            <span>Showcase 2026</span>
+            <strong>Operacion viva para licorerias urbanas</strong>
+          </div>
 
-          <div class="hero-mockup motion-reveal is-visible hero-delay-4 motion-hover-lift motion-float-slow">
+          <div class="hero-mockup motion-reveal is-visible hero-delay-5 motion-hover-lift motion-float-slow" #heroMockup>
             <div class="spline-frame">
               <model-viewer
                 src="/models/bien-helodias-iphone15-front-graphite-cameras.glb"
@@ -83,32 +107,53 @@
             </div>
           </div>
 
-          <article class="floating-card incoming-card motion-reveal is-visible hero-delay-5 motion-hover-lift motion-float-fast">
+          <article class="floating-card incoming-card motion-reveal is-visible hero-delay-6 motion-hover-lift motion-float-fast">
             <div class="status-line">
               <div class="status-dot pulse-dot"></div>
-              <small>Pedido recibido</small>
+              <small>Pedido confirmado</small>
             </div>
             <strong>Corona 12 Pack</strong>
-            <span>$249</span>
+            <span>$249 · listo para salir</span>
           </article>
 
-          <article class="floating-card rider-card motion-reveal is-visible hero-delay-6 motion-hover-lift motion-float-reverse">
+          <article class="floating-card rider-card motion-reveal is-visible hero-delay-7 motion-hover-lift motion-float-reverse">
             <div class="mini-route">
               <span class="route-icon route-icon--motorbike" aria-hidden="true"></span>
               <b></b>
               <span class="route-icon route-icon--customer" aria-hidden="true"></span>
             </div>
-            <small>Repartidor en camino</small>
+            <small>Entrega trazada</small>
             <strong>Llega en 12 min</strong>
           </article>
 
-          <article class="floating-card promo-card motion-reveal is-visible hero-delay-7 motion-hover-lift motion-float-medium">
-            <small>Promo activa</small>
+          <article class="floating-card promo-card motion-reveal is-visible hero-delay-8 motion-hover-lift motion-float-medium">
+            <small>Promocion en curso</small>
             <strong>2x1 seleccionados</strong>
-            <div class="promo-pill">Hoy</div>
+            <div class="promo-pill">prime time</div>
           </article>
 
-          <article class="bottle-card motion-reveal is-visible hero-delay-8 motion-float-bottle">
+          <article class="hero-command-card motion-reveal is-visible hero-delay-8 motion-hover-lift" #heroCommandCard>
+            <div class="hero-command-card__header">
+              <span class="hero-command-card__eyebrow">Centro de control</span>
+              <span class="hero-command-card__badge">Live</span>
+            </div>
+            <div class="hero-command-card__rows">
+              <div class="hero-command-row">
+                <span>Pedidos</span>
+                <strong>+18 esta noche</strong>
+              </div>
+              <div class="hero-command-row">
+                <span>Ruta media</span>
+                <strong>12 min</strong>
+              </div>
+              <div class="hero-command-row">
+                <span>Promos activas</span>
+                <strong>03 campanas</strong>
+              </div>
+            </div>
+          </article>
+
+          <article class="bottle-card motion-reveal is-visible hero-delay-9 motion-float-bottle">
             <model-viewer
               class="martini-model"
               src="/models/copa_martini_verde.glb"
@@ -129,20 +174,26 @@
     <section #metricsSection class="band section-band trust-band">
       <div class="band-inner metrics-layout">
         <div class="section-copy motion-reveal" #revealEl>
-          <p class="eyebrow">Señal de red</p>
-          <h2>Operación real, no promesa.</h2>
+          <p class="eyebrow">Senal de red</p>
+          <h2>Operacion real, no solo una landing bonita.</h2>
+          <p>
+            Esta showcase tiene que vender ambicion, pero tambien control. Por eso la narrativa gira alrededor de disponibilidad, seguimiento y respuesta operativa.
+          </p>
         </div>
 
-        <div class="metrics-grid">
-          <article
-            class="metric-tile motion-reveal motion-hover-lift"
-            #revealEl
-            *ngFor="let metric of metrics; let i = index; trackBy: trackByLabel"
-            [style.transitionDelay.ms]="80 + i * 100"
-          >
-            <strong #counterEl>{{ metric.display }}</strong>
-            <span>{{ metric.label }}</span>
-          </article>
+        <div class="metrics-panel motion-reveal" #revealEl>
+          <div class="metrics-grid">
+            <article
+              class="metric-tile motion-reveal motion-hover-lift"
+              #revealEl
+              *ngFor="let metric of metrics; let i = index; trackBy: trackByLabel"
+              [style.transitionDelay.ms]="80 + i * 100"
+            >
+              <strong #counterEl>{{ metric.display }}</strong>
+              <span>{{ metric.label }}</span>
+            </article>
+          </div>
+          <p class="metrics-footnote">Una sola logica de producto para clientes, negocios y repartidores.</p>
         </div>
       </div>
     </section>
@@ -151,7 +202,10 @@
       <div class="band-inner platform-layout">
         <div class="section-copy" #platformCopy>
           <p class="eyebrow">Plataforma</p>
-          <h2>Menos explicación. Más señales vivas.</h2>
+          <h2>Menos explicacion. Mas senales vivas.</h2>
+          <p>
+            Cada frente del sistema debe sentirse especializado, pero hablar el mismo lenguaje visual: conversion, operacion y entrega.
+          </p>
         </div>
 
         <div class="bento-grid">
@@ -167,32 +221,29 @@
             <h3>{{ card.title }}</h3>
             <div class="tile-mockup">
               <ng-container [ngSwitch]="card.eyebrow">
-                <div *ngSwitchCase="'Cliente'" #platformScene class="tile-ui tile-ui--storefront scene-client" style="background: transparent;">
+                <div *ngSwitchCase="'Cliente'" #platformScene class="tile-ui tile-ui--storefront scene-client">
                   <img
                     src="/imgs/beerbag.png"
                     alt="Promo 2x1 Bien Helodias"
-                    class="scene-client__image scene-illustration"
+                    class="scene-client__image scene-illustration scene-illustration--client"
                     #platformIllustration
-                    style="width: auto; max-width: 112%; height: 112%; object-fit: contain; filter: drop-shadow(0 0 18px rgb(210 253 110 / 0.16)) drop-shadow(0 16px 28px rgb(0 0 0 / 0.18)); transform-origin: 50% 58%;"
                   />
                 </div>
-                <div *ngSwitchCase="'Negocio'" #platformScene class="tile-ui tile-ui--admin scene-admin" style="background: transparent;">
+                <div *ngSwitchCase="'Negocio'" #platformScene class="tile-ui tile-ui--admin scene-admin">
                   <img
                     src="/imgs/bussines.png"
                     alt="Panel de negocio Bien Helodias"
-                    class="scene-admin__image scene-illustration"
+                    class="scene-admin__image scene-illustration scene-illustration--admin"
                     #platformIllustration
-                    style="width: auto; max-width: 112%; height: 112%; object-fit: contain; filter: drop-shadow(0 0 18px rgb(210 253 110 / 0.14)) drop-shadow(0 16px 28px rgb(0 0 0 / 0.18)); transform-origin: 50% 56%;"
                   />
                   <span class="scene-accent-pulse scene-accent-pulse--admin" #platformPulse aria-hidden="true"></span>
                 </div>
-                <div *ngSwitchDefault #platformScene class="tile-ui tile-ui--delivery scene-delivery" style="background: transparent;">
+                <div *ngSwitchDefault #platformScene class="tile-ui tile-ui--delivery scene-delivery">
                   <img
                     src="/imgs/route.png"
                     alt="Ruta de delivery Bien Helodias"
-                    class="scene-delivery__image scene-illustration"
+                    class="scene-delivery__image scene-illustration scene-illustration--delivery"
                     #platformIllustration
-                    style="width: auto; max-width: 112%; height: 112%; object-fit: contain; filter: drop-shadow(0 0 18px rgb(210 253 110 / 0.14)) drop-shadow(0 16px 28px rgb(0 0 0 / 0.18)); transform-origin: 50% 56%;"
                   />
                   <span class="scene-accent-pulse scene-accent-pulse--delivery" #platformPulse aria-hidden="true"></span>
                 </div>
@@ -209,8 +260,8 @@
     <section class="band blue-band">
       <div class="band-inner flow-layout">
         <div class="section-copy on-dark motion-reveal" #revealEl>
-          <p class="eyebrow dark-eyebrow">Cómo funciona</p>
-          <h2>Afíliate. Configura. Vende. Entrega.</h2>
+          <p class="eyebrow dark-eyebrow">Core de operacion</p>
+          <h2>Afiliate. Configura. Vende. Entrega.</h2>
         </div>
 
         <div class="timeline-track motion-reveal" #revealEl>
@@ -219,8 +270,9 @@
             <div class="timeline-node">
               <span class="material-symbols-outlined timeline-icon timeline-icon--affiliate" aria-hidden="true">storefront</span>
             </div>
-            <strong>Afíliate</strong>
+            <strong>Afiliate</strong>
             <span>01</span>
+            <p>Alta comercial y diagnostico inicial.</p>
           </article>
           <article class="timeline-step motion-hover-lift">
             <div class="timeline-node">
@@ -228,6 +280,7 @@
             </div>
             <strong>Configura</strong>
             <span>02</span>
+            <p>Catalogo, horarios, zonas y promos.</p>
           </article>
           <article class="timeline-step motion-hover-lift">
             <div class="timeline-node">
@@ -235,6 +288,7 @@
             </div>
             <strong>Vende</strong>
             <span>03</span>
+            <p>Campanas activas y checkout sin friccion.</p>
           </article>
           <article class="timeline-step motion-hover-lift">
             <div class="timeline-node">
@@ -242,6 +296,7 @@
             </div>
             <strong>Entrega</strong>
             <span>04</span>
+            <p>Asignacion de ruta con trazabilidad.</p>
           </article>
           <article class="timeline-step motion-hover-lift">
             <div class="timeline-node">
@@ -249,6 +304,7 @@
             </div>
             <strong>Crece</strong>
             <span>05</span>
+            <p>Mas alcance, mas repeticion, mas marca.</p>
           </article>
         </div>
       </div>
@@ -259,22 +315,39 @@
         <div class="section-copy motion-reveal" #revealEl>
           <p class="eyebrow">Ecosistema</p>
           <h2>Tres superficies. Un solo pulso.</h2>
+          <p>
+            Lo que el cliente ve, lo que el negocio controla y lo que el repartidor ejecuta deben sentirse como un mismo sistema, no como apps separadas.
+          </p>
+          <div class="ecosystem-notes">
+            <div class="ecosystem-note">
+              <span class="ecosystem-note__kicker">Cliente</span>
+              <strong>Catalogo con urgencia visual</strong>
+            </div>
+            <div class="ecosystem-note">
+              <span class="ecosystem-note__kicker">Backoffice</span>
+              <strong>Lectura rapida para decisiones de tienda</strong>
+            </div>
+            <div class="ecosystem-note">
+              <span class="ecosystem-note__kicker">Delivery</span>
+              <strong>Ruta clara y estado inmediato</strong>
+            </div>
+          </div>
         </div>
 
-        <div class="ecosystem-stage motion-reveal" #revealEl>
+        <div class="ecosystem-stage motion-reveal" #revealEl #ecosystemStage>
           <div class="ecosystem-wave"></div>
-          <article class="ecosystem-mockup center motion-hover-lift motion-float-slow">
+          <article class="ecosystem-mockup center motion-hover-lift motion-float-slow" #ecosystemMockup>
             <img src="/imgs/eco_tienda.png" alt="Tienda Bien Helodias" class="ecosystem-image ecosystem-image--storefront" />
           </article>
-          <article class="ecosystem-mockup left motion-hover-lift motion-float-fast">
+          <article class="ecosystem-mockup left motion-hover-lift motion-float-fast" #ecosystemMockup>
             <img src="/imgs/eco_admin.png" alt="Panel administrativo Bien Helodias" class="ecosystem-image ecosystem-image--admin" />
           </article>
-          <article class="ecosystem-mockup right motion-hover-lift motion-float-medium">
-            <img src="/imgs/eco_envio.png" alt="Aplicación de envíos Bien Helodias" class="ecosystem-image ecosystem-image--delivery" />
+          <article class="ecosystem-mockup right motion-hover-lift motion-float-medium" #ecosystemMockup>
+            <img src="/imgs/eco_envio.png" alt="Aplicacion de envios Bien Helodias" class="ecosystem-image ecosystem-image--delivery" />
           </article>
-          <div class="ecosystem-chip top-left">Promos</div>
-          <div class="ecosystem-chip bottom-right">Tracking</div>
-          <div class="ecosystem-chip mid-right">Push</div>
+          <div class="ecosystem-chip top-left" #ecosystemChip>Promos</div>
+          <div class="ecosystem-chip bottom-right" #ecosystemChip>Tracking</div>
+          <div class="ecosystem-chip mid-right" #ecosystemChip>Push</div>
         </div>
       </div>
     </section>
@@ -283,7 +356,10 @@
       <div class="band-inner affiliates-layout">
         <div class="section-copy motion-reveal" #revealEl>
           <p class="eyebrow">Miembros de la red</p>
-          <h2>Negocios impulsados por Bien Helodias.</h2>
+          <h2>Negocios que ya operan bajo el mismo pulso.</h2>
+          <p>
+            La confianza sube cuando la marca se presenta como red activa y no como promesa abstracta.
+          </p>
         </div>
 
         <div class="affiliate-row">
@@ -307,9 +383,23 @@
     <section class="band maroon-band" id="afiliate">
       <div class="band-inner cta-layout">
         <div class="section-copy on-dark motion-reveal" #revealEl>
-          <p class="eyebrow dark-eyebrow">Afiliación</p>
-          <h2>Lleva tu licorería a internet.</h2>
-          <p>Solicita información y arma tu operación sobre una base lista para vender.</p>
+          <p class="eyebrow dark-eyebrow">Afiliacion</p>
+          <h2>Lleva tu licoreria a internet con presencia de marca y control operativo.</h2>
+          <p>Solicita informacion y arma tu operacion sobre una base lista para vender, promocionar y entregar.</p>
+          <div class="cta-benefits">
+            <div class="cta-benefit">
+              <span class="material-symbols-outlined" aria-hidden="true">bolt</span>
+              <span>Setup agil</span>
+            </div>
+            <div class="cta-benefit">
+              <span class="material-symbols-outlined" aria-hidden="true">campaign</span>
+              <span>Promos listas</span>
+            </div>
+            <div class="cta-benefit">
+              <span class="material-symbols-outlined" aria-hidden="true">route</span>
+              <span>Rastreo claro</span>
+            </div>
+          </div>
         </div>
 
         <div class="cta-stage motion-reveal" #revealEl>
@@ -324,7 +414,7 @@
             </label>
             <label class="mini-form__field">
               <span class="material-symbols-outlined mini-form__icon" aria-hidden="true">call</span>
-              <input #affiliatePhone type="tel" placeholder="Teléfono" />
+              <input #affiliatePhone type="tel" placeholder="Telefono" />
             </label>
             <label class="mini-form__field">
               <span class="material-symbols-outlined mini-form__icon" aria-hidden="true">mail</span>
@@ -341,7 +431,7 @@
             </a>
           </form>
 
-          <div class="cta-float-card motion-float-medium">Setup rápido</div>
+          <div class="cta-float-card motion-float-medium">Setup rapido</div>
           <div class="cta-icon-cluster motion-float-reverse" aria-hidden="true">
             <span class="material-symbols-outlined cta-icon-cluster__item cta-icon-cluster__item--catalog">inventory_2</span>
             <span class="material-symbols-outlined cta-icon-cluster__item cta-icon-cluster__item--checkout">point_of_sale</span>

@@ -92,7 +92,13 @@ export function MartiniHeroCanvas({ glass }: MartiniHeroCanvasProps) {
     scene.add(ambient, key, rim);
 
     const glassRoot = glass;
+    glassRoot.clear();
     applyGlassState(glassRoot, glassStates.hidden);
+    glassRoot.userData.operationFloatStrength = 0;
+
+    const glassVisual = new THREE.Group();
+    glassVisual.name = "martini-glass-visual";
+    glassRoot.add(glassVisual);
     scene.add(glassRoot);
 
     const loader = new GLTFLoader();
@@ -105,7 +111,7 @@ export function MartiniHeroCanvas({ glass }: MartiniHeroCanvasProps) {
           return;
         }
 
-        glassRoot.clear();
+        glassVisual.clear();
         const model = gltf.scene;
         normalizeModel(model);
         model.traverse((child) => {
@@ -114,18 +120,18 @@ export function MartiniHeroCanvas({ glass }: MartiniHeroCanvasProps) {
             child.receiveShadow = true;
           }
         });
-        glassRoot.add(model);
+        glassVisual.add(model);
       },
       undefined,
       () => {
-        if (!disposed && glassRoot.children.length === 0) {
-          glassRoot.add(createFallbackGlass());
+        if (!disposed && glassVisual.children.length === 0) {
+          glassVisual.add(createFallbackGlass());
         }
       }
     );
 
-    if (glassRoot.children.length === 0) {
-      glassRoot.add(createFallbackGlass());
+    if (glassVisual.children.length === 0) {
+      glassVisual.add(createFallbackGlass());
     }
 
     const resize = () => {
@@ -139,9 +145,40 @@ export function MartiniHeroCanvas({ glass }: MartiniHeroCanvasProps) {
     const observer = new ResizeObserver(resize);
     observer.observe(mount);
 
+    const clock = new THREE.Clock();
+    const floatSeed = Math.random() * 100;
     let frame = 0;
     const render = () => {
       frame = window.requestAnimationFrame(render);
+      const elapsed = clock.getElapsedTime() + floatSeed;
+      const strength = THREE.MathUtils.clamp(
+        Number(glassRoot.userData.operationFloatStrength ?? 0),
+        0,
+        1
+      );
+      const floatConfig = canvasConfig.operationFloat;
+
+      if (strength > 0.001) {
+        glassVisual.position.set(
+          strength *
+            (Math.sin(elapsed * 1.07) * floatConfig.positionAmplitude.x +
+              Math.sin(elapsed * 0.53 + 2.1) * floatConfig.positionAmplitude.x * 0.38),
+          strength *
+            (Math.sin(elapsed * 0.86 + 0.8) * floatConfig.positionAmplitude.y +
+              Math.sin(elapsed * 1.34 + 3.2) * floatConfig.positionAmplitude.y * 0.25),
+          strength * Math.sin(elapsed * 0.74 + 1.7) * floatConfig.positionAmplitude.z
+        );
+        glassVisual.rotation.set(
+          strength * Math.sin(elapsed * 0.78 + 1.2) * floatConfig.rotationAmplitude.x,
+          strength *
+            (Math.sin(elapsed * 0.64 + 0.4) * floatConfig.rotationAmplitude.y +
+              Math.sin(elapsed * 1.11 + 2.7) * floatConfig.rotationAmplitude.y * 0.28),
+          strength * Math.sin(elapsed * 0.92 + 2.4) * floatConfig.rotationAmplitude.z
+        );
+      } else {
+        glassVisual.position.set(0, 0, 0);
+        glassVisual.rotation.set(0, 0, 0);
+      }
       renderer.render(scene, camera);
     };
     render();
