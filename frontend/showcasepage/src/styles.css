@@ -7,26 +7,29 @@
 }
 
 @theme {
-  --font-display: "Space Grotesk", sans-serif;
+  --font-display: "Sora", sans-serif;
   --font-body: "Manrope", sans-serif;
+  --font-accent: "Cormorant Garamond", serif;
   --font-brand: "Hyperwave", "Space Grotesk", sans-serif;
 
   --color-primary: #d2fd6e;
   --color-primary-deep: #87ad26;
   --color-primary-text: #486100;
-  --color-surface: #0e0e0e;
-  --color-surface-low: #131313;
-  --color-surface-high: #1f2020;
-  --color-surface-highest: #262626;
-  --color-outline: #484848;
+  --color-surface: #090909;
+  --color-surface-low: #111111;
+  --color-surface-high: #17191c;
+  --color-surface-highest: #23262b;
+  --color-outline: #3f434a;
   --color-text-primary: #ffffff;
-  --color-text-secondary: #c9c9c9;
+  --color-text-secondary: #b8bcc5;
   --color-cobalt-band: #2665d6;
   --color-maroon-plate: #780016;
   --color-cobalt-deep: #061492;
   --color-forest-ink: #254f1a;
   --color-mustard-pop: #d6a337;
   --color-lavender-mist: #e9c0e9;
+  --color-gold: #d7b56d;
+  --color-card-veil: rgb(255 255 255 / 0.05);
 }
 
 @layer base {
@@ -50,9 +53,9 @@
     --float-y: 12px;
     --float-x: 8px;
 
-    --glow-lime-soft: 0 0 60px rgb(210 253 110 / 0.06);
-    --glow-lime-medium: 0 0 80px rgb(210 253 110 / 0.12);
-    --shadow-card-tonal: 0 24px 80px rgb(0 0 0 / 0.28);
+    --glow-lime-soft: 0 0 60px rgb(210 253 110 / 0.08);
+    --glow-lime-medium: 0 0 96px rgb(210 253 110 / 0.16);
+    --shadow-card-tonal: 0 24px 80px rgb(0 0 0 / 0.34);
   }
 
   * {
@@ -71,11 +74,13 @@
   body {
     margin: 0;
     background:
-      radial-gradient(circle at top right, rgb(210 253 110 / 0.12), transparent 26%),
-      radial-gradient(circle at left 80%, rgb(231 233 89 / 0.06), transparent 18%),
+      radial-gradient(circle at top right, rgb(210 253 110 / 0.1), transparent 22%),
+      radial-gradient(circle at 14% 18%, rgb(38 101 214 / 0.12), transparent 24%),
+      radial-gradient(circle at 82% 72%, rgb(120 0 22 / 0.14), transparent 20%),
       var(--color-surface);
     color: var(--color-text-primary);
     font-family: var(--font-body);
+    text-rendering: optimizeLegibility;
   }
 
   a,

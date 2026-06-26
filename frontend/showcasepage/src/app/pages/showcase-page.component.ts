@@ -68,6 +68,8 @@ export class ShowcasePageComponent implements AfterViewInit {
   private revealObserver: IntersectionObserver | null = null;
   private counterObserver: IntersectionObserver | null = null;
   private platformContext: gsap.Context | null = null;
+  private cinematicContext: gsap.Context | null = null;
+  private mediaMatcher: gsap.MatchMedia | null = null;
   private readonly introSprites: HTMLImageElement[] = [];
   private readonly introParticles: IntroParticle[] = [];
   private introParticleTimeline: gsap.core.Timeline | null = null;
@@ -84,6 +86,16 @@ export class ShowcasePageComponent implements AfterViewInit {
   @ViewChild('introCanvas', { read: ElementRef }) private readonly introCanvas?: ElementRef<HTMLCanvasElement>;
   @ViewChild('introGlow', { read: ElementRef }) private readonly introGlow?: ElementRef<HTMLElement>;
   @ViewChild('introTitle', { read: ElementRef }) private readonly introTitle?: ElementRef<HTMLElement>;
+  @ViewChild('heroSection', { read: ElementRef }) private readonly heroSection?: ElementRef<HTMLElement>;
+  @ViewChild('heroVisual', { read: ElementRef }) private readonly heroVisual?: ElementRef<HTMLElement>;
+  @ViewChild('heroMockup', { read: ElementRef }) private readonly heroMockup?: ElementRef<HTMLElement>;
+  @ViewChild('heroWave', { read: ElementRef }) private readonly heroWave?: ElementRef<HTMLElement>;
+  @ViewChild('heroOrbit', { read: ElementRef }) private readonly heroOrbit?: ElementRef<HTMLElement>;
+  @ViewChild('heroStageCopy', { read: ElementRef }) private readonly heroStageCopy?: ElementRef<HTMLElement>;
+  @ViewChild('heroCommandCard', { read: ElementRef }) private readonly heroCommandCard?: ElementRef<HTMLElement>;
+  @ViewChild('ecosystemStage', { read: ElementRef }) private readonly ecosystemStage?: ElementRef<HTMLElement>;
+  @ViewChildren('ecosystemMockup', { read: ElementRef }) private readonly ecosystemMockups!: QueryList<ElementRef<HTMLElement>>;
+  @ViewChildren('ecosystemChip', { read: ElementRef }) private readonly ecosystemChips!: QueryList<ElementRef<HTMLElement>>;
   @ViewChild('affiliateButton', { read: ElementRef }) private readonly affiliateButton?: ElementRef<HTMLElement>;
   @ViewChild('affiliateIcon', { read: ElementRef }) private readonly affiliateIcon?: ElementRef<HTMLElement>;
   @ViewChildren('introLetter', { read: ElementRef }) private readonly introLetters!: QueryList<ElementRef<HTMLElement>>;
@@ -107,19 +119,19 @@ export class ShowcasePageComponent implements AfterViewInit {
   readonly solutions: SolutionCard[] = [
     {
       eyebrow: 'Cliente',
-      title: 'Compra en corto',
-      chips: ['Catálogo', 'Promo activa', 'Tracking'],
+      title: 'Catalogo que convierte',
+      chips: ['Descubre', 'Promo activa', 'Tracking'],
       tone: 'lime'
     },
     {
       eyebrow: 'Negocio',
-      title: 'Sin fricción',
-      chips: ['Productos', 'Pedidos', 'Panel'],
+      title: 'Operacion centralizada',
+      chips: ['Inventario', 'Pedidos', 'Panel'],
       tone: 'blue'
     },
     {
       eyebrow: 'Delivery',
-      title: 'Entrega al tiro',
+      title: 'Ruta con respuesta',
       chips: ['Disponible', 'Ruta', 'Avisos'],
       tone: 'maroon'
     }
@@ -149,7 +161,7 @@ export class ShowcasePageComponent implements AfterViewInit {
     }
   ];
 
-  readonly marqueeItems = ['DELIVERY', 'PROMOS', 'CATÁLOGO', 'TRACKING', 'PANEL', 'REPARTIDORES'];
+  readonly marqueeItems = ['DELIVERY', 'PROMOS', 'CATALOGO', 'TRACKING', 'PANEL', 'REPARTIDORES'];
   readonly introLineOne = Array.from('Bien');
   readonly introLineTwo = Array.from('Helodias');
 
@@ -170,16 +182,26 @@ export class ShowcasePageComponent implements AfterViewInit {
     this.setupRevealObserver();
     this.setupCounterObserver();
     this.setupPlatformScrollAnimation();
+    this.setupCinematicScrollAnimation();
 
     this.destroyRef.onDestroy(() => {
       this.revealObserver?.disconnect();
       this.counterObserver?.disconnect();
       this.platformContext?.revert();
+      this.cinematicContext?.revert();
+      this.mediaMatcher?.revert();
       gsap.killTweensOf([
         this.introOverlay?.nativeElement,
         this.introGlow?.nativeElement,
         this.introTitle?.nativeElement,
-        ...this.introLetters.toArray().map((entry) => entry.nativeElement)
+        ...this.introLetters.toArray().map((entry) => entry.nativeElement),
+        this.heroMockup?.nativeElement,
+        this.heroWave?.nativeElement,
+        this.heroOrbit?.nativeElement,
+        this.heroStageCopy?.nativeElement,
+        this.heroCommandCard?.nativeElement,
+        ...this.ecosystemMockups.toArray().map((entry) => entry.nativeElement),
+        ...this.ecosystemChips.toArray().map((entry) => entry.nativeElement)
       ]);
       this.stopIntroCanvas();
     });
@@ -501,6 +523,132 @@ export class ShowcasePageComponent implements AfterViewInit {
         }
       });
     }, section);
+  }
+
+  private setupCinematicScrollAnimation(): void {
+    const heroSection = this.heroSection?.nativeElement;
+    const heroVisual = this.heroVisual?.nativeElement;
+    const heroMockup = this.heroMockup?.nativeElement;
+    const heroWave = this.heroWave?.nativeElement;
+    const heroOrbit = this.heroOrbit?.nativeElement;
+    const heroStageCopy = this.heroStageCopy?.nativeElement;
+    const heroCommandCard = this.heroCommandCard?.nativeElement;
+    const ecosystemStage = this.ecosystemStage?.nativeElement;
+    const ecosystemMockups = this.ecosystemMockups.toArray().map((entry) => entry.nativeElement);
+    const ecosystemChips = this.ecosystemChips.toArray().map((entry) => entry.nativeElement);
+
+    if (
+      !heroSection ||
+      !heroVisual ||
+      !heroMockup ||
+      !heroWave ||
+      !heroOrbit ||
+      !heroStageCopy ||
+      !heroCommandCard ||
+      !ecosystemStage ||
+      ecosystemMockups.length === 0
+    ) {
+      return;
+    }
+
+    this.mediaMatcher = gsap.matchMedia();
+    this.cinematicContext = gsap.context(() => {
+      this.mediaMatcher?.add(
+        {
+          isDesktop: '(min-width: 761px)',
+          isMobile: '(max-width: 760px)',
+          reduceMotion: '(prefers-reduced-motion: reduce)'
+        },
+        (context) => {
+          const conditions = (context.conditions ?? {}) as {
+            isDesktop?: boolean;
+            reduceMotion?: boolean;
+          };
+          const isDesktop = conditions.isDesktop ?? false;
+          const reduceMotion = conditions.reduceMotion ?? false;
+
+          if (reduceMotion) {
+            gsap.set(
+              [heroMockup, heroWave, heroOrbit, heroStageCopy, heroCommandCard, ...ecosystemMockups, ...ecosystemChips],
+              { clearProps: 'all' }
+            );
+            return;
+          }
+
+          const heroTimeline = gsap.timeline({
+            defaults: { ease: 'power3.out' },
+            scrollTrigger: {
+              trigger: heroSection,
+              start: 'top top',
+              end: isDesktop ? 'bottom top+=12%' : 'bottom top',
+              scrub: isDesktop ? 0.85 : 0.45
+            }
+          });
+
+          heroTimeline
+            .to(heroMockup, { y: isDesktop ? -42 : -18, rotation: isDesktop ? -2.5 : -1.2 }, 0)
+            .to(heroWave, { scale: isDesktop ? 1.08 : 1.03, rotate: isDesktop ? 8 : 4, transformOrigin: '50% 50%' }, 0)
+            .to(heroOrbit, { rotate: isDesktop ? -10 : -5, scale: isDesktop ? 1.04 : 1.02, transformOrigin: '50% 50%' }, 0)
+            .to(heroStageCopy, { y: isDesktop ? -34 : -14, autoAlpha: 0.24 }, 0)
+            .to(heroCommandCard, { y: isDesktop ? -22 : -10, rotation: isDesktop ? -3 : -1.5 }, 0);
+
+          ecosystemMockups.forEach((mockup, index) => {
+            gsap.fromTo(
+              mockup,
+              {
+                autoAlpha: 0,
+                y: 56 + index * 20,
+                x: index === 0 ? 0 : index === 1 ? -30 : 30,
+                rotate: index === 0 ? 0 : index === 1 ? -7 : 7,
+                scale: 0.9
+              },
+              {
+                autoAlpha: 1,
+                y: 0,
+                x: 0,
+                rotate: 0,
+                scale: 1,
+                duration: 0.9,
+                ease: 'power4.out',
+                scrollTrigger: {
+                  trigger: ecosystemStage,
+                  start: 'top 68%',
+                  once: true
+                },
+                delay: index * 0.08
+              }
+            );
+
+            gsap.to(mockup, {
+              y: index === 0 ? -10 : -6,
+              x: index === 1 ? -6 : index === 2 ? 6 : 0,
+              duration: 4.6 + index * 0.4,
+              ease: 'sine.inOut',
+              repeat: -1,
+              yoyo: true
+            });
+          });
+
+          gsap.fromTo(
+            ecosystemChips,
+            { autoAlpha: 0, y: 18, scale: 0.92 },
+            {
+              autoAlpha: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.42,
+              ease: 'back.out(1.5)',
+              stagger: 0.08,
+              scrollTrigger: {
+                trigger: ecosystemStage,
+                start: 'top 62%',
+                once: true
+              }
+            }
+          );
+        }
+      );
+    });
   }
 
   private async playIntro(): Promise<void> {
