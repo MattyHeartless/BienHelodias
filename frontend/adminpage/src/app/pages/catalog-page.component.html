@@ -148,7 +148,11 @@
 
 @if (modalOpen()) {
   <div class="modal-backdrop" (click)="resetForm()">
-    <div class="modal-panel" (click)="$event.stopPropagation()">
+    <div
+      class="modal-panel t-modal"
+      [class.is-open]="productModalActive()"
+      [class.is-closing]="productModalClosing()"
+      (click)="$event.stopPropagation()">
       <div class="flex items-center justify-between gap-4">
         <div>
           <p class="eyebrow">{{ isEditing() ? 'Editar producto' : 'Nuevo producto' }}</p>
@@ -197,15 +201,18 @@
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div class="field-block">
             <label class="field-label" for="product-price">Precio de venta</label>
-            <input
-              id="product-price"
-              class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
-              formControlName="price"
-              type="number"
-              step="0.01"
-              inputmode="decimal"
-              placeholder="Ej. 299"
-            />
+            <div class="relative">
+              <span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-bold text-primary" aria-hidden="true">$</span>
+              <input
+                id="product-price"
+                class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high py-3 pl-9 pr-4 text-white outline-none focus:border-primary"
+                formControlName="price"
+                type="number"
+                step="0.01"
+                inputmode="decimal"
+                placeholder="Ej. 299"
+              />
+            </div>
             <p class="field-help">Precio que verá el cliente.</p>
           </div>
 
@@ -255,7 +262,11 @@
 
 @if (inventoryAiModalOpen()) {
   <div class="modal-backdrop" (click)="closeInventoryAiModal()">
-    <div class="modal-panel inventory-ai-modal" (click)="$event.stopPropagation()">
+    <div
+      class="modal-panel inventory-ai-modal t-modal"
+      [class.is-open]="inventoryAiModalActive()"
+      [class.is-closing]="inventoryAiModalClosing()"
+      (click)="$event.stopPropagation()">
       @if (inventoryAiLoading()) {
         <div class="inventory-loading-overlay" #inventoryLoadingOverlay aria-live="polite" aria-busy="true">
           <div class="inventory-loading-overlay__glow" #inventoryLoadingGlow></div>

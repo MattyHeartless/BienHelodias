@@ -76,19 +76,19 @@
     ]
   },
   "packageFolders": {
-    "/Users/jaiman/.nuget/packages/": {}
+    "C:\\Users\\Dev\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Application/LiquorSaaS.Application.csproj",
+      "projectUniqueName": "C:\\Users\\Dev\\My Web Sites\\BienHelodias\\backend\\src\\LiquorSaaS.Application\\LiquorSaaS.Application.csproj",
       "projectName": "LiquorSaaS.Application",
-      "projectPath": "/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Application/LiquorSaaS.Application.csproj",
-      "packagesPath": "/Users/jaiman/.nuget/packages/",
-      "outputPath": "/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Application/obj/",
+      "projectPath": "C:\\Users\\Dev\\My Web Sites\\BienHelodias\\backend\\src\\LiquorSaaS.Application\\LiquorSaaS.Application.csproj",
+      "packagesPath": "C:\\Users\\Dev\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Dev\\My Web Sites\\BienHelodias\\backend\\src\\LiquorSaaS.Application\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/jaiman/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\Dev\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -100,8 +100,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Domain/LiquorSaaS.Domain.csproj": {
-              "projectPath": "/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Domain/LiquorSaaS.Domain.csproj"
+            "C:\\Users\\Dev\\My Web Sites\\BienHelodias\\backend\\src\\LiquorSaaS.Domain\\LiquorSaaS.Domain.csproj": {
+              "projectPath": "C:\\Users\\Dev\\My Web Sites\\BienHelodias\\backend\\src\\LiquorSaaS.Domain\\LiquorSaaS.Domain.csproj"
             }
           }
         }
@@ -115,8 +115,7 @@
         "enableAudit": "true",
         "auditLevel": "low",
         "auditMode": "direct"
-      },
-      "SdkAnalysisLevel": "10.0.100"
+      }
     },
     "frameworks": {
       "net8.0": {
@@ -143,7 +142,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/10.0.102/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.417/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

@@ -19,6 +19,16 @@ public sealed class AdminController(IAdminService adminService, IInventoryAiServ
         return Ok(ApiResponse<DashboardDto>.Ok(result, "Dashboard retrieved successfully."));
     }
 
+    [HttpGet("dashboard/overview")]
+    public async Task<ActionResult<ApiResponse<DashboardOverviewDto>>> GetDashboardOverview(
+        [FromQuery] DateTime? from,
+        [FromQuery] DateTime? to,
+        CancellationToken cancellationToken)
+    {
+        var result = await adminService.GetDashboardOverviewAsync(from, to, cancellationToken);
+        return Ok(ApiResponse<DashboardOverviewDto>.Ok(result, "Dashboard overview retrieved successfully."));
+    }
+
     [HttpGet("delivery-users")]
     public async Task<ActionResult<ApiResponse<IReadOnlyList<DeliveryUserDto>>>> GetDeliveryUsers(CancellationToken cancellationToken)
     {

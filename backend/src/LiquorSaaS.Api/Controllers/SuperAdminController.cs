@@ -11,6 +11,16 @@ namespace LiquorSaaS.Api.Controllers;
 [Route("api/superadmin")]
 public sealed class SuperAdminController(IStoreService storeService, IAdminService adminService) : ControllerBase
 {
+    [HttpGet("dashboard/overview")]
+    public async Task<ActionResult<ApiResponse<SuperAdminDashboardOverviewDto>>> GetDashboardOverview(
+        [FromQuery] DateTime? from,
+        [FromQuery] DateTime? to,
+        CancellationToken cancellationToken)
+    {
+        var result = await adminService.GetSuperAdminDashboardOverviewAsync(from, to, cancellationToken);
+        return Ok(ApiResponse<SuperAdminDashboardOverviewDto>.Ok(result, "Super admin dashboard overview retrieved successfully."));
+    }
+
     [HttpGet("stores")]
     public async Task<ActionResult<ApiResponse<PagedResult<StoreDto>>>> GetStores([FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken cancellationToken = default)
     {

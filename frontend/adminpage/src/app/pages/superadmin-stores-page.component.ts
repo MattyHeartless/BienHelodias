@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, WritableSignal, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { StoreAdminDto, StoreDto, SubscriptionStatus } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
+import { shakeInvalidFormControls } from '../core/form-error-shake.util';
 import { NotificationUiService } from '../core/notification-ui.service';
 import { SuperadminApiService } from '../services/superadmin-api.service';
 
@@ -16,6 +17,7 @@ const DEFAULT_ADMIN_PASSWORD = 'Admin123!';
   styleUrl: './superadmin-stores-page.component.css'
 })
 export class SuperadminStoresPageComponent {
+  private readonly host = inject(ElementRef<HTMLElement>);
   private readonly superadminApi = inject(SuperadminApiService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly notifications = inject(NotificationUiService);
@@ -25,8 +27,14 @@ export class SuperadminStoresPageComponent {
   readonly feedback = signal<string | null>(null);
   readonly stores = signal<StoreDto[]>([]);
   readonly createStoreModalOpen = signal(false);
+  readonly createStoreModalActive = signal(false);
+  readonly createStoreModalClosing = signal(false);
   readonly editStoreModalOpen = signal(false);
+  readonly editStoreModalActive = signal(false);
+  readonly editStoreModalClosing = signal(false);
   readonly adminsModalOpen = signal(false);
+  readonly adminsModalActive = signal(false);
+  readonly adminsModalClosing = signal(false);
   readonly selectedStore = signal<StoreDto | null>(null);
   readonly loadingAdmins = signal(false);
   readonly savingAdmin = signal(false);
@@ -68,15 +76,16 @@ export class SuperadminStoresPageComponent {
   openCreateStoreModal(): void {
     this.error.set(null);
     this.feedback.set(null);
-    this.createStoreModalOpen.set(true);
+    this.openAnimatedModal(this.createStoreModalOpen, this.createStoreModalActive, this.createStoreModalClosing);
   }
 
   closeCreateStoreModal(): void {
-    this.createStoreModalOpen.set(false);
-    this.storeForm.reset({
-      name: '',
-      slug: '',
-      subscriptionStatus: SubscriptionStatus.Active
+    this.closeAnimatedModal(this.createStoreModalOpen, this.createStoreModalActive, this.createStoreModalClosing, () => {
+      this.storeForm.reset({
+        name: '',
+        slug: '',
+        subscriptionStatus: SubscriptionStatus.Active
+      });
     });
   }
 
@@ -89,16 +98,17 @@ export class SuperadminStoresPageComponent {
       slug: store.slug,
       isActive: store.isActive
     });
-    this.editStoreModalOpen.set(true);
+    this.openAnimatedModal(this.editStoreModalOpen, this.editStoreModalActive, this.editStoreModalClosing);
   }
 
   closeEditStoreModal(): void {
-    this.editStoreModalOpen.set(false);
-    this.selectedStore.set(null);
-    this.editStoreForm.reset({
-      name: '',
-      slug: '',
-      isActive: true
+    this.closeAnimatedModal(this.editStoreModalOpen, this.editStoreModalActive, this.editStoreModalClosing, () => {
+      this.selectedStore.set(null);
+      this.editStoreForm.reset({
+        name: '',
+        slug: '',
+        isActive: true
+      });
     });
   }
 
@@ -112,20 +122,21 @@ export class SuperadminStoresPageComponent {
       email: '',
       password: DEFAULT_ADMIN_PASSWORD
     });
-    this.adminsModalOpen.set(true);
+    this.openAnimatedModal(this.adminsModalOpen, this.adminsModalActive, this.adminsModalClosing);
     this.loadStoreAdmins(store.id);
   }
 
   closeAdminsModal(): void {
-    this.adminsModalOpen.set(false);
-    this.selectedStore.set(null);
-    this.storeAdmins.set([]);
-    this.adminForm.reset({
-      name: '',
-      email: '',
-      password: DEFAULT_ADMIN_PASSWORD
+    this.closeAnimatedModal(this.adminsModalOpen, this.adminsModalActive, this.adminsModalClosing, () => {
+      this.selectedStore.set(null);
+      this.storeAdmins.set([]);
+      this.adminForm.reset({
+        name: '',
+        email: '',
+        password: DEFAULT_ADMIN_PASSWORD
+      });
+      this.savingAdmin.set(false);
     });
-    this.savingAdmin.set(false);
   }
 
   load(clearFeedback = true): void {
@@ -152,6 +163,7 @@ export class SuperadminStoresPageComponent {
   createStore(): void {
     this.storeForm.markAllAsTouched();
     if (this.storeForm.invalid) {
+      shakeInvalidFormControls(this.host.nativeElement);
       return;
     }
 
@@ -179,6 +191,7 @@ export class SuperadminStoresPageComponent {
 
     this.editStoreForm.markAllAsTouched();
     if (this.editStoreForm.invalid) {
+      shakeInvalidFormControls(this.host.nativeElement);
       return;
     }
 
@@ -210,6 +223,7 @@ export class SuperadminStoresPageComponent {
     if (this.adminForm.invalid) {
       const message = 'Completa nombre, correo valido y una contrasena de al menos 8 caracteres.';
       this.error.set(message);
+      shakeInvalidFormControls(this.host.nativeElement);
       this.notifications.error({ summary: message });
       return;
     }
@@ -275,5 +289,56 @@ export class SuperadminStoresPageComponent {
         this.notifications.error({ summary: message });
       }
     });
+  }
+
+  private openAnimatedModal(
+    open: WritableSignal<boolean>,
+    active: WritableSignal<boolean>,
+    closing: WritableSignal<boolean>
+  ): void {
+    closing.set(false);
+    active.set(false);
+    open.set(true);
+    window.requestAnimationFrame(() => active.set(true));
+  }
+
+  private closeAnimatedModal(
+    open: WritableSignal<boolean>,
+    active: WritableSignal<boolean>,
+    closing: WritableSignal<boolean>,
+    afterClose?: () => void
+  ): void {
+    if (!open()) {
+      afterClose?.();
+      return;
+    }
+
+    if (closing()) {
+      return;
+    }
+
+    active.set(false);
+    closing.set(true);
+    window.setTimeout(() => {
+      open.set(false);
+      closing.set(false);
+      afterClose?.();
+    }, this.getModalCloseDurationMs());
+  }
+
+  private getModalCloseDurationMs(): number {
+    const rawValue = getComputedStyle(document.documentElement)
+      .getPropertyValue('--modal-close-dur')
+      .trim();
+
+    if (rawValue.endsWith('ms')) {
+      return Number.parseFloat(rawValue) || 150;
+    }
+
+    if (rawValue.endsWith('s')) {
+      return (Number.parseFloat(rawValue) || 0.15) * 1000;
+    }
+
+    return Number.parseFloat(rawValue) || 150;
   }
 }

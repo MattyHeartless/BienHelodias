@@ -6,6 +6,7 @@ import {
   AuthTokenDto,
   BannerDto,
   DashboardDto,
+  DashboardOverviewDto,
   DeliveryUserDto,
   InventoryAiAnalysisDto,
   InventoryAiCommitRequest,
@@ -34,6 +35,20 @@ export class StoreAdminApiService {
 
   getDashboard(): Observable<ApiResponse<DashboardDto>> {
     return this.http.get<ApiResponse<DashboardDto>>(this.adminUrl);
+  }
+
+  getDashboardOverview(from?: string, to?: string): Observable<ApiResponse<DashboardOverviewDto>> {
+    const params: Record<string, string> = {};
+
+    if (from) {
+      params['from'] = from;
+    }
+
+    if (to) {
+      params['to'] = to;
+    }
+
+    return this.http.get<ApiResponse<DashboardOverviewDto>>(`${this.adminUrl}/overview`, { params });
   }
 
   getDeliveryUsers(): Observable<ApiResponse<DeliveryUserDto[]>> {

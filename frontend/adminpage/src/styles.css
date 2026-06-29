@@ -18,7 +18,21 @@
 }
 
 @layer base {
-  :root { color-scheme: dark; }
+  :root {
+    color-scheme: dark;
+    --modal-open-dur: 250ms;
+    --modal-close-dur: 150ms;
+    --modal-scale: 0.96;
+    --modal-scale-close: 0.96;
+    --modal-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --shake-distance: 6px;
+    --shake-overshoot: 4px;
+    --shake-dur-a: 80ms;
+    --shake-dur-b: 60ms;
+    --shake-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --revert-hold: 3000ms;
+    --revert-dur: 280ms;
+  }
   * { box-sizing: border-box; }
   body {
     margin: 0;
@@ -40,4 +54,97 @@
   .liquid-button { @apply inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-br from-primary to-primary-container px-6 py-3 font-semibold text-on-primary shadow-[0_0_28px_rgba(210,253,110,0.22)] transition duration-300 hover:scale-[1.02]; }
   .ghost-button { @apply inline-flex items-center justify-center gap-2 rounded-full border border-outline-variant/40 bg-transparent px-5 py-3 text-sm font-semibold text-on-surface transition hover:border-primary/60 hover:bg-white/4 hover:text-primary; }
   .eyebrow { @apply text-[0.72rem] font-semibold uppercase tracking-[0.28em] text-primary; }
+
+  .t-modal {
+    transform-origin: center;
+    transform: scale(var(--modal-scale));
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      transform var(--modal-open-dur) var(--modal-ease),
+      opacity   var(--modal-open-dur) var(--modal-ease);
+    will-change: transform, opacity;
+  }
+  .t-modal.is-open {
+    transform: scale(1);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .t-modal.is-closing {
+    transform: scale(var(--modal-scale-close));
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      transform var(--modal-close-dur) var(--modal-ease),
+      opacity   var(--modal-close-dur) var(--modal-ease);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .t-modal { transition: none !important; }
+  }
+
+  .t-input {
+    transition: border-color 150ms ease-out;
+    will-change: transform;
+  }
+  .t-input.is-error {
+    border-color: var(--color-error) !important;
+    transition: border-color var(--revert-dur, 280ms) ease-out;
+  }
+
+  .t-error-msg {
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity    var(--revert-dur, 280ms) ease-out,
+      visibility 0s linear var(--revert-dur, 280ms);
+  }
+  .t-input-wrap.is-error .t-error-msg,
+  .t-input.is-error + .t-error-msg {
+    opacity: 1;
+    visibility: visible;
+    transition:
+      opacity    var(--revert-dur, 280ms) ease-out,
+      visibility 0s linear 0s;
+  }
+
+  .t-input.is-shaking {
+    animation: t-input-shake calc(
+        var(--shake-dur-a) * 2 + var(--shake-dur-b) * 2
+      ) linear;
+  }
+  @keyframes t-input-shake {
+    0%      { transform: translateX(0);                                animation-timing-function: var(--shake-ease); }
+    28.57%  { transform: translateX(var(--shake-distance));            animation-timing-function: var(--shake-ease); }
+    57.14%  { transform: translateX(calc(var(--shake-distance) * -1)); animation-timing-function: var(--shake-ease); }
+    78.57%  { transform: translateX(var(--shake-overshoot));           animation-timing-function: var(--shake-ease); }
+    100%    { transform: translateX(0); }
+  }
+
+  .field-error-shake-message {
+    margin: 0;
+    color: var(--color-error);
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .t-input { animation: none !important; transform: none !important; }
+  }
+}
+
+@layer utilities {
+  .scrollbar-hidden,
+  .modal-panel {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .scrollbar-hidden::-webkit-scrollbar,
+  .modal-panel::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
 }

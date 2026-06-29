@@ -1,101 +1,67 @@
 @if (loading()) {
   <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-    @for (item of [1, 2, 3, 4]; track item) {
-      <div class="glass-panel h-48 animate-pulse bg-white/4"></div>
+    @for (item of [1, 2, 3, 4, 5, 6]; track item) {
+      <div class="glass-panel h-44 animate-pulse bg-white/4"></div>
     }
   </div>
+} @else if (error()) {
+  <section class="glass-panel p-6">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <p class="eyebrow">Dashboard</p>
+        <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">No fue posible cargar la vista</h2>
+        <p class="mt-3 text-sm text-on-surface-variant">{{ error() }}</p>
+      </div>
+      <button class="ghost-button" type="button" (click)="load()">
+        <span class="material-symbols-outlined text-base">refresh</span>
+        Reintentar
+      </button>
+    </div>
+  </section>
 } @else if (isSuperAdmin()) {
-  <div class="space-y-8">
-    <section class="flex flex-wrap items-center justify-between gap-4">
+  <div class="dashboard-stack superadmin-dashboard">
+    <section class="dashboard-hero">
       <div>
         <p class="eyebrow">Overview</p>
-        <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Resumen operativo del ecosistema</h2>
+        <h2 class="dashboard-title">Vista global</h2>
+        <p class="dashboard-subtitle">{{ superAdminPeriodLabel() }}</p>
       </div>
-      <button class="ghost-button" type="button" (click)="load()">
-        <span class="material-symbols-outlined text-base">refresh</span>
-        Refrescar
-      </button>
+      <div class="dashboard-actions">
+        <div class="quick-range" aria-label="Rangos rapidos">
+          <button type="button" (click)="setDatePreset(7)">7D</button>
+          <button type="button" (click)="setDatePreset(30)">30D</button>
+          <button type="button" (click)="setDatePreset(90)">90D</button>
+          <button type="button" (click)="setCurrentMonth()">Mes</button>
+        </div>
+        <div class="date-filter">
+          <label>
+            <span>Desde</span>
+            <input type="date" [value]="dateFrom()" [max]="dateTo()" (change)="updateDateFrom($any($event.target).value)">
+          </label>
+          <label>
+            <span>Hasta</span>
+            <input type="date" [value]="dateTo()" [min]="dateFrom()" (change)="updateDateTo($any($event.target).value)">
+          </label>
+          <button class="ghost-button" type="button" (click)="applyDateRange()">
+            <span class="material-symbols-outlined text-base">filter_alt</span>
+            Aplicar
+          </button>
+          <button class="icon-filter-button" type="button" (click)="load()" aria-label="Refrescar dashboard">
+            <span class="material-symbols-outlined text-base">refresh</span>
+          </button>
+        </div>
+      </div>
     </section>
 
-    <section class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+    <section class="metric-grid">
       @for (metric of superAdminMetrics(); track metric.label) {
-        <article class="glass-panel p-6">
-          <div class="flex items-center justify-between gap-3">
-            <p class="eyebrow">{{ metric.label }}</p>
-            <span class="material-symbols-outlined text-xl text-primary">{{ metric.icon }}</span>
+        <article class="metric-card" [class.metric-card-warn]="metric.warn">
+          <div class="metric-card-top">
+            <span class="material-symbols-outlined">{{ metric.icon }}</span>
+            <p>{{ metric.hint }}</p>
           </div>
-          <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">{{ metric.value }}</p>
-        </article>
-      }
-    </section>
-
-    <section class="grid gap-8 xl:grid-cols-[1fr_420px]">
-      <article class="glass-panel p-6">
-        <div class="flex items-center justify-between gap-4">
-          <div>
-            <p class="eyebrow">Recientes</p>
-            <h3 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Últimas licorerías registradas</h3>
-          </div>
-          <a class="ghost-button" routerLink="/dashboard/stores">
-            <span class="material-symbols-outlined text-base">storefront</span>
-            Ver licorerías
-          </a>
-        </div>
-
-        <div class="mt-6 space-y-4">
-          @for (store of recentStores(); track store.id) {
-            <div class="rounded-[1.5rem] bg-white/4 p-5">
-              <div class="flex items-start justify-between gap-4">
-                <div>
-                  <p class="font-display text-xl font-bold tracking-[-0.04em]">{{ store.name }}</p>
-                  <p class="mt-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">{{ store.slug }}</p>
-                </div>
-                <p class="rounded-full bg-white/8 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-primary">
-                  {{ store.isActive ? 'Activa' : 'Inactiva' }}
-                </p>
-              </div>
-            </div>
-          }
-        </div>
-      </article>
-
-      <article class="glass-panel p-6">
-        <p class="eyebrow">Suscripciones</p>
-        <h3 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Estado comercial</h3>
-        <div class="mt-6 space-y-4">
-          @for (card of statusCards(); track card.label) {
-            <div class="rounded-[1.5rem] bg-white/4 p-5">
-              <p class="text-xs uppercase tracking-[0.24em] text-on-surface-variant">{{ card.label }}</p>
-              <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em]" [class.text-primary]="card.tone === 'primary'" [class.text-white]="card.tone === 'neutral'" [class.text-error]="card.tone === 'warn'">
-                {{ card.value }}
-              </p>
-            </div>
-          }
-        </div>
-      </article>
-    </section>
-  </div>
-} @else {
-  <div class="space-y-8">
-    <section class="flex flex-wrap items-center justify-between gap-4">
-      <div>
-        <p class="eyebrow">Overview</p>
-        <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">KPIs y estado general de la tienda</h2>
-      </div>
-      <button class="ghost-button" type="button" (click)="load()">
-        <span class="material-symbols-outlined text-base">refresh</span>
-        Refrescar
-      </button>
-    </section>
-
-    <section class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-      @for (metric of storeMetrics(); track metric.label) {
-        <article class="glass-panel p-6">
-          <div class="flex items-center justify-between gap-3">
-            <p class="eyebrow">{{ metric.label }}</p>
-            <span class="material-symbols-outlined text-xl text-primary">{{ metric.icon }}</span>
-          </div>
-          <p class="mt-4 font-display text-4xl font-bold tracking-[-0.05em] text-primary">
+          <p class="metric-label">{{ metric.label }}</p>
+          <p class="metric-value">
             @if (metric.currency) {
               {{ metric.value | currency: 'MXN':'symbol-narrow':'1.0-0' }}
             } @else {
@@ -106,51 +72,556 @@
       }
     </section>
 
-    <section class="grid gap-8 xl:grid-cols-[1fr_420px]">
-      <article class="glass-panel p-6">
-        <p class="eyebrow">Actividad reciente</p>
-        <h3 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Últimos pedidos</h3>
-        <div class="mt-6 space-y-4">
-          @for (order of latestOrders(); track order.id) {
-            <div class="rounded-[1.5rem] bg-white/4 p-5">
-              <div class="flex items-start justify-between gap-4">
-                <div class="flex items-start gap-3">
-                  <span class="material-symbols-outlined mt-1 text-xl text-primary">receipt_long</span>
-                  <div>
-                    <p class="font-display text-xl font-bold tracking-[-0.04em]">{{ order.customerName }}</p>
-                    <p class="mt-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">{{ order.id }}</p>
-                  </div>
-                </div>
-                <div class="flex items-center gap-2">
-                  <span class="material-symbols-outlined text-base text-primary">payments</span>
-                  <p class="font-display text-2xl font-bold text-primary">{{ order.total | currency: 'MXN':'symbol-narrow':'1.0-0' }}</p>
-                </div>
+    <section class="dashboard-grid-main">
+      <article class="dashboard-panel revenue-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Ingresos</p>
+            <h3>Venta global diaria</h3>
+          </div>
+          <span class="material-symbols-outlined">monitoring</span>
+        </div>
+
+        @if (hasSuperAdminRevenueData()) {
+          <apx-chart
+            [series]="superAdminRevenueChart().series"
+            [chart]="superAdminRevenueChart().chart"
+            [colors]="superAdminRevenueChart().colors"
+            [dataLabels]="superAdminRevenueChart().dataLabels"
+            [fill]="superAdminRevenueChart().fill"
+            [grid]="superAdminRevenueChart().grid"
+            [stroke]="superAdminRevenueChart().stroke"
+            [tooltip]="superAdminRevenueChart().tooltip"
+            [xaxis]="superAdminRevenueChart().xaxis"
+            [yaxis]="superAdminRevenueChart().yaxis">
+          </apx-chart>
+        } @else {
+          <div class="empty-visual">
+            <span class="material-symbols-outlined">show_chart</span>
+            <p>Sin ventas en el periodo</p>
+          </div>
+        }
+      </article>
+
+      <article class="dashboard-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Suscripciones</p>
+            <h3>Estado comercial</h3>
+          </div>
+          <span class="material-symbols-outlined">donut_large</span>
+        </div>
+
+        <apx-chart
+          [series]="superAdminSubscriptionChart().series"
+          [chart]="superAdminSubscriptionChart().chart"
+          [colors]="superAdminSubscriptionChart().colors"
+          [dataLabels]="superAdminSubscriptionChart().dataLabels"
+          [labels]="superAdminSubscriptionChart().labels"
+          [legend]="superAdminSubscriptionChart().legend"
+          [plotOptions]="superAdminSubscriptionChart().plotOptions"
+          [stroke]="superAdminSubscriptionChart().stroke"
+          [tooltip]="superAdminSubscriptionChart().tooltip">
+        </apx-chart>
+      </article>
+    </section>
+
+    <section class="dashboard-grid-secondary">
+      <article class="dashboard-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Top ingresos</p>
+            <h3>Tiendas con mayor venta</h3>
+          </div>
+          <span class="material-symbols-outlined">leaderboard</span>
+        </div>
+
+        @if (hasTopStoresByRevenue()) {
+          <apx-chart
+            [series]="topStoresRevenueChart().series"
+            [chart]="topStoresRevenueChart().chart"
+            [colors]="topStoresRevenueChart().colors"
+            [dataLabels]="topStoresRevenueChart().dataLabels"
+            [grid]="topStoresRevenueChart().grid"
+            [plotOptions]="topStoresRevenueChart().plotOptions"
+            [tooltip]="topStoresRevenueChart().tooltip"
+            [xaxis]="topStoresRevenueChart().xaxis"
+            [yaxis]="topStoresRevenueChart().yaxis">
+          </apx-chart>
+        } @else {
+          <div class="empty-visual">
+            <span class="material-symbols-outlined">storefront</span>
+            <p>Sin ventas por tienda</p>
+          </div>
+        }
+      </article>
+
+      <article class="dashboard-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Pedidos</p>
+            <h3>Estado global</h3>
+          </div>
+          <span class="material-symbols-outlined">receipt_long</span>
+        </div>
+
+        <apx-chart
+          [series]="superAdminOrdersStatusChart().series"
+          [chart]="superAdminOrdersStatusChart().chart"
+          [colors]="superAdminOrdersStatusChart().colors"
+          [dataLabels]="superAdminOrdersStatusChart().dataLabels"
+          [labels]="superAdminOrdersStatusChart().labels"
+          [legend]="superAdminOrdersStatusChart().legend"
+          [plotOptions]="superAdminOrdersStatusChart().plotOptions"
+          [stroke]="superAdminOrdersStatusChart().stroke"
+          [tooltip]="superAdminOrdersStatusChart().tooltip">
+        </apx-chart>
+      </article>
+    </section>
+
+    <section class="dashboard-grid-bottom">
+      <article class="dashboard-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Top pedidos</p>
+            <h3>Tiendas con mas demanda</h3>
+          </div>
+          <a class="icon-link" routerLink="/dashboard/stores" aria-label="Abrir licorerias">
+            <span class="material-symbols-outlined">open_in_new</span>
+          </a>
+        </div>
+
+        @if (hasTopStoresByOrders()) {
+          <apx-chart
+            [series]="topStoresOrdersChart().series"
+            [chart]="topStoresOrdersChart().chart"
+            [colors]="topStoresOrdersChart().colors"
+            [dataLabels]="topStoresOrdersChart().dataLabels"
+            [grid]="topStoresOrdersChart().grid"
+            [plotOptions]="topStoresOrdersChart().plotOptions"
+            [tooltip]="topStoresOrdersChart().tooltip"
+            [xaxis]="topStoresOrdersChart().xaxis"
+            [yaxis]="topStoresOrdersChart().yaxis">
+          </apx-chart>
+        } @else {
+          <div class="empty-visual">
+            <span class="material-symbols-outlined">bar_chart</span>
+            <p>Sin pedidos por tienda</p>
+          </div>
+        }
+      </article>
+
+      <article class="dashboard-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Atencion</p>
+            <h3>Tiendas con alertas</h3>
+          </div>
+          <span class="material-symbols-outlined">warning</span>
+        </div>
+
+        <div class="list-stack">
+          @for (store of storeOperationalHealth(); track store.storeId) {
+            <div class="store-health-row">
+              <div class="row-main">
+                <p>{{ store.name }}</p>
+                <span>{{ store.slug }}</span>
               </div>
-              <div class="mt-4 flex items-start gap-3 text-sm leading-7 text-on-surface-variant">
-                <span class="material-symbols-outlined mt-1 text-base text-primary">location_on</span>
-                <p>{{ order.deliveryAddress }}</p>
+              <div class="health-badges">
+                @if (store.outOfStockProducts > 0) {
+                  <span class="stock-badge stock-out"><span>Agotado</span><strong>{{ store.outOfStockProducts }}</strong></span>
+                }
+                @if (store.lowStockProducts > 0) {
+                  <span class="stock-badge"><span>Bajo</span><strong>{{ store.lowStockProducts }}</strong></span>
+                }
+                @if (store.pendingOrders + store.onTheWayOrders > 0) {
+                  <span class="status-pill status-way">{{ store.pendingOrders + store.onTheWayOrders }} abiertos</span>
+                }
               </div>
+            </div>
+          } @empty {
+            <div class="empty-row">
+              <span class="material-symbols-outlined">task_alt</span>
+              <p>Sin alertas operativas</p>
             </div>
           }
         </div>
       </article>
 
-      <article class="glass-panel p-6">
-        <p class="eyebrow">Inventario crítico</p>
-        <h3 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Productos con menor stock</h3>
-        <div class="mt-6 space-y-4">
-          @for (product of lowStockProducts(); track product.id) {
-            <div class="rounded-[1.5rem] bg-white/4 p-5">
-              <div class="flex items-start justify-between gap-4">
-                <div>
-                  <p class="font-display text-xl font-bold tracking-[-0.04em]">{{ product.name }}</p>
-                  <p class="mt-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">{{ product.category }}</p>
-                </div>
-                <p class="rounded-full bg-white/8 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-primary">
-                  Stock {{ product.stock }}
-                </p>
+      <article class="dashboard-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Actividad</p>
+            <h3>Pedidos recientes</h3>
+          </div>
+          <span class="material-symbols-outlined">bolt</span>
+        </div>
+
+        <div class="list-stack">
+          @for (order of superAdminRecentOrders(); track order.id) {
+            <div class="order-row">
+              <div class="order-icon">
+                <span class="material-symbols-outlined">receipt_long</span>
               </div>
-              <p class="mt-4 text-sm leading-7 text-on-surface-variant">{{ product.description }}</p>
+              <div class="row-main">
+                <p>{{ order.storeName }}</p>
+                <span>{{ order.customerName }} Â· {{ order.itemCount }} piezas Â· {{ order.createdAtUtc | date: 'dd MMM, HH:mm' }}</span>
+              </div>
+              <div class="order-total">
+                <strong>{{ order.total | currency: 'MXN':'symbol-narrow':'1.0-0' }}</strong>
+                <span class="status-pill" [ngClass]="getOrderStatusClass(order.status)">
+                  {{ getOrderStatusLabel(order.status) }}
+                </span>
+              </div>
+            </div>
+          } @empty {
+            <div class="empty-row">
+              <span class="material-symbols-outlined">hourglass_empty</span>
+              <p>Sin pedidos recientes</p>
+            </div>
+          }
+        </div>
+      </article>
+    </section>
+
+    <section class="dashboard-grid-secondary">
+      <article class="dashboard-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Recientes</p>
+            <h3>Ultimas licorerias registradas</h3>
+          </div>
+          <a class="icon-link" routerLink="/dashboard/stores" aria-label="Abrir licorerias">
+            <span class="material-symbols-outlined">open_in_new</span>
+          </a>
+        </div>
+
+        <div class="list-stack">
+          @for (store of superAdminRecentStores(); track store.storeId) {
+            <div class="store-row">
+              <div class="order-icon">
+                <span class="material-symbols-outlined">storefront</span>
+              </div>
+              <div class="row-main">
+                <p>{{ store.name }}</p>
+                <span>{{ store.slug }} Â· {{ store.createdAtUtc | date: 'dd MMM yyyy' }}</span>
+              </div>
+              <span class="status-pill" [ngClass]="getSubscriptionStatusClass(store.subscriptionStatus)">
+                {{ getSubscriptionStatusLabel(store.subscriptionStatus) }}
+              </span>
+            </div>
+          } @empty {
+            <div class="empty-row">
+              <span class="material-symbols-outlined">storefront</span>
+              <p>Sin licorerias registradas</p>
+            </div>
+          }
+        </div>
+      </article>
+
+      <article class="dashboard-panel superadmin-footprint">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Inventario</p>
+            <h3>Huella global</h3>
+          </div>
+          <span class="material-symbols-outlined">inventory_2</span>
+        </div>
+        <div class="footprint-grid">
+          <div class="rounded-[0.9rem] border border-white/8 bg-white/[0.045] p-4">
+            <span class="block text-[0.7rem] font-black uppercase text-on-surface-variant">Productos</span>
+            <strong class="mt-2 block break-words font-display text-3xl leading-none">{{ superAdminOverview()?.kpis?.totalProducts ?? 0 }}</strong>
+          </div>
+          <div class="rounded-[0.9rem] border border-white/8 bg-white/[0.045] p-4">
+            <span class="block text-[0.7rem] font-black uppercase text-on-surface-variant">Activos</span>
+            <strong class="mt-2 block break-words font-display text-3xl leading-none">{{ superAdminOverview()?.kpis?.activeProducts ?? 0 }}</strong>
+          </div>
+          <div class="rounded-[0.9rem] border border-white/8 bg-white/[0.045] p-4">
+            <span class="block text-[0.7rem] font-black uppercase text-on-surface-variant">Valor inventario</span>
+            <strong class="mt-2 block break-words font-display text-3xl leading-none">{{ (superAdminOverview()?.kpis?.inventoryValue ?? 0) | currency: 'MXN':'symbol-narrow':'1.0-0' }}</strong>
+          </div>
+          <div class="rounded-[0.9rem] border border-white/8 bg-white/[0.045] p-4">
+            <span class="block text-[0.7rem] font-black uppercase text-on-surface-variant">Tiendas vendiendo</span>
+            <strong class="mt-2 block break-words font-display text-3xl leading-none">{{ superAdminOverview()?.kpis?.storesWithOrders ?? 0 }}</strong>
+          </div>
+        </div>
+      </article>
+    </section>
+  </div>
+} @else {
+  <div class="dashboard-stack">
+    <section class="dashboard-hero">
+      <div>
+        <p class="eyebrow">Overview</p>
+        <h2 class="dashboard-title">Resumen de la tienda</h2>
+        <p class="dashboard-subtitle">{{ periodLabel() }}</p>
+      </div>
+      <div class="dashboard-actions">
+        <div class="quick-range" aria-label="Rangos rapidos">
+          <button type="button" (click)="setDatePreset(7)">7D</button>
+          <button type="button" (click)="setDatePreset(30)">30D</button>
+          <button type="button" (click)="setDatePreset(90)">90D</button>
+          <button type="button" (click)="setCurrentMonth()">Mes</button>
+        </div>
+        <div class="date-filter">
+          <label>
+            <span>Desde</span>
+            <input type="date" [value]="dateFrom()" [max]="dateTo()" (change)="updateDateFrom($any($event.target).value)">
+          </label>
+          <label>
+            <span>Hasta</span>
+            <input type="date" [value]="dateTo()" [min]="dateFrom()" (change)="updateDateTo($any($event.target).value)">
+          </label>
+          <button class="ghost-button" type="button" (click)="applyDateRange()">
+            <span class="material-symbols-outlined text-base">filter_alt</span>
+            Aplicar
+          </button>
+          <button class="icon-filter-button" type="button" (click)="load()" aria-label="Refrescar dashboard">
+            <span class="material-symbols-outlined text-base">refresh</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="metric-grid">
+      @for (metric of storeMetrics(); track metric.label) {
+        <article class="metric-card" [class.metric-card-warn]="metric.warn">
+          <div class="metric-card-top">
+            <span class="material-symbols-outlined">{{ metric.icon }}</span>
+            <p>{{ metric.hint }}</p>
+          </div>
+          <p class="metric-label">{{ metric.label }}</p>
+          <p class="metric-value">
+            @if (metric.currency) {
+              {{ metric.value | currency: 'MXN':'symbol-narrow':'1.0-0' }}
+            } @else {
+              {{ metric.value }}
+            }
+          </p>
+        </article>
+      }
+    </section>
+
+    <section class="dashboard-grid-main">
+      <article class="dashboard-panel revenue-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Ingresos</p>
+            <h3>Venta diaria</h3>
+          </div>
+          <span class="material-symbols-outlined">monitoring</span>
+        </div>
+
+        @if (hasRevenueData()) {
+          <apx-chart
+            [series]="revenueChart().series"
+            [chart]="revenueChart().chart"
+            [colors]="revenueChart().colors"
+            [dataLabels]="revenueChart().dataLabels"
+            [fill]="revenueChart().fill"
+            [grid]="revenueChart().grid"
+            [stroke]="revenueChart().stroke"
+            [tooltip]="revenueChart().tooltip"
+            [xaxis]="revenueChart().xaxis"
+            [yaxis]="revenueChart().yaxis">
+          </apx-chart>
+        } @else {
+          <div class="empty-visual">
+            <span class="material-symbols-outlined">show_chart</span>
+            <p>Sin ventas en el periodo</p>
+          </div>
+        }
+      </article>
+
+      <article class="dashboard-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Pedidos</p>
+            <h3>Estado actual</h3>
+          </div>
+          <span class="material-symbols-outlined">donut_large</span>
+        </div>
+
+        <apx-chart
+          [series]="ordersStatusChart().series"
+          [chart]="ordersStatusChart().chart"
+          [colors]="ordersStatusChart().colors"
+          [dataLabels]="ordersStatusChart().dataLabels"
+          [labels]="ordersStatusChart().labels"
+          [legend]="ordersStatusChart().legend"
+          [plotOptions]="ordersStatusChart().plotOptions"
+          [stroke]="ordersStatusChart().stroke"
+          [tooltip]="ordersStatusChart().tooltip">
+        </apx-chart>
+
+        <div class="status-breakdown">
+          @for (status of orderStatusSummary(); track status.status) {
+            <div class="status-row">
+              <span class="status-dot" [ngClass]="getOrderStatusClass(status.status)"></span>
+              <p>{{ status.label }}</p>
+              <strong>{{ status.count }}</strong>
+            </div>
+          } @empty {
+            <div class="status-row">
+              <span class="status-dot status-pending"></span>
+              <p>Sin pedidos</p>
+              <strong>0</strong>
+            </div>
+          }
+        </div>
+      </article>
+    </section>
+
+    <section class="dashboard-grid-secondary">
+      <article class="dashboard-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Inventario</p>
+            <h3>Salud de stock</h3>
+          </div>
+          <span class="material-symbols-outlined">inventory</span>
+        </div>
+        <apx-chart
+          [series]="inventoryHealthChart().series"
+          [chart]="inventoryHealthChart().chart"
+          [colors]="inventoryHealthChart().colors"
+          [dataLabels]="inventoryHealthChart().dataLabels"
+          [labels]="inventoryHealthChart().labels"
+          [plotOptions]="inventoryHealthChart().plotOptions"
+          [stroke]="inventoryHealthChart().stroke"
+          [tooltip]="inventoryHealthChart().tooltip">
+        </apx-chart>
+      </article>
+
+      <article class="dashboard-panel category-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Categorias</p>
+            <h3>Unidades por categoria</h3>
+          </div>
+          <span class="material-symbols-outlined">category</span>
+        </div>
+
+        @if (hasCategoryData()) {
+          <apx-chart
+            [series]="categoryStockChart().series"
+            [chart]="categoryStockChart().chart"
+            [colors]="categoryStockChart().colors"
+            [dataLabels]="categoryStockChart().dataLabels"
+            [grid]="categoryStockChart().grid"
+            [plotOptions]="categoryStockChart().plotOptions"
+            [tooltip]="categoryStockChart().tooltip"
+            [xaxis]="categoryStockChart().xaxis"
+            [yaxis]="categoryStockChart().yaxis">
+          </apx-chart>
+        } @else {
+          <div class="empty-visual">
+            <span class="material-symbols-outlined">inventory_2</span>
+            <p>Sin inventario capturado</p>
+          </div>
+        }
+      </article>
+    </section>
+
+    <section class="dashboard-grid-bottom">
+      <article class="dashboard-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Top ventas</p>
+            <h3>Productos que mas se mueven</h3>
+          </div>
+          <span class="material-symbols-outlined">workspace_premium</span>
+        </div>
+
+        @if (hasTopProducts()) {
+          <apx-chart
+            [series]="topProductsChart().series"
+            [chart]="topProductsChart().chart"
+            [colors]="topProductsChart().colors"
+            [dataLabels]="topProductsChart().dataLabels"
+            [grid]="topProductsChart().grid"
+            [plotOptions]="topProductsChart().plotOptions"
+            [tooltip]="topProductsChart().tooltip"
+            [xaxis]="topProductsChart().xaxis"
+            [yaxis]="topProductsChart().yaxis">
+          </apx-chart>
+        } @else {
+          <div class="empty-visual">
+            <span class="material-symbols-outlined">leaderboard</span>
+            <p>Aun no hay productos vendidos</p>
+          </div>
+        }
+      </article>
+
+      <article class="dashboard-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Alertas</p>
+            <h3>Stock critico</h3>
+          </div>
+          <a class="icon-link" routerLink="/dashboard/catalog" aria-label="Abrir catalogo">
+            <span class="material-symbols-outlined">open_in_new</span>
+          </a>
+        </div>
+
+        <div class="list-stack">
+          @for (product of stockAlerts(); track product.productId) {
+            <div class="product-row">
+              @if (product.imageUrl) {
+                <img class="product-thumb" [src]="product.imageUrl" [alt]="product.name">
+              } @else {
+                <div class="product-thumb product-initials">{{ getProductInitials(product.name) }}</div>
+              }
+              <div class="row-main">
+                <p>{{ product.name }}</p>
+                <span>{{ product.category }}</span>
+              </div>
+              <div class="stock-badge" [class.stock-out]="product.severity === 'out'">
+                <span>{{ getStockSeverityLabel(product.severity) }}</span>
+                <strong>{{ product.stock }}</strong>
+              </div>
+            </div>
+          } @empty {
+            <div class="empty-row">
+              <span class="material-symbols-outlined">task_alt</span>
+              <p>Inventario sin alertas criticas</p>
+            </div>
+          }
+        </div>
+      </article>
+
+      <article class="dashboard-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Actividad</p>
+            <h3>Pedidos recientes</h3>
+          </div>
+          <a class="icon-link" routerLink="/dashboard/orders" aria-label="Abrir pedidos">
+            <span class="material-symbols-outlined">open_in_new</span>
+          </a>
+        </div>
+
+        <div class="list-stack">
+          @for (order of recentOrders(); track order.id) {
+            <div class="order-row">
+              <div class="order-icon">
+                <span class="material-symbols-outlined">receipt_long</span>
+              </div>
+              <div class="row-main">
+                <p>{{ order.customerName }}</p>
+                <span>{{ order.itemCount }} piezas · {{ order.createdAtUtc | date: 'dd MMM, HH:mm' }}</span>
+              </div>
+              <div class="order-total">
+                <strong>{{ order.total | currency: 'MXN':'symbol-narrow':'1.0-0' }}</strong>
+                <span class="status-pill" [ngClass]="getOrderStatusClass(order.status)">
+                  {{ getOrderStatusLabel(order.status) }}
+                </span>
+              </div>
+            </div>
+          } @empty {
+            <div class="empty-row">
+              <span class="material-symbols-outlined">hourglass_empty</span>
+              <p>Sin pedidos recientes</p>
             </div>
           }
         </div>

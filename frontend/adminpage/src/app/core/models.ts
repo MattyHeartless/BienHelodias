@@ -196,6 +196,180 @@ export interface DashboardDto {
   revenueInOrders: number;
 }
 
+export interface DashboardPeriodDto {
+  from: string;
+  to: string;
+}
+
+export interface DashboardKpisDto {
+  totalOrders: number;
+  revenue: number;
+  averageTicket: number;
+  pendingOrders: number;
+  readyOrders: number;
+  onTheWayOrders: number;
+  deliveredOrders: number;
+  cancelledOrders: number;
+  totalProducts: number;
+  activeProducts: number;
+  lowStockProducts: number;
+  outOfStockProducts: number;
+  inventoryValue: number;
+}
+
+export interface RevenuePointDto {
+  date: string;
+  orders: number;
+  revenue: number;
+  averageTicket: number;
+}
+
+export interface OrderStatusMetricDto {
+  status: OrderStatus;
+  label: string;
+  count: number;
+  percentage: number;
+  revenue: number;
+}
+
+export interface InventoryHealthDto {
+  activeProducts: number;
+  inactiveProducts: number;
+  lowStockProducts: number;
+  outOfStockProducts: number;
+  healthyProducts: number;
+  lowStockThreshold: number;
+}
+
+export interface CategoryStockDto {
+  category: string;
+  products: number;
+  units: number;
+  inventoryValue: number;
+  lowStockProducts: number;
+}
+
+export interface TopSellingProductDto {
+  productId: string;
+  name: string;
+  category: string;
+  unitsSold: number;
+  revenue: number;
+  imageUrl: string | null;
+}
+
+export interface StockAlertProductDto {
+  productId: string;
+  name: string;
+  category: string;
+  stock: number;
+  price: number;
+  imageUrl: string | null;
+  severity: 'out' | 'low';
+}
+
+export interface RecentOrderDto {
+  id: string;
+  customerName: string;
+  status: OrderStatus;
+  total: number;
+  itemCount: number;
+  createdAtUtc: string;
+}
+
+export interface DashboardOverviewDto {
+  period: DashboardPeriodDto;
+  kpis: DashboardKpisDto;
+  revenueByDay: RevenuePointDto[];
+  ordersByStatus: OrderStatusMetricDto[];
+  inventoryHealth: InventoryHealthDto;
+  stockByCategory: CategoryStockDto[];
+  topSellingProducts: TopSellingProductDto[];
+  stockAlerts: StockAlertProductDto[];
+  recentOrders: RecentOrderDto[];
+}
+
+export interface SuperAdminDashboardKpisDto {
+  totalStores: number;
+  activeStores: number;
+  inactiveStores: number;
+  trialStores: number;
+  activeSubscriptions: number;
+  suspendedStores: number;
+  cancelledStores: number;
+  storesWithOrders: number;
+  totalOrders: number;
+  revenue: number;
+  averageTicket: number;
+  totalProducts: number;
+  activeProducts: number;
+  lowStockProducts: number;
+  outOfStockProducts: number;
+  inventoryValue: number;
+}
+
+export interface SubscriptionStatusMetricDto {
+  status: SubscriptionStatus;
+  label: string;
+  count: number;
+  percentage: number;
+}
+
+export interface TopStoreMetricDto {
+  storeId: string;
+  name: string;
+  slug: string;
+  orders: number;
+  revenue: number;
+  averageTicket: number;
+}
+
+export interface StoreOperationalHealthDto {
+  storeId: string;
+  name: string;
+  slug: string;
+  isActive: boolean;
+  subscriptionStatus: SubscriptionStatus;
+  lowStockProducts: number;
+  outOfStockProducts: number;
+  pendingOrders: number;
+  onTheWayOrders: number;
+  lastOrderAtUtc: string | null;
+}
+
+export interface RecentStoreDto {
+  storeId: string;
+  name: string;
+  slug: string;
+  isActive: boolean;
+  subscriptionStatus: SubscriptionStatus;
+  createdAtUtc: string;
+}
+
+export interface SuperAdminRecentOrderDto {
+  id: string;
+  storeId: string;
+  storeName: string;
+  customerName: string;
+  status: OrderStatus;
+  total: number;
+  itemCount: number;
+  createdAtUtc: string;
+}
+
+export interface SuperAdminDashboardOverviewDto {
+  period: DashboardPeriodDto;
+  kpis: SuperAdminDashboardKpisDto;
+  revenueByDay: RevenuePointDto[];
+  ordersByStatus: OrderStatusMetricDto[];
+  storesBySubscription: SubscriptionStatusMetricDto[];
+  topStoresByRevenue: TopStoreMetricDto[];
+  topStoresByOrders: TopStoreMetricDto[];
+  storeOperationalHealth: StoreOperationalHealthDto[];
+  recentStores: RecentStoreDto[];
+  recentOrders: SuperAdminRecentOrderDto[];
+}
+
 export interface OrderItemDto {
   id: string;
   productId: string;

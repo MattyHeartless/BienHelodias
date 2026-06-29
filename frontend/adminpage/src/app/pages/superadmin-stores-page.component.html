@@ -77,7 +77,11 @@
 
 @if (createStoreModalOpen()) {
   <div class="modal-backdrop" (click)="closeCreateStoreModal()">
-    <div class="modal-panel glass-panel p-6" (click)="$event.stopPropagation()">
+    <div
+      class="modal-panel glass-panel p-6 t-modal"
+      [class.is-open]="createStoreModalActive()"
+      [class.is-closing]="createStoreModalClosing()"
+      (click)="$event.stopPropagation()">
       <div class="flex items-start justify-between gap-4">
         <div>
           <p class="eyebrow">Nueva licorería</p>
@@ -115,7 +119,11 @@
 
 @if (editStoreModalOpen() && selectedStore(); as store) {
   <div class="modal-backdrop" (click)="closeEditStoreModal()">
-    <div class="modal-panel glass-panel p-6" (click)="$event.stopPropagation()">
+    <div
+      class="modal-panel glass-panel p-6 t-modal"
+      [class.is-open]="editStoreModalActive()"
+      [class.is-closing]="editStoreModalClosing()"
+      (click)="$event.stopPropagation()">
       <div class="flex items-start justify-between gap-4">
         <div>
           <p class="eyebrow">Modificar licorería</p>
@@ -153,7 +161,11 @@
 
 @if (adminsModalOpen() && selectedStore(); as store) {
   <div class="modal-backdrop" (click)="closeAdminsModal()">
-    <div class="modal-panel glass-panel p-6" (click)="$event.stopPropagation()">
+    <div
+      class="modal-panel glass-panel p-6 t-modal"
+      [class.is-open]="adminsModalActive()"
+      [class.is-closing]="adminsModalClosing()"
+      (click)="$event.stopPropagation()">
       <div class="flex items-start justify-between gap-4">
         <div>
           <p class="eyebrow">Administradores</p>

@@ -272,7 +272,11 @@
 
 @if (bannerModalOpen()) {
   <div class="modal-backdrop" (click)="closeBannerModal()">
-    <div class="modal-panel" (click)="$event.stopPropagation()">
+    <div
+      class="modal-panel t-modal"
+      [class.is-open]="bannerModalActive()"
+      [class.is-closing]="bannerModalClosing()"
+      (click)="$event.stopPropagation()">
       <div class="flex items-center justify-between gap-4">
         <div>
           <p class="eyebrow">{{ isEditingBanner() ? 'Editar banner' : 'Nuevo banner' }}</p>
@@ -469,7 +473,11 @@
 
 @if (deliveryUserModalOpen()) {
   <div class="modal-backdrop" (click)="closeDeliveryUserModal()">
-    <div class="modal-panel" (click)="$event.stopPropagation()">
+    <div
+      class="modal-panel t-modal"
+      [class.is-open]="deliveryUserModalActive()"
+      [class.is-closing]="deliveryUserModalClosing()"
+      (click)="$event.stopPropagation()">
       <div class="flex items-center justify-between gap-4">
         <div>
           <p class="eyebrow">Nuevo repartidor</p>

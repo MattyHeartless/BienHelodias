@@ -1,5 +1,5 @@
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
-import { Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, ViewChild, WritableSignal, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import gsap from 'gsap';
 import {
@@ -9,6 +9,7 @@ import {
   ProductDto
 } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
+import { shakeInvalidFormControls } from '../core/form-error-shake.util';
 import { NotificationUiService } from '../core/notification-ui.service';
 import { StoreAdminApiService } from '../services/store-admin-api.service';
 
@@ -49,6 +50,7 @@ interface InventoryAiReviewItem {
   styleUrl: './catalog-page.component.css'
 })
 export class CatalogPageComponent {
+  private readonly host = inject(ElementRef<HTMLElement>);
   private readonly storeAdminApi = inject(StoreAdminApiService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly notifications = inject(NotificationUiService);
@@ -71,8 +73,12 @@ export class CatalogPageComponent {
   readonly selectedCategory = signal('all');
   readonly editingProductId = signal<string | null>(null);
   readonly modalOpen = signal(false);
+  readonly productModalActive = signal(false);
+  readonly productModalClosing = signal(false);
 
   readonly inventoryAiModalOpen = signal(false);
+  readonly inventoryAiModalActive = signal(false);
+  readonly inventoryAiModalClosing = signal(false);
   readonly inventoryAiLoading = signal(false);
   readonly inventoryAiSubmitting = signal(false);
   readonly inventoryAiError = signal<string | null>(null);
@@ -192,7 +198,12 @@ export class CatalogPageComponent {
 
   saveProduct(): void {
     this.productForm.markAllAsTouched();
-    if (this.productForm.invalid || this.submitting()) {
+    if (this.productForm.invalid) {
+      shakeInvalidFormControls(this.host.nativeElement);
+      return;
+    }
+
+    if (this.submitting()) {
       return;
     }
 
@@ -244,7 +255,7 @@ export class CatalogPageComponent {
       imageUrl: product.imageUrl ?? '',
       isActive: product.isActive
     });
-    this.modalOpen.set(true);
+    this.openAnimatedModal(this.modalOpen, this.productModalActive, this.productModalClosing);
   }
 
   deleteProduct(product: ProductDto): void {
@@ -286,16 +297,17 @@ export class CatalogPageComponent {
   }
 
   resetForm(): void {
-    this.editingProductId.set(null);
-    this.modalOpen.set(false);
-    this.productForm.reset({
-      name: '',
-      description: '',
-      price: 0,
-      stock: 0,
-      category: '',
-      imageUrl: '',
-      isActive: true
+    this.closeAnimatedModal(this.modalOpen, this.productModalActive, this.productModalClosing, () => {
+      this.editingProductId.set(null);
+      this.productForm.reset({
+        name: '',
+        description: '',
+        price: 0,
+        stock: 0,
+        category: '',
+        imageUrl: '',
+        isActive: true
+      });
     });
   }
 
@@ -310,17 +322,18 @@ export class CatalogPageComponent {
       imageUrl: '',
       isActive: true
     });
-    this.modalOpen.set(true);
+    this.openAnimatedModal(this.modalOpen, this.productModalActive, this.productModalClosing);
   }
 
   openInventoryAiModal(): void {
-    this.inventoryAiModalOpen.set(true);
+    this.openAnimatedModal(this.inventoryAiModalOpen, this.inventoryAiModalActive, this.inventoryAiModalClosing);
     this.inventoryAiError.set(null);
   }
 
   closeInventoryAiModal(): void {
-    this.inventoryAiModalOpen.set(false);
-    this.resetInventoryAiState();
+    this.closeAnimatedModal(this.inventoryAiModalOpen, this.inventoryAiModalActive, this.inventoryAiModalClosing, () => {
+      this.resetInventoryAiState();
+    });
   }
 
   updateInventoryImage(event: Event): void {
@@ -626,6 +639,57 @@ export class CatalogPageComponent {
 
     const parsed = Number.parseFloat(normalized);
     return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  private openAnimatedModal(
+    open: WritableSignal<boolean>,
+    active: WritableSignal<boolean>,
+    closing: WritableSignal<boolean>
+  ): void {
+    closing.set(false);
+    active.set(false);
+    open.set(true);
+    window.requestAnimationFrame(() => active.set(true));
+  }
+
+  private closeAnimatedModal(
+    open: WritableSignal<boolean>,
+    active: WritableSignal<boolean>,
+    closing: WritableSignal<boolean>,
+    afterClose?: () => void
+  ): void {
+    if (!open()) {
+      afterClose?.();
+      return;
+    }
+
+    if (closing()) {
+      return;
+    }
+
+    active.set(false);
+    closing.set(true);
+    window.setTimeout(() => {
+      open.set(false);
+      closing.set(false);
+      afterClose?.();
+    }, this.getModalCloseDurationMs());
+  }
+
+  private getModalCloseDurationMs(): number {
+    const rawValue = getComputedStyle(document.documentElement)
+      .getPropertyValue('--modal-close-dur')
+      .trim();
+
+    if (rawValue.endsWith('ms')) {
+      return Number.parseFloat(rawValue) || 150;
+    }
+
+    if (rawValue.endsWith('s')) {
+      return (Number.parseFloat(rawValue) || 0.15) * 1000;
+    }
+
+    return Number.parseFloat(rawValue) || 150;
   }
 
   private resetInventoryAiState(): void {

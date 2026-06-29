@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ApiResponse, PagedResult, StoreDto, StoreAdminDto, SubscriptionStatus, AuthTokenDto } from '../core/models';
+import { ApiResponse, PagedResult, StoreDto, StoreAdminDto, SubscriptionStatus, AuthTokenDto, SuperAdminDashboardOverviewDto } from '../core/models';
 import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -11,6 +11,7 @@ export class SuperadminApiService {
 
   private readonly storesUrl = `${this.apiUrl}/stores`;
   private readonly superadminUrl = `${this.apiUrl}/superadmin/stores`;
+  private readonly dashboardUrl = `${this.apiUrl}/superadmin/dashboard`;
   private readonly authUrl = `${this.apiUrl}/auth`;
 
   getStores(): Observable<ApiResponse<PagedResult<StoreDto>>> {
@@ -21,6 +22,20 @@ export class SuperadminApiService {
 
   getStoreAdmins(storeId: string): Observable<ApiResponse<StoreAdminDto[]>> {
     return this.http.get<ApiResponse<StoreAdminDto[]>>(`${this.superadminUrl}/${storeId}/admins`);
+  }
+
+  getDashboardOverview(from?: string, to?: string): Observable<ApiResponse<SuperAdminDashboardOverviewDto>> {
+    const params: Record<string, string> = {};
+
+    if (from) {
+      params['from'] = from;
+    }
+
+    if (to) {
+      params['to'] = to;
+    }
+
+    return this.http.get<ApiResponse<SuperAdminDashboardOverviewDto>>(`${this.dashboardUrl}/overview`, { params });
   }
 
   createStore(request: { name: string; slug: string; subscriptionStatus: SubscriptionStatus }): Observable<ApiResponse<StoreDto>> {

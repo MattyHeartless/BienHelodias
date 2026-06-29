@@ -1,9 +1,10 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, WritableSignal, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { BannerDto, DeliveryAvailability, DeliveryUserDto, ProductDto, PromotionType, StoreDto } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
+import { shakeFieldBySelector, shakeInvalidFormControls } from '../core/form-error-shake.util';
 import { NotificationUiService } from '../core/notification-ui.service';
 import { StoreAdminApiService } from '../services/store-admin-api.service';
 
@@ -15,6 +16,7 @@ import { StoreAdminApiService } from '../services/store-admin-api.service';
   styleUrl: './store-settings-page.component.css'
 })
 export class StoreSettingsPageComponent {
+  private readonly host = inject(ElementRef<HTMLElement>);
   private readonly storeAdminApi = inject(StoreAdminApiService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly notifications = inject(NotificationUiService);
@@ -30,7 +32,11 @@ export class StoreSettingsPageComponent {
   readonly products = signal<ProductDto[]>([]);
   readonly deliveryUsers = signal<DeliveryUserDto[]>([]);
   readonly bannerModalOpen = signal(false);
+  readonly bannerModalActive = signal(false);
+  readonly bannerModalClosing = signal(false);
   readonly deliveryUserModalOpen = signal(false);
+  readonly deliveryUserModalActive = signal(false);
+  readonly deliveryUserModalClosing = signal(false);
   readonly editingBannerId = signal<string | null>(null);
   readonly editingPromotionProductName = signal('');
   readonly deliveryAvailability = DeliveryAvailability;
@@ -219,7 +225,7 @@ export class StoreSettingsPageComponent {
     });
     this.promotionProductSearch.set('');
     this.editingPromotionProductName.set('');
-    this.bannerModalOpen.set(true);
+    this.openAnimatedModal(this.bannerModalOpen, this.bannerModalActive, this.bannerModalClosing);
   }
 
   editBanner(banner: BannerDto): void {
@@ -256,35 +262,41 @@ export class StoreSettingsPageComponent {
         }
       });
     }
-    this.bannerModalOpen.set(true);
+    this.openAnimatedModal(this.bannerModalOpen, this.bannerModalActive, this.bannerModalClosing);
   }
 
   closeBannerModal(): void {
-    this.bannerModalOpen.set(false);
-    this.editingBannerId.set(null);
-    this.bannerForm.reset({
-      header: '',
-      title: '',
-      description: '',
-      wildcard: '',
-      expirationDate: '',
-      status: true,
-      hasPromotion: false,
-      promotionName: '',
-      promotionCode: '',
-      promotionType: PromotionType.Percentage,
-      percentageValue: 10,
-      targetProductId: '',
-      buyQuantity: 1,
-      freeQuantity: 1
+    this.closeAnimatedModal(this.bannerModalOpen, this.bannerModalActive, this.bannerModalClosing, () => {
+      this.editingBannerId.set(null);
+      this.bannerForm.reset({
+        header: '',
+        title: '',
+        description: '',
+        wildcard: '',
+        expirationDate: '',
+        status: true,
+        hasPromotion: false,
+        promotionName: '',
+        promotionCode: '',
+        promotionType: PromotionType.Percentage,
+        percentageValue: 10,
+        targetProductId: '',
+        buyQuantity: 1,
+        freeQuantity: 1
+      });
+      this.promotionProductSearch.set('');
+      this.editingPromotionProductName.set('');
     });
-    this.promotionProductSearch.set('');
-    this.editingPromotionProductName.set('');
   }
 
   saveBanner(): void {
     this.bannerForm.markAllAsTouched();
-    if (this.bannerForm.invalid || this.submittingBanner()) {
+    if (this.bannerForm.invalid) {
+      shakeInvalidFormControls(this.host.nativeElement);
+      return;
+    }
+
+    if (this.submittingBanner()) {
       return;
     }
 
@@ -298,6 +310,7 @@ export class StoreSettingsPageComponent {
       if (!Number.isFinite(percentageValue) || percentageValue <= 0 || percentageValue > 100) {
         const message = 'Captura un porcentaje de descuento entre 1 y 100.';
         this.error.set(message);
+        shakeFieldBySelector(this.host.nativeElement, '#promotion-percentage', message);
         this.notifications.error({ summary: message });
         this.submittingBanner.set(false);
         return;
@@ -307,6 +320,7 @@ export class StoreSettingsPageComponent {
     if (values.hasPromotion && values.promotionType === PromotionType.BuyXGetY && !values.targetProductId) {
       const message = 'Selecciona el producto al que aplica el 2x1.';
       this.error.set(message);
+      shakeFieldBySelector(this.host.nativeElement, '#promotion-target-product', message);
       this.notifications.error({ summary: message });
       this.submittingBanner.set(false);
       return;
@@ -404,22 +418,28 @@ export class StoreSettingsPageComponent {
       phone: '',
       password: ''
     });
-    this.deliveryUserModalOpen.set(true);
+    this.openAnimatedModal(this.deliveryUserModalOpen, this.deliveryUserModalActive, this.deliveryUserModalClosing);
   }
 
   closeDeliveryUserModal(): void {
-    this.deliveryUserModalOpen.set(false);
-    this.deliveryUserForm.reset({
-      name: '',
-      email: '',
-      phone: '',
-      password: ''
+    this.closeAnimatedModal(this.deliveryUserModalOpen, this.deliveryUserModalActive, this.deliveryUserModalClosing, () => {
+      this.deliveryUserForm.reset({
+        name: '',
+        email: '',
+        phone: '',
+        password: ''
+      });
     });
   }
 
   saveDeliveryUser(): void {
     this.deliveryUserForm.markAllAsTouched();
-    if (this.deliveryUserForm.invalid || this.submittingDeliveryUser()) {
+    if (this.deliveryUserForm.invalid) {
+      shakeInvalidFormControls(this.host.nativeElement);
+      return;
+    }
+
+    if (this.submittingDeliveryUser()) {
       return;
     }
 
@@ -513,6 +533,57 @@ export class StoreSettingsPageComponent {
     this.bannerForm.controls.targetProductId.setValue('');
     this.promotionProductSearch.set('');
     this.editingPromotionProductName.set('');
+  }
+
+  private openAnimatedModal(
+    open: WritableSignal<boolean>,
+    active: WritableSignal<boolean>,
+    closing: WritableSignal<boolean>
+  ): void {
+    closing.set(false);
+    active.set(false);
+    open.set(true);
+    window.requestAnimationFrame(() => active.set(true));
+  }
+
+  private closeAnimatedModal(
+    open: WritableSignal<boolean>,
+    active: WritableSignal<boolean>,
+    closing: WritableSignal<boolean>,
+    afterClose?: () => void
+  ): void {
+    if (!open()) {
+      afterClose?.();
+      return;
+    }
+
+    if (closing()) {
+      return;
+    }
+
+    active.set(false);
+    closing.set(true);
+    window.setTimeout(() => {
+      open.set(false);
+      closing.set(false);
+      afterClose?.();
+    }, this.getModalCloseDurationMs());
+  }
+
+  private getModalCloseDurationMs(): number {
+    const rawValue = getComputedStyle(document.documentElement)
+      .getPropertyValue('--modal-close-dur')
+      .trim();
+
+    if (rawValue.endsWith('ms')) {
+      return Number.parseFloat(rawValue) || 150;
+    }
+
+    if (rawValue.endsWith('s')) {
+      return (Number.parseFloat(rawValue) || 0.15) * 1000;
+    }
+
+    return Number.parseFloat(rawValue) || 150;
   }
 
   private selectedPromotionProductName(productId: string): string {

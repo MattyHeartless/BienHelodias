@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LiquorSaaS.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+80e54509ce27544da24a8e5237654680f409d6b6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f59d7d679227943e1c2cd719c82da85c5fc70c1c")]
 [assembly: System.Reflection.AssemblyProductAttribute("LiquorSaaS.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LiquorSaaS.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
