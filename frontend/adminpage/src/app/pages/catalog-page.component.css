@@ -2,6 +2,33 @@
   display: block;
 }
 
+.catalog-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.catalog-kpi-card {
+  min-width: 0;
+  padding: 1rem;
+}
+
+.catalog-kpi-card .eyebrow {
+  overflow-wrap: anywhere;
+  letter-spacing: 0.16em;
+}
+
+.catalog-kpi-card > p {
+  margin-top: 0.85rem;
+  font-size: clamp(2rem, 12vw, 2.8rem);
+  line-height: 0.95;
+}
+
+.catalog-kpi-card-inventory {
+  grid-column: 1 / -1;
+}
+
 .field-block {
   display: grid;
   gap: 0.55rem;
@@ -80,6 +107,20 @@
   background: #131313;
   padding: 1.25rem;
   box-shadow: 0 22px 80px rgba(0, 0, 0, 0.32);
+}
+
+.product-card-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-top: 1.25rem;
+}
+
+.product-action-button {
+  width: 100%;
+  min-width: 0;
+  height: 2.85rem;
+  padding: 0;
 }
 
 .catalog-filters {
@@ -428,6 +469,23 @@
 }
 
 @media (min-width: 768px) {
+  .catalog-kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+
+  .catalog-kpi-card {
+    padding: 1.5rem;
+  }
+
+  .catalog-kpi-card > p {
+    font-size: 2.25rem;
+  }
+
+  .catalog-kpi-card-inventory {
+    grid-column: auto;
+  }
+
   .catalog-filters {
     grid-template-columns: minmax(0, 1.7fr) minmax(220px, 0.9fr) auto;
     align-items: end;

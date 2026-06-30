@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, ElementRef, WritableSignal, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, WritableSignal, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { BannerDto, DeliveryAvailability, DeliveryUserDto, ProductDto, PromotionType, StoreDto } from '../core/models';
@@ -27,6 +27,7 @@ export class StoreSettingsPageComponent {
   readonly submittingDeliveryUser = signal(false);
   readonly error = signal<string | null>(null);
   readonly feedback = signal<string | null>(null);
+  readonly welcomePhraseRows = signal(1);
   readonly store = signal<StoreDto | null>(null);
   readonly banners = signal<BannerDto[]>([]);
   readonly products = signal<ProductDto[]>([]);
@@ -112,6 +113,8 @@ export class StoreSettingsPageComponent {
   });
 
   constructor() {
+    this.syncWelcomeTextareaRows();
+
     this.bannerForm.controls.promotionType.valueChanges.subscribe((value) => {
       if (value !== PromotionType.BuyXGetY) {
         this.clearPromotionProductSelection();
@@ -119,6 +122,11 @@ export class StoreSettingsPageComponent {
     });
 
     this.load();
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.syncWelcomeTextareaRows();
   }
 
   load(): void {
@@ -588,5 +596,9 @@ export class StoreSettingsPageComponent {
 
   private selectedPromotionProductName(productId: string): string {
     return this.products().find((product) => product.id === productId)?.name ?? '';
+  }
+
+  private syncWelcomeTextareaRows(): void {
+    this.welcomePhraseRows.set(window.matchMedia('(max-width: 639px)').matches ? 3 : 1);
   }
 }

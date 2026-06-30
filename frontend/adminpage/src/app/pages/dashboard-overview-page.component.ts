@@ -1,5 +1,5 @@
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
   ApexAxisChartSeries,
@@ -76,6 +76,9 @@ export class DashboardOverviewPageComponent {
   readonly superAdminOverview = signal<SuperAdminDashboardOverviewDto | null>(null);
   readonly dateFrom = signal(this.toDateInputValue(this.addDays(new Date(), -29)));
   readonly dateTo = signal(this.toDateInputValue(new Date()));
+  readonly mobileFiltersOpen = signal(false);
+  readonly mobileFiltersActive = signal(false);
+  readonly mobileFiltersClosing = signal(false);
 
   readonly isSuperAdmin = computed(() => this.role() === AppRole.SuperAdmin);
   readonly storeMetrics = computed(() => {
@@ -627,6 +630,11 @@ export class DashboardOverviewPageComponent {
     this.load();
   }
 
+  @HostListener('document:keydown.escape')
+  closeMobileFiltersOnEscape(): void {
+    this.closeMobileFilters();
+  }
+
   load(): void {
     this.loading.set(true);
     this.error.set(null);
@@ -693,6 +701,11 @@ export class DashboardOverviewPageComponent {
     this.load();
   }
 
+  applyDateRangeAndCloseMobileFilters(): void {
+    this.applyDateRange();
+    this.closeMobileFilters();
+  }
+
   setDatePreset(days: number): void {
     const today = new Date();
     this.dateFrom.set(this.toDateInputValue(this.addDays(today, -(days - 1))));
@@ -700,11 +713,47 @@ export class DashboardOverviewPageComponent {
     this.load();
   }
 
+  setDatePresetAndCloseMobileFilters(days: number): void {
+    this.setDatePreset(days);
+    this.closeMobileFilters();
+  }
+
   setCurrentMonth(): void {
     const today = new Date();
     this.dateFrom.set(this.toDateInputValue(new Date(today.getFullYear(), today.getMonth(), 1)));
     this.dateTo.set(this.toDateInputValue(today));
     this.load();
+  }
+
+  setCurrentMonthAndCloseMobileFilters(): void {
+    this.setCurrentMonth();
+    this.closeMobileFilters();
+  }
+
+  openMobileFilters(): void {
+    if (this.mobileFiltersOpen()) {
+      return;
+    }
+
+    this.mobileFiltersClosing.set(false);
+    this.mobileFiltersActive.set(false);
+    this.mobileFiltersOpen.set(true);
+
+    requestAnimationFrame(() => this.mobileFiltersActive.set(true));
+  }
+
+  closeMobileFilters(): void {
+    if (!this.mobileFiltersOpen() || this.mobileFiltersClosing()) {
+      return;
+    }
+
+    this.mobileFiltersActive.set(false);
+    this.mobileFiltersClosing.set(true);
+
+    setTimeout(() => {
+      this.mobileFiltersOpen.set(false);
+      this.mobileFiltersClosing.set(false);
+    }, this.getModalCloseDurationMs());
   }
 
   getOrderStatusLabel(status: OrderStatus): string {
@@ -875,5 +924,25 @@ export class DashboardOverviewPageComponent {
     const day = String(value.getDate()).padStart(2, '0');
 
     return `${year}-${month}-${day}`;
+  }
+
+  private getModalCloseDurationMs(): number {
+    if (typeof window === 'undefined') {
+      return 150;
+    }
+
+    const duration = getComputedStyle(document.documentElement)
+      .getPropertyValue('--modal-close-dur')
+      .trim();
+
+    if (duration.endsWith('ms')) {
+      return Number.parseFloat(duration) || 150;
+    }
+
+    if (duration.endsWith('s')) {
+      return (Number.parseFloat(duration) || 0.15) * 1000;
+    }
+
+    return 150;
   }
 }

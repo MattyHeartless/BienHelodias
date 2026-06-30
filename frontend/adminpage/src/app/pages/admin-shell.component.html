@@ -11,8 +11,8 @@
           </div>
         </div>
 
-        <button class="menu-toggle lg:hidden" type="button" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen()">
-          <span class="material-symbols-outlined text-[1.35rem]">{{ menuOpen() ? 'close' : 'menu' }}</span>
+        <button class="menu-toggle lg:hidden" type="button" aria-label="Abrir menu" (click)="openMenu()" [attr.aria-expanded]="menuOpen()">
+          <span class="material-symbols-outlined text-[1.35rem]">menu</span>
         </button>
 
         <div class="nav-desktop hidden lg:flex">
@@ -45,31 +45,16 @@
           {{ workspaceBadge() }}
         </span>
       </div>
-
-      @if (menuOpen()) {
-        <div class="mobile-menu lg:hidden">
-          <nav class="mobile-nav">
-            @for (item of navigation(); track item.route) {
-              <a
-                class="mobile-nav-item"
-                [routerLink]="item.route"
-                routerLinkActive="mobile-nav-item-active"
-                [routerLinkActiveOptions]="{ exact: item.route === '/dashboard/overview' }"
-                (click)="closeMenu()"
-              >
-                <span class="material-symbols-outlined text-[1.05rem]">{{ item.icon }}</span>
-                {{ item.label }}
-              </a>
-            }
-          </nav>
-
-          <button class="liquid-button w-full !justify-center" type="button" (click)="logout()">
-            <span class="material-symbols-outlined text-base">logout</span>
-            Cerrar sesion
-          </button>
-        </div>
-      }
     </header>
+
+    <app-mobile-drawer-menu
+      [open]="menuOpen()"
+      [title]="workspaceTitle()"
+      [description]="workspaceSubtitle()"
+      [navigation]="navigation()"
+      (closeMenu)="closeMenu()"
+      (logout)="logout()"
+    />
 
     <router-outlet />
   </div>

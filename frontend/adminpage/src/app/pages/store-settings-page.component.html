@@ -31,7 +31,7 @@
     @if (store(); as currentStore) {
       <section class="space-y-6">
         <div class="store-kpi-grid">
-          <article class="glass-panel p-6">
+          <article class="glass-panel store-kpi-card">
             <div class="flex items-center justify-between gap-3">
               <p class="eyebrow">Banners</p>
               <span class="material-symbols-outlined text-xl text-primary">photo_library</span>
@@ -40,7 +40,7 @@
             <p class="mt-2 text-sm text-on-surface-variant">Piezas cargadas para la portada</p>
           </article>
 
-          <article class="glass-panel p-6">
+          <article class="glass-panel store-kpi-card">
             <div class="flex items-center justify-between gap-3">
               <p class="eyebrow">Activos</p>
               <span class="material-symbols-outlined text-xl text-primary">visibility</span>
@@ -49,7 +49,7 @@
             <p class="mt-2 text-sm text-on-surface-variant">Banners encendidos y visibles para el cliente</p>
           </article>
 
-          <article class="glass-panel p-6">
+          <article class="glass-panel store-kpi-card">
             <div class="flex items-center justify-between gap-3">
               <p class="eyebrow">Programados</p>
               <span class="material-symbols-outlined text-xl text-primary">event_upcoming</span>
@@ -58,7 +58,7 @@
             <p class="mt-2 text-sm text-on-surface-variant">Banners con fecha de expiración configurada</p>
           </article>
 
-          <article class="glass-panel p-6">
+          <article class="glass-panel store-kpi-card">
             <div class="flex items-center justify-between gap-3">
               <p class="eyebrow">Repartidores</p>
               <span class="material-symbols-outlined text-xl text-primary">delivery_dining</span>
@@ -67,7 +67,7 @@
             <p class="mt-2 text-sm text-on-surface-variant">Perfiles ligados a esta tienda</p>
           </article>
 
-          <article class="glass-panel p-6">
+          <article class="glass-panel store-kpi-card">
             <div class="flex items-center justify-between gap-3">
               <p class="eyebrow">Disponibles</p>
               <span class="material-symbols-outlined text-xl text-primary">verified</span>
@@ -82,10 +82,10 @@
             <div>
               <p class="eyebrow">Identidad</p>
               <h3 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">{{ currentStore.name }}</h3>
-              <p class="mt-3 text-xs uppercase tracking-[0.26em] text-on-surface-variant">{{ currentStore.slug }}</p>
+              <p class="store-identity-slug mt-3 text-xs uppercase tracking-[0.26em] text-on-surface-variant">{{ currentStore.slug }}</p>
             </div>
 
-            <p class="rounded-full bg-white/8 px-3 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-primary">
+            <p class="store-status-badge rounded-full bg-white/8 px-3 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-primary">
               {{ currentStore.isActive ? 'Tienda activa' : 'Tienda inactiva' }}
             </p>
           </div>
@@ -96,7 +96,7 @@
               <textarea
                 id="welcome-phrase"
                 class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
-                rows="1"
+                [attr.rows]="welcomePhraseRows()"
                 formControlName="welcomePhrase"
                 placeholder="Ej. Bienvenido a la mejor selección de licores para tu noche."
               ></textarea>
@@ -108,7 +108,7 @@
                 {{ welcomeForm.get('welcomePhrase')?.value?.length ?? 0 }}/280 caracteres
               </p>
 
-              <button class="liquid-button !justify-center" type="submit" [disabled]="submittingWelcome()">
+              <button class="liquid-button welcome-save-button !justify-center" type="submit" [disabled]="submittingWelcome()">
                 <span class="material-symbols-outlined text-base">save</span>
                 {{ submittingWelcome() ? 'Guardando...' : 'Guardar frase' }}
               </button>
@@ -119,13 +119,13 @@
 
       <section>
         <article class="glass-panel p-6">
-          <div class="flex flex-wrap items-end justify-between gap-4">
-            <div>
+          <div class="section-action-header">
+            <div class="min-w-0">
               <p class="eyebrow">Promociones y anuncios</p>
-              <h3 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">Banners publicados</h3>
+              <h3 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">Banners</h3>
             </div>
 
-            <button class="ghost-button" type="button" (click)="openCreateBannerModal()">
+            <button class="ghost-button section-action-button" type="button" (click)="openCreateBannerModal()">
               <span class="material-symbols-outlined text-base">add</span>
               Crear banner
             </button>
@@ -133,11 +133,14 @@
 
           <div class="mt-6 grid gap-5 lg:grid-cols-2">
             @if (!orderedBanners().length) {
-              <article class="banner-card lg:col-span-2">
+              <article class="empty-state-card lg:col-span-2">
+                <div class="empty-state-icon">
+                  <span class="material-symbols-outlined">campaign</span>
+                </div>
                 <p class="eyebrow">Sin banners</p>
-                <h4 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">Todavía no hay promociones publicadas</h4>
+                <h4 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">Sin promociones</h4>
                 <p class="mt-4 text-sm leading-7 text-on-surface-variant">
-                  Crea tu primer banner para mostrar descuentos, anuncios o campañas temporales en la pantalla principal de la tienda.
+                  Crea un banner para mostrarlo en tu tienda.
                 </p>
               </article>
             } @else {
@@ -206,25 +209,28 @@
 
       <section>
         <article class="glass-panel p-6">
-          <div class="flex flex-wrap items-end justify-between gap-4">
-            <div>
+          <div class="section-action-header">
+            <div class="min-w-0">
               <p class="eyebrow">Logística</p>
-              <h3 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">Repartidores de la tienda</h3>
+              <h3 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">Repartidores</h3>
             </div>
 
-            <button class="ghost-button" type="button" (click)="openCreateDeliveryUserModal()">
+            <button class="ghost-button section-action-button" type="button" (click)="openCreateDeliveryUserModal()">
               <span class="material-symbols-outlined text-base">person_add</span>
-              Dar de alta repartidor
+              Nuevo
             </button>
           </div>
 
           <div class="mt-6 grid gap-5 lg:grid-cols-2">
             @if (!deliveryUsers().length) {
-              <article class="banner-card lg:col-span-2">
+              <article class="empty-state-card lg:col-span-2">
+                <div class="empty-state-icon">
+                  <span class="material-symbols-outlined">delivery_dining</span>
+                </div>
                 <p class="eyebrow">Sin repartidores</p>
-                <h4 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">Todavía no hay repartidores registrados</h4>
+                <h4 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">Sin repartidores</h4>
                 <p class="mt-4 text-sm leading-7 text-on-surface-variant">
-                  Da de alta al personal de reparto de esta tienda para que pueda iniciar sesión y tomar pedidos disponibles.
+                  Agrega un repartidor para gestionar entregas.
                 </p>
               </article>
             } @else {

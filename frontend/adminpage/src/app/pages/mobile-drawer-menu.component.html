@@ -1,0 +1,45 @@
+@if (rendered) {
+<div #drawerRoot class="mobile-drawer-root lg:hidden" [class.is-open]="open" [attr.aria-hidden]="!open" [attr.inert]="open ? null : ''">
+  <button #drawerOverlay class="mobile-drawer-overlay" type="button" aria-label="Cerrar menu" (click)="close()"></button>
+
+  <aside
+    #drawerPanel
+    class="mobile-drawer-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Menu de navegacion"
+  >
+    <div class="drawer-header">
+      <div #drawerItem class="drawer-menu-heading">
+        <p class="drawer-menu-title">MENU</p>
+        <p class="drawer-store-name">{{ title }}</p>
+      </div>
+
+      <button class="drawer-close" type="button" aria-label="Cerrar menu" (click)="close()">
+        <span class="material-symbols-outlined text-[1.25rem]">close</span>
+      </button>
+    </div>
+
+    <nav class="mobile-drawer-nav" aria-label="Navegacion mobile">
+      @for (item of navigation; track item.route) {
+        <a
+          #drawerItem
+          class="mobile-drawer-nav-item"
+          [routerLink]="item.route"
+          routerLinkActive="mobile-drawer-nav-item-active"
+          [routerLinkActiveOptions]="{ exact: item.route === '/dashboard/overview' }"
+          (click)="close()"
+        >
+          <span class="material-symbols-outlined text-[1.05rem]">{{ item.icon }}</span>
+          {{ item.label }}
+        </a>
+      }
+    </nav>
+
+    <button #drawerItem class="liquid-button w-full !justify-center" type="button" (click)="requestLogout()">
+      <span class="material-symbols-outlined text-base">logout</span>
+      Cerrar sesion
+    </button>
+  </aside>
+</div>
+}

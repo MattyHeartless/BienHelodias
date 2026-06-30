@@ -1,6 +1,7 @@
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, ViewChild, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import gsap from 'gsap';
 import { OrderDto, OrderStatus } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
 import { NotificationUiService } from '../core/notification-ui.service';
@@ -18,12 +19,19 @@ export class OrdersPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly notifications = inject(NotificationUiService);
+  private readonly cdr = inject(ChangeDetectorRef);
+
+  @ViewChild('ordersListPanel') private readonly ordersListPanel?: ElementRef<HTMLElement>;
+  @ViewChild('ordersDetailPanel') private readonly ordersDetailPanel?: ElementRef<HTMLElement>;
 
   readonly loading = signal(true);
   readonly detailLoading = signal(false);
   readonly error = signal<string | null>(null);
   readonly orders = signal<OrderDto[]>([]);
   readonly selectedOrder = signal<OrderDto | null>(null);
+  readonly mobileDetailVisible = signal(false);
+
+  private mobileTransitionTimeline: gsap.core.Timeline | null = null;
 
   readonly summary = computed(() => ({
     total: this.orders().length,
@@ -50,6 +58,13 @@ export class OrdersPageComponent {
     });
   }
 
+  @HostListener('window:resize')
+  onResize(): void {
+    if (!this.isMobileOrdersLayout()) {
+      this.resetMobilePanels();
+    }
+  }
+
   orderStatusLabel(status: OrderStatus): string {
     return (
       {
@@ -72,6 +87,11 @@ export class OrdersPageComponent {
         2: 'Ocupado'
       }[availability] ?? 'Sin estado'
     );
+  }
+
+  orderItemsLabel(order: OrderDto): string {
+    const totalItems = order.items.reduce((acc, item) => acc + item.quantity, 0);
+    return totalItems === 1 ? '1 producto' : `${totalItems} productos`;
   }
 
   orderTimeline(order: OrderDto): Array<{
@@ -144,6 +164,57 @@ export class OrdersPageComponent {
 
   selectOrder(orderId: string): void {
     void this.router.navigate(['/dashboard/orders', orderId]);
+
+    if (this.isMobileOrdersLayout()) {
+      this.openMobileDetail();
+    }
+  }
+
+  showMobileOrderList(): void {
+    if (!this.mobileDetailVisible()) {
+      return;
+    }
+
+    const listPanel = this.ordersListPanel?.nativeElement;
+    const detailPanel = this.ordersDetailPanel?.nativeElement;
+
+    if (!listPanel || !detailPanel || this.prefersReducedMotion()) {
+      this.mobileDetailVisible.set(false);
+      this.resetMobilePanels();
+      return;
+    }
+
+    this.mobileTransitionTimeline?.kill();
+    this.mobileTransitionTimeline = gsap.timeline({
+      defaults: { ease: 'power3.inOut' },
+      onComplete: () => {
+        this.mobileDetailVisible.set(false);
+        this.cdr.detectChanges();
+
+        window.requestAnimationFrame(() => {
+          gsap.fromTo(
+            listPanel,
+            { xPercent: -8, autoAlpha: 0, filter: 'blur(3px)' },
+            {
+              xPercent: 0,
+              autoAlpha: 1,
+              filter: 'blur(0px)',
+              duration: 0.28,
+              ease: 'power3.out',
+              clearProps: 'transform,opacity,visibility,filter'
+            }
+          );
+          gsap.set(detailPanel, { clearProps: 'transform,opacity,visibility,filter' });
+        });
+      }
+    });
+
+    this.mobileTransitionTimeline.to(detailPanel, {
+      xPercent: 8,
+      autoAlpha: 0,
+      filter: 'blur(3px)',
+      duration: 0.22
+    });
   }
 
   private loadOrderDetail(orderId: string): void {
@@ -161,5 +232,74 @@ export class OrdersPageComponent {
         this.detailLoading.set(false);
       }
     });
+  }
+
+  private openMobileDetail(): void {
+    if (this.mobileDetailVisible()) {
+      return;
+    }
+
+    const listPanel = this.ordersListPanel?.nativeElement;
+    const detailPanel = this.ordersDetailPanel?.nativeElement;
+
+    if (!listPanel || !detailPanel || this.prefersReducedMotion()) {
+      this.mobileDetailVisible.set(true);
+      this.resetMobilePanels();
+      return;
+    }
+
+    this.mobileTransitionTimeline?.kill();
+    this.mobileTransitionTimeline = gsap.timeline({
+      defaults: { ease: 'power3.inOut' },
+      onComplete: () => {
+        this.mobileDetailVisible.set(true);
+        this.cdr.detectChanges();
+
+        window.requestAnimationFrame(() => {
+          gsap.fromTo(
+            detailPanel,
+            { xPercent: 8, autoAlpha: 0, filter: 'blur(3px)' },
+            {
+              xPercent: 0,
+              autoAlpha: 1,
+              filter: 'blur(0px)',
+              duration: 0.32,
+              ease: 'power3.out',
+              clearProps: 'transform,opacity,visibility,filter'
+            }
+          );
+          gsap.set(listPanel, { clearProps: 'transform,opacity,visibility,filter' });
+        });
+      }
+    });
+
+    this.mobileTransitionTimeline.to(listPanel, {
+      xPercent: -8,
+      autoAlpha: 0,
+      filter: 'blur(3px)',
+      duration: 0.22
+    });
+  }
+
+  private resetMobilePanels(): void {
+    this.mobileTransitionTimeline?.kill();
+    this.mobileTransitionTimeline = null;
+
+    const panels = [
+      this.ordersListPanel?.nativeElement,
+      this.ordersDetailPanel?.nativeElement
+    ].filter((panel): panel is HTMLElement => Boolean(panel));
+
+    if (panels.length) {
+      gsap.set(panels, { clearProps: 'transform,opacity,visibility,filter' });
+    }
+  }
+
+  private isMobileOrdersLayout(): boolean {
+    return window.matchMedia('(max-width: 1279px)').matches;
+  }
+
+  private prefersReducedMotion(): boolean {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 }

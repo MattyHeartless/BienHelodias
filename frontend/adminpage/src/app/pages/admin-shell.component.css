@@ -93,38 +93,6 @@
   }
 }
 
-.mobile-menu {
-  margin-top: 1rem;
-  display: grid;
-  gap: 0.9rem;
-  border-top: 1px solid rgb(255 255 255 / 0.06);
-  padding-top: 1rem;
-}
-
-.mobile-nav {
-  display: grid;
-  gap: 0.65rem;
-}
-
-.mobile-nav-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  border-radius: 1.2rem;
-  border: 1px solid rgb(255 255 255 / 0.08);
-  background: rgb(255 255 255 / 0.04);
-  padding: 1rem 1.1rem;
-  color: #fff;
-  text-decoration: none;
-  transition: 180ms ease;
-}
-
-.mobile-nav-item-active {
-  border-color: rgb(210 253 110 / 0.5);
-  background: linear-gradient(135deg, rgb(210 253 110 / 0.18), rgb(135 173 38 / 0.18));
-  color: #d2fd6e;
-}
-
 @media (max-width: 1023px) {
   .nav-shell {
     align-items: flex-start;

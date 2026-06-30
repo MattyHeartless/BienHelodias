@@ -2,6 +2,90 @@
   display: block;
 }
 
+.orders-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.orders-kpi-card {
+  min-width: 0;
+  padding: 1rem;
+}
+
+.orders-kpi-card .eyebrow {
+  overflow-wrap: anywhere;
+  letter-spacing: 0.16em;
+}
+
+.orders-kpi-card > p {
+  margin-top: 0.85rem;
+  font-size: clamp(2rem, 12vw, 2.8rem);
+  line-height: 0.95;
+}
+
+.orders-kpi-card-revenue {
+  grid-column: 1 / -1;
+}
+
+.orders-workspace {
+  display: grid;
+  gap: 2rem;
+}
+
+.orders-mobile-back {
+  display: none;
+  margin-bottom: 1.25rem;
+}
+
+@media (max-width: 1279px) {
+  .orders-list-panel.is-mobile-hidden {
+    display: none;
+  }
+
+  .orders-detail-panel {
+    display: none;
+  }
+
+  .orders-detail-panel.is-mobile-visible {
+    display: block;
+  }
+
+  .orders-mobile-back {
+    display: inline-flex;
+  }
+}
+
+@media (min-width: 768px) {
+  .orders-kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+
+  .orders-kpi-card {
+    padding: 1.5rem;
+  }
+
+  .orders-kpi-card > p {
+    font-size: 2.25rem;
+  }
+
+  .orders-kpi-card-revenue {
+    grid-column: auto;
+  }
+}
+
+@media (min-width: 1280px) {
+  .orders-workspace {
+    grid-template-columns: 460px minmax(0, 1fr);
+  }
+
+  .orders-detail-panel {
+    display: block;
+  }
+}
+
 .order-list-item {
   border: 1px solid rgb(255 255 255 / 0.08);
   border-radius: 1.5rem;

@@ -27,28 +27,34 @@
         <p class="dashboard-subtitle">{{ superAdminPeriodLabel() }}</p>
       </div>
       <div class="dashboard-actions">
-        <div class="quick-range" aria-label="Rangos rapidos">
-          <button type="button" (click)="setDatePreset(7)">7D</button>
-          <button type="button" (click)="setDatePreset(30)">30D</button>
-          <button type="button" (click)="setDatePreset(90)">90D</button>
-          <button type="button" (click)="setCurrentMonth()">Mes</button>
-        </div>
-        <div class="date-filter">
-          <label>
-            <span>Desde</span>
-            <input type="date" [value]="dateFrom()" [max]="dateTo()" (change)="updateDateFrom($any($event.target).value)">
-          </label>
-          <label>
-            <span>Hasta</span>
-            <input type="date" [value]="dateTo()" [min]="dateFrom()" (change)="updateDateTo($any($event.target).value)">
-          </label>
-          <button class="ghost-button" type="button" (click)="applyDateRange()">
-            <span class="material-symbols-outlined text-base">filter_alt</span>
-            Aplicar
-          </button>
-          <button class="icon-filter-button" type="button" (click)="load()" aria-label="Refrescar dashboard">
-            <span class="material-symbols-outlined text-base">refresh</span>
-          </button>
+        <button class="ghost-button dashboard-filter-trigger" type="button" (click)="openMobileFilters()">
+          <span class="material-symbols-outlined text-base">tune</span>
+          Filtros
+        </button>
+        <div class="dashboard-actions-inline">
+          <div class="quick-range" aria-label="Rangos rapidos">
+            <button type="button" (click)="setDatePreset(7)">7D</button>
+            <button type="button" (click)="setDatePreset(30)">30D</button>
+            <button type="button" (click)="setDatePreset(90)">90D</button>
+            <button type="button" (click)="setCurrentMonth()">Mes</button>
+          </div>
+          <div class="date-filter">
+            <label>
+              <span>Desde</span>
+              <input type="date" [value]="dateFrom()" [max]="dateTo()" (change)="updateDateFrom($any($event.target).value)">
+            </label>
+            <label>
+              <span>Hasta</span>
+              <input type="date" [value]="dateTo()" [min]="dateFrom()" (change)="updateDateTo($any($event.target).value)">
+            </label>
+            <button class="ghost-button" type="button" (click)="applyDateRange()">
+              <span class="material-symbols-outlined text-base">filter_alt</span>
+              Aplicar
+            </button>
+            <button class="icon-filter-button" type="button" (click)="load()" aria-label="Refrescar dashboard">
+              <span class="material-symbols-outlined text-base">refresh</span>
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -353,32 +359,38 @@
     <section class="dashboard-hero">
       <div>
         <p class="eyebrow">Overview</p>
-        <h2 class="dashboard-title">Resumen de la tienda</h2>
+        <h2 class="dashboard-title">Resumen</h2>
         <p class="dashboard-subtitle">{{ periodLabel() }}</p>
       </div>
       <div class="dashboard-actions">
-        <div class="quick-range" aria-label="Rangos rapidos">
-          <button type="button" (click)="setDatePreset(7)">7D</button>
-          <button type="button" (click)="setDatePreset(30)">30D</button>
-          <button type="button" (click)="setDatePreset(90)">90D</button>
-          <button type="button" (click)="setCurrentMonth()">Mes</button>
-        </div>
-        <div class="date-filter">
-          <label>
-            <span>Desde</span>
-            <input type="date" [value]="dateFrom()" [max]="dateTo()" (change)="updateDateFrom($any($event.target).value)">
-          </label>
-          <label>
-            <span>Hasta</span>
-            <input type="date" [value]="dateTo()" [min]="dateFrom()" (change)="updateDateTo($any($event.target).value)">
-          </label>
-          <button class="ghost-button" type="button" (click)="applyDateRange()">
-            <span class="material-symbols-outlined text-base">filter_alt</span>
-            Aplicar
-          </button>
-          <button class="icon-filter-button" type="button" (click)="load()" aria-label="Refrescar dashboard">
-            <span class="material-symbols-outlined text-base">refresh</span>
-          </button>
+        <button class="ghost-button dashboard-filter-trigger" type="button" (click)="openMobileFilters()">
+          <span class="material-symbols-outlined text-base">tune</span>
+          Filtros
+        </button>
+        <div class="dashboard-actions-inline">
+          <div class="quick-range" aria-label="Rangos rapidos">
+            <button type="button" (click)="setDatePreset(7)">7D</button>
+            <button type="button" (click)="setDatePreset(30)">30D</button>
+            <button type="button" (click)="setDatePreset(90)">90D</button>
+            <button type="button" (click)="setCurrentMonth()">Mes</button>
+          </div>
+          <div class="date-filter">
+            <label>
+              <span>Desde</span>
+              <input type="date" [value]="dateFrom()" [max]="dateTo()" (change)="updateDateFrom($any($event.target).value)">
+            </label>
+            <label>
+              <span>Hasta</span>
+              <input type="date" [value]="dateTo()" [min]="dateFrom()" (change)="updateDateTo($any($event.target).value)">
+            </label>
+            <button class="ghost-button" type="button" (click)="applyDateRange()">
+              <span class="material-symbols-outlined text-base">filter_alt</span>
+              Aplicar
+            </button>
+            <button class="icon-filter-button" type="button" (click)="load()" aria-label="Refrescar dashboard">
+              <span class="material-symbols-outlined text-base">refresh</span>
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -626,6 +638,61 @@
           }
         </div>
       </article>
+    </section>
+  </div>
+}
+
+@if (mobileFiltersOpen()) {
+  <div class="mobile-filter-backdrop" (click)="closeMobileFilters()">
+    <section
+      class="mobile-filter-modal t-modal"
+      [class.is-open]="mobileFiltersActive()"
+      [class.is-closing]="mobileFiltersClosing()"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="mobile-dashboard-filters-title"
+      (click)="$event.stopPropagation()">
+      <div class="mobile-filter-header">
+        <div>
+          <p class="eyebrow">Dashboard</p>
+          <h3 id="mobile-dashboard-filters-title">Filtros</h3>
+        </div>
+        <button class="icon-filter-button" type="button" (click)="closeMobileFilters()" aria-label="Cerrar filtros">
+          <span class="material-symbols-outlined text-base">close</span>
+        </button>
+      </div>
+
+      <div class="mobile-filter-section">
+        <p class="mobile-filter-label">Rango rapido</p>
+        <div class="mobile-filter-quick-range" aria-label="Rangos rapidos">
+          <button type="button" (click)="setDatePresetAndCloseMobileFilters(7)">7D</button>
+          <button type="button" (click)="setDatePresetAndCloseMobileFilters(30)">30D</button>
+          <button type="button" (click)="setDatePresetAndCloseMobileFilters(90)">90D</button>
+          <button type="button" (click)="setCurrentMonthAndCloseMobileFilters()">Mes</button>
+        </div>
+      </div>
+
+      <div class="mobile-filter-section">
+        <p class="mobile-filter-label">Fechas</p>
+        <div class="date-filter mobile-filter-date-grid">
+          <label>
+            <span>Desde</span>
+            <input type="date" [value]="dateFrom()" [max]="dateTo()" (change)="updateDateFrom($any($event.target).value)">
+          </label>
+          <label>
+            <span>Hasta</span>
+            <input type="date" [value]="dateTo()" [min]="dateFrom()" (change)="updateDateTo($any($event.target).value)">
+          </label>
+        </div>
+      </div>
+
+      <div class="mobile-filter-actions">
+        <button class="ghost-button" type="button" (click)="closeMobileFilters()">Cancelar</button>
+        <button class="liquid-button" type="button" (click)="applyDateRangeAndCloseMobileFilters()">
+          <span class="material-symbols-outlined text-base">filter_alt</span>
+          Aplicar
+        </button>
+      </div>
     </section>
   </div>
 }
