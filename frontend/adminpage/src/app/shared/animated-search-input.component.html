@@ -1,0 +1,23 @@
+<div class="t-clear animated-search" [class.has-value]="hasValue()" [class.is-clearing]="isClearing()">
+  <span class="material-symbols-outlined animated-search-icon" aria-hidden="true">search</span>
+  <input
+    #inputElement
+    class="animated-search-input"
+    type="search"
+    [attr.aria-label]="ariaLabel"
+    [value]="internalValue()"
+    (input)="updateValue($any($event.target).value)"
+  />
+  <div #mirrorElement class="t-clear-mirror animated-search-text" aria-hidden="true">{{ mirrorText() }}</div>
+  <div #placeholderElement class="t-clear-placeholder animated-search-text" aria-hidden="true">{{ placeholder }}</div>
+  <div #glowElement class="t-clear-glow" aria-hidden="true"></div>
+  <button
+    class="t-clear-btn animated-search-clear"
+    type="button"
+    aria-label="Limpiar busqueda"
+    (pointerdown)="preserveFocus($event)"
+    (mousedown)="preserveFocus($event)"
+    (click)="clearWithAnimation()">
+    <span class="material-symbols-outlined" aria-hidden="true">close</span>
+  </button>
+</div>

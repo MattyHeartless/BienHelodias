@@ -6,11 +6,12 @@ import { OrderDto, OrderStatus } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
 import { NotificationUiService } from '../core/notification-ui.service';
 import { StoreAdminApiService } from '../services/store-admin-api.service';
+import { AnimatedSearchInputComponent } from '../shared/animated-search-input.component';
 
 @Component({
   selector: 'app-orders-page',
   standalone: true,
-  imports: [CommonModule, CurrencyPipe, DatePipe],
+  imports: [CommonModule, CurrencyPipe, DatePipe, AnimatedSearchInputComponent],
   templateUrl: './orders-page.component.html',
   styleUrl: './orders-page.component.css'
 })
@@ -28,15 +29,19 @@ export class OrdersPageComponent {
   readonly detailLoading = signal(false);
   readonly error = signal<string | null>(null);
   readonly orders = signal<OrderDto[]>([]);
+  readonly summaryOrders = signal<OrderDto[]>([]);
   readonly selectedOrder = signal<OrderDto | null>(null);
   readonly mobileDetailVisible = signal(false);
+  readonly searchTerm = signal('');
 
   private mobileTransitionTimeline: gsap.core.Timeline | null = null;
+  private searchDebounceHandle: ReturnType<typeof setTimeout> | null = null;
+  private ordersRequestId = 0;
 
   readonly summary = computed(() => ({
-    total: this.orders().length,
-    revenue: this.orders().reduce((acc, order) => acc + order.total, 0),
-    pending: this.orders().filter((order) => order.status === OrderStatus.Pending).length
+    total: this.summaryOrders().length,
+    revenue: this.summaryOrders().reduce((acc, order) => acc + order.total, 0),
+    pending: this.summaryOrders().filter((order) => order.status === OrderStatus.Pending).length
   }));
 
   private readonly orderFlow = [
@@ -52,7 +57,7 @@ export class OrdersPageComponent {
     this.loadOrders();
     this.route.paramMap.subscribe((params) => {
       const orderId = params.get('orderId');
-      if (orderId) {
+      if (orderId && this.selectedOrder()?.id !== orderId) {
         this.loadOrderDetail(orderId);
       }
     });
@@ -132,17 +137,34 @@ export class OrdersPageComponent {
     }));
   }
 
-  loadOrders(): void {
-    this.loading.set(true);
+  loadOrders(keepCurrentRoute = false): void {
+    const requestId = ++this.ordersRequestId;
+
+    if (!keepCurrentRoute) {
+      this.loading.set(true);
+    }
+
     this.error.set(null);
 
-    this.storeAdminApi.getOrders().subscribe({
+    this.storeAdminApi.getOrders(this.searchTerm()).subscribe({
       next: (response) => {
+        if (requestId !== this.ordersRequestId) {
+          return;
+        }
+
         this.orders.set(response.data.items);
+        if (!this.searchTerm().trim()) {
+          this.summaryOrders.set(response.data.items);
+        }
         this.loading.set(false);
 
+        if (keepCurrentRoute) {
+          this.syncSelectedOrderWithResults(response.data.items);
+          return;
+        }
+
         const routeOrderId = this.route.snapshot.paramMap.get('orderId');
-        if (routeOrderId) {
+        if (routeOrderId && (!this.searchTerm().trim() || response.data.items.some((order) => order.id === routeOrderId))) {
           this.loadOrderDetail(routeOrderId);
           return;
         }
@@ -151,9 +173,17 @@ export class OrdersPageComponent {
         if (firstOrder) {
           this.selectedOrder.set(firstOrder);
           void this.router.navigate(['/dashboard/orders', firstOrder.id], { replaceUrl: true });
+          return;
         }
+
+        this.selectedOrder.set(null);
+        void this.router.navigate(['/dashboard/orders'], { replaceUrl: true });
       },
       error: (error) => {
+        if (requestId !== this.ordersRequestId) {
+          return;
+        }
+
         const message = getApiErrorMessage(error, 'No fue posible cargar los pedidos.');
         this.error.set(message);
         this.notifications.error({ summary: message });
@@ -163,6 +193,13 @@ export class OrdersPageComponent {
   }
 
   selectOrder(orderId: string): void {
+    const order = this.orders().find((item) => item.id === orderId);
+
+    if (order) {
+      this.selectedOrder.set(order);
+    }
+
+    this.loadOrderDetail(orderId);
     void this.router.navigate(['/dashboard/orders', orderId]);
 
     if (this.isMobileOrdersLayout()) {
@@ -215,6 +252,38 @@ export class OrdersPageComponent {
       filter: 'blur(3px)',
       duration: 0.22
     });
+  }
+
+  updateSearchTerm(value: string): void {
+    this.searchTerm.set(value);
+
+    if (this.searchDebounceHandle) {
+      clearTimeout(this.searchDebounceHandle);
+    }
+
+    this.searchDebounceHandle = setTimeout(() => {
+      this.searchDebounceHandle = null;
+      this.loadOrders(true);
+    }, 250);
+  }
+
+  private syncSelectedOrderWithResults(orders: OrderDto[]): void {
+    const selected = this.selectedOrder();
+
+    if (!selected) {
+      return;
+    }
+
+    const refreshedSelection = orders.find((order) => order.id === selected.id);
+
+    if (refreshedSelection) {
+      this.selectedOrder.set(refreshedSelection);
+      return;
+    }
+
+    if (this.searchTerm().trim()) {
+      this.selectedOrder.set(null);
+    }
   }
 
   private loadOrderDetail(orderId: string): void {

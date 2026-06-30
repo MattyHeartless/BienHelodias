@@ -3,16 +3,12 @@
     <p class="eyebrow">Catálogo</p>
     <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Administra tus productos e inventario</h2>
   </div>
-  <div class="flex flex-wrap gap-3">
-    <button class="ghost-button" type="button" (click)="loadProducts()">
-      <span class="material-symbols-outlined text-base">refresh</span>
-      Refrescar
-    </button>
-    <button class="ghost-button" type="button" (click)="openInventoryAiModal()">
+  <div class="catalog-header-actions">
+    <button class="ghost-button catalog-header-action" type="button" (click)="openInventoryAiModal()">
       <span class="material-symbols-outlined text-base">photo_camera</span>
-      Inventario con IA
+      Inventario IA
     </button>
-    <button class="liquid-button cursor-pointer" type="button" (click)="openCreateModal()">
+    <button class="liquid-button catalog-header-action cursor-pointer" type="button" (click)="openCreateModal()">
       <span class="material-symbols-outlined text-base">add</span>
       Nuevo producto
     </button>
@@ -44,21 +40,14 @@
 </section>
 
 <section>
-  <article class="glass-panel p-6">
-    <p class="eyebrow">Inventario actual</p>
-    <h3 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">Productos disponibles</h3>
-
-    <div class="catalog-filters mt-6">
-      <label class="catalog-search">
-        <span class="material-symbols-outlined text-lg text-primary">search</span>
-        <input
-          class="catalog-search-input"
-          type="search"
-          placeholder="Busca por nombre o categoria"
-          [value]="searchTerm()"
-          (input)="updateSearchTerm($any($event.target).value)"
-        />
-      </label>
+  <article class="catalog-inventory-section">
+    <div class="catalog-filters">
+      <app-animated-search-input
+        placeholder="Busca por nombre o categoria"
+        ariaLabel="Buscar productos por nombre o categoria"
+        [value]="searchTerm()"
+        (valueChange)="updateSearchTerm($event)"
+      />
 
       <label class="catalog-category-filter">
         <span class="eyebrow">Categoría</span>
@@ -88,7 +77,7 @@
         @if (filteredProducts().length) {
           @for (product of filteredProducts(); track product.id) {
             <article class="product-card">
-              <div class="rounded-[1.35rem] bg-surface-container-high px-5 py-5">
+              <div class="product-card-content">
                 <div class="flex items-start justify-between gap-4">
                   <div>
                     <p class="eyebrow">{{ product.category }}</p>

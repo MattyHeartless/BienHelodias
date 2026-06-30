@@ -12,6 +12,7 @@ import { getApiErrorMessage } from '../core/api-error.util';
 import { shakeInvalidFormControls } from '../core/form-error-shake.util';
 import { NotificationUiService } from '../core/notification-ui.service';
 import { StoreAdminApiService } from '../services/store-admin-api.service';
+import { AnimatedSearchInputComponent } from '../shared/animated-search-input.component';
 
 type InventoryAction = 'adjust' | 'link' | 'create' | 'ignore';
 
@@ -45,7 +46,7 @@ interface InventoryAiReviewItem {
 @Component({
   selector: 'app-catalog-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, DatePipe],
+  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, DatePipe, AnimatedSearchInputComponent],
   templateUrl: './catalog-page.component.html',
   styleUrl: './catalog-page.component.css'
 })

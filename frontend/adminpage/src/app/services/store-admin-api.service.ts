@@ -125,9 +125,16 @@ export class StoreAdminApiService {
     return this.http.post<ApiResponse<InventoryAiCommitResultDto>>(`${this.inventoryAiUrl}/commit`, request);
   }
 
-  getOrders(): Observable<ApiResponse<PagedResult<OrderDto>>> {
+  getOrders(search = ''): Observable<ApiResponse<PagedResult<OrderDto>>> {
+    const params: Record<string, string | number> = { page: 1, pageSize: 10 };
+    const query = search.trim();
+
+    if (query) {
+      params['q'] = query;
+    }
+
     return this.http.get<ApiResponse<PagedResult<OrderDto>>>(this.ordersUrl, {
-      params: { page: 1, pageSize: 10 }
+      params
     });
   }
 

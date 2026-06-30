@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Hyperwave";
+  src: url("/brand/Hyperwave.otf") format("opentype");
+  font-display: swap;
+}
+
 @theme {
   --font-display: "Space Grotesk", sans-serif;
   --font-body: "Manrope", sans-serif;
@@ -25,6 +31,18 @@
     --modal-scale: 0.96;
     --modal-scale-close: 0.96;
     --modal-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --clear-dur: 1000ms;
+    --clear-out-dur: 400ms;
+    --clear-in-dur: 400ms;
+    --clear-out-fly: 12px;
+    --clear-in-fly: 12px;
+    --clear-out-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --clear-in-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --clear-blur: 2px;
+    --glow-delay: 50ms;
+    --glow-peak-at: 0.15;
+    --glow-opacity: 0.85;
+    --glow-spread: 1.5;
     --shake-distance: 6px;
     --shake-overshoot: 4px;
     --shake-dur-a: 80ms;

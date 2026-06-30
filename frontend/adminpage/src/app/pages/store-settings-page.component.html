@@ -2,23 +2,9 @@
   <div class="flex flex-wrap items-end justify-between gap-4">
     <div>
       <p class="eyebrow">Mi tienda</p>
-      <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Configura la bienvenida, banners y repartidores de tu tienda</h2>
+      <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Gestiona tu tienda</h2>
     </div>
 
-    <div class="flex flex-wrap gap-3">
-      <button class="ghost-button" type="button" (click)="load()">
-        <span class="material-symbols-outlined text-base">refresh</span>
-        Refrescar
-      </button>
-      <button class="ghost-button" type="button" (click)="openCreateDeliveryUserModal()">
-        <span class="material-symbols-outlined text-base">person_add</span>
-        Nuevo repartidor
-      </button>
-      <button class="liquid-button" type="button" (click)="openCreateBannerModal()">
-        <span class="material-symbols-outlined text-base">add_photo_alternate</span>
-        Nuevo banner
-      </button>
-    </div>
   </div>
 
   @if (loading()) {
@@ -118,7 +104,7 @@
       </section>
 
       <section>
-        <article class="glass-panel p-6">
+        <article class="store-list-section">
           <div class="section-action-header">
             <div class="min-w-0">
               <p class="eyebrow">Promociones y anuncios</p>
@@ -146,7 +132,7 @@
             } @else {
               @for (banner of orderedBanners(); track banner.bannerId) {
                 <article class="banner-card">
-                  <div class="rounded-[1.35rem] bg-surface-container-high px-5 py-5">
+                  <div class="banner-card-content">
                     <div class="flex items-start justify-between gap-4">
                       <div>
                         <p class="eyebrow">{{ banner.header }}</p>
@@ -186,18 +172,21 @@
                     </div>
                   </div>
 
-                  <div class="mt-5 flex flex-wrap gap-3">
-                    <button class="ghost-button" type="button" (click)="editBanner(banner)">
+                  <div class="banner-card-actions">
+                    <button class="ghost-button banner-action-button" type="button" (click)="editBanner(banner)" aria-label="Editar banner" title="Editar">
                       <span class="material-symbols-outlined text-base">edit</span>
-                      Editar
                     </button>
-                    <button class="ghost-button" type="button" (click)="toggleBannerStatus(banner)">
+                    <button
+                      class="ghost-button banner-action-button"
+                      type="button"
+                      (click)="toggleBannerStatus(banner)"
+                      [attr.aria-label]="banner.status ? 'Desactivar banner' : 'Activar banner'"
+                      [attr.title]="banner.status ? 'Desactivar' : 'Activar'"
+                    >
                       <span class="material-symbols-outlined text-base">{{ banner.status ? 'visibility_off' : 'visibility' }}</span>
-                      {{ banner.status ? 'Desactivar' : 'Activar' }}
                     </button>
-                    <button class="danger-button" type="button" (click)="deleteBanner(banner)">
+                    <button class="danger-button banner-action-button" type="button" (click)="deleteBanner(banner)" aria-label="Eliminar banner" title="Eliminar">
                       <span class="material-symbols-outlined text-base">delete</span>
-                      Eliminar
                     </button>
                   </div>
                 </article>
@@ -208,7 +197,7 @@
       </section>
 
       <section>
-        <article class="glass-panel p-6">
+        <article class="store-list-section">
           <div class="section-action-header">
             <div class="min-w-0">
               <p class="eyebrow">Logística</p>
@@ -236,19 +225,13 @@
             } @else {
               @for (deliveryUser of deliveryUsers(); track deliveryUser.id) {
                 <article class="banner-card">
-                  <div class="rounded-[1.35rem] bg-surface-container-high px-5 py-5">
+                  <div class="banner-card-content">
                     <div class="flex items-start justify-between gap-4">
                       <div>
                         <p class="eyebrow">{{ deliveryUser.email }}</p>
                         <h4 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">{{ deliveryUser.fullName }}</h4>
                       </div>
 
-                      <span
-                        class="rounded-full px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.22em]"
-                        [ngClass]="deliveryUser.isActive ? 'banner-badge-active' : 'banner-badge-hidden'"
-                      >
-                        {{ deliveryUser.isActive ? 'Activo' : 'Inactivo' }}
-                      </span>
                     </div>
 
                     <div class="mt-4 grid gap-3 text-sm text-on-surface-variant">
@@ -260,7 +243,14 @@
                     </div>
                   </div>
 
-                  <div class="mt-5 flex flex-wrap gap-3">
+                  <div class="delivery-card-actions">
+                    <span
+                      class="delivery-status-badge"
+                      [ngClass]="deliveryUser.isActive ? 'delivery-status-badge-active' : 'delivery-status-badge-hidden'"
+                    >
+                      <span class="material-symbols-outlined" aria-hidden="true">{{ deliveryUser.isActive ? 'check_circle' : 'block' }}</span>
+                      {{ deliveryUser.isActive ? 'Activo' : 'Inactivo' }}
+                    </span>
                     <button class="ghost-button" type="button" (click)="toggleDeliveryUserStatus(deliveryUser)">
                       <span class="material-symbols-outlined text-base">{{ deliveryUser.isActive ? 'block' : 'check_circle' }}</span>
                       {{ deliveryUser.isActive ? 'Desactivar acceso' : 'Activar acceso' }}

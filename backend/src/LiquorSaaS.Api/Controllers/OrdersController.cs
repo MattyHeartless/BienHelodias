@@ -12,9 +12,14 @@ public sealed class OrdersController(IOrderService orderService) : ControllerBas
 {
     [Authorize]
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<PagedResult<OrderDto>>>> GetOrders([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] OrderStatus? status = null, CancellationToken cancellationToken = default)
+    public async Task<ActionResult<ApiResponse<PagedResult<OrderDto>>>> GetOrders(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] OrderStatus? status = null,
+        [FromQuery] string? q = null,
+        CancellationToken cancellationToken = default)
     {
-        var result = await orderService.GetStoreOrdersAsync(new PaginationRequest { Page = page, PageSize = pageSize }, status, cancellationToken);
+        var result = await orderService.GetStoreOrdersAsync(new PaginationRequest { Page = page, PageSize = pageSize }, status, q, cancellationToken);
         return Ok(ApiResponse<PagedResult<OrderDto>>.Ok(result, "Orders retrieved successfully."));
     }
 

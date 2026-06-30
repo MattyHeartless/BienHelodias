@@ -196,6 +196,20 @@
   box-shadow: 0 22px 80px rgba(0, 0, 0, 0.32);
 }
 
+.banner-card-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-top: 1.25rem;
+}
+
+.banner-action-button {
+  width: 100%;
+  min-width: 0;
+  height: 2.85rem;
+  padding: 0;
+}
+
 .empty-state-card {
   display: grid;
   justify-items: center;
@@ -273,6 +287,51 @@
 .banner-badge-hidden {
   background: rgb(255 255 255 / 0.08);
   color: #adaaaa;
+}
+
+.delivery-status-badge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.42rem 0.7rem;
+  font-size: 0.7rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.delivery-status-badge .material-symbols-outlined {
+  font-size: 0.95rem;
+}
+
+.delivery-status-badge-active {
+  border-color: rgb(210 253 110 / 0.34);
+  background: rgb(210 253 110 / 0.16);
+  color: #d2fd6e;
+  box-shadow: 0 0 0 4px rgb(210 253 110 / 0.055);
+}
+
+.delivery-status-badge-hidden {
+  border-color: rgb(255 255 255 / 0.1);
+  background: rgb(255 255 255 / 0.06);
+  color: #adaaaa;
+}
+
+.delivery-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.delivery-card-actions .ghost-button {
+  flex: 0 0 auto;
 }
 
 .banner-wildcard-badge {

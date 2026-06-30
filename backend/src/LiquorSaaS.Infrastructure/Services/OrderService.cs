@@ -123,7 +123,7 @@ public sealed class OrderService(
         return await MapOrderAsync(order, cancellationToken);
     }
 
-    public async Task<PagedResult<OrderDto>> GetStoreOrdersAsync(PaginationRequest request, OrderStatus? status, CancellationToken cancellationToken)
+    public async Task<PagedResult<OrderDto>> GetStoreOrdersAsync(PaginationRequest request, OrderStatus? status, string? search, CancellationToken cancellationToken)
     {
         EnsureStoreScopedRole();
         var storeId = tenantProvider.GetRequiredStoreId();
@@ -135,6 +135,22 @@ public sealed class OrderService(
         if (status.HasValue)
         {
             query = query.Where(x => x.Status == status.Value);
+        }
+
+        var normalizedSearch = search?.Trim();
+        if (!string.IsNullOrWhiteSpace(normalizedSearch))
+        {
+            var likePattern = $"%{EscapeLikePattern(normalizedSearch)}%";
+            var hasOrderId = Guid.TryParse(normalizedSearch, out var orderId);
+
+            query = query.Where(x =>
+                (hasOrderId && x.Id == orderId) ||
+                EF.Functions.Like(x.CustomerName, likePattern) ||
+                EF.Functions.Like(x.CustomerPhone, likePattern) ||
+                EF.Functions.Like(x.DeliveryAddress, likePattern) ||
+                (x.Notes != null && EF.Functions.Like(x.Notes, likePattern)) ||
+                (x.AppliedPromotionCode != null && EF.Functions.Like(x.AppliedPromotionCode, likePattern)) ||
+                x.Items.Any(item => EF.Functions.Like(item.ProductNameSnapshot, likePattern)));
         }
 
         var paged = await query
@@ -150,6 +166,14 @@ public sealed class OrderService(
             Total = paged.Total,
             Items = items
         };
+    }
+
+    private static string EscapeLikePattern(string value)
+    {
+        return value
+            .Replace("[", "[[]", StringComparison.Ordinal)
+            .Replace("%", "[%]", StringComparison.Ordinal)
+            .Replace("_", "[_]", StringComparison.Ordinal);
     }
 
     public async Task<OrderDto> UpdateStatusAsync(Guid id, UpdateOrderStatusRequest request, CancellationToken cancellationToken)
