@@ -1,13 +1,13 @@
-<div class="min-h-screen px-6 pb-16 pt-8 lg:px-10">
+<div class="min-h-screen px-4 pb-16 pt-4 sm:px-6 lg:px-10 lg:pt-6">
   <div class="mx-auto max-w-7xl">
-    <header class="mb-8 rounded-[2.2rem] bg-surface-container-low p-5 shadow-[0_35px_110px_rgba(0,0,0,0.4)] lg:p-6">
+    <header class="admin-topbar" appLiquidGlass>
       <div class="nav-shell">
         <div class="nav-brand">
           <div class="nav-brand-mark">
             <span class="nav-brand-monogram">BH</span>
           </div>
           <div>
-            <p class="font-display text-xl font-black tracking-[-0.05em] text-white lg:text-2xl">{{ workspaceTitle() }}</p>
+            <p class="nav-workspace-title">{{ workspaceTitle() }}</p>
           </div>
         </div>
 
@@ -16,7 +16,7 @@
         </button>
 
         <div class="nav-desktop hidden lg:flex">
-          <nav class="nav-cluster">
+          <nav class="nav-cluster" aria-label="Navegacion principal">
             @for (item of navigation(); track item.route) {
               <a
                 class="nav-pill"
@@ -28,6 +28,13 @@
                 {{ item.label }}
               </a>
             }
+
+            @if (publicStoreUrl(); as storeUrl) {
+              <a class="nav-pill" [href]="storeUrl">
+                <span class="material-symbols-outlined text-[1.05rem]">storefront</span>
+                Ver tienda
+              </a>
+            }
           </nav>
 
           <button class="ghost-button nav-logout" type="button" (click)="logout()">
@@ -36,22 +43,19 @@
           </button>
         </div>
       </div>
-
-      <div class="mt-4 flex items-center justify-between gap-4 border-t border-white/6 pt-4">
-        <p class="max-w-2xl text-sm leading-7 text-on-surface-variant">
-          {{ workspaceSubtitle() }}
-        </p>
-        <span class="hidden rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-primary xl:inline-flex">
-          {{ workspaceBadge() }}
-        </span>
-      </div>
     </header>
+
+    <section class="workspace-strip" aria-label="Contexto del workspace">
+      <p>{{ workspaceSubtitle() }}</p>
+      <span>{{ workspaceBadge() }}</span>
+    </section>
 
     <app-mobile-drawer-menu
       [open]="menuOpen()"
       [title]="workspaceTitle()"
       [description]="workspaceSubtitle()"
       [navigation]="navigation()"
+      [storeUrl]="publicStoreUrl()"
       (closeMenu)="closeMenu()"
       (logout)="logout()"
     />

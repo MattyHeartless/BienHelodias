@@ -4,12 +4,13 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { AdminSessionService } from '../core/admin-session.service';
 import { AppRole, StoreDto } from '../core/models';
 import { StoreAdminApiService } from '../services/store-admin-api.service';
+import { LiquidGlassDirective } from '../shared/liquid-glass.directive';
 import { MobileDrawerMenuComponent } from './mobile-drawer-menu.component';
 
 @Component({
   selector: 'app-admin-shell',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, MobileDrawerMenuComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, MobileDrawerMenuComponent, LiquidGlassDirective],
   templateUrl: './admin-shell.component.html',
   styleUrl: './admin-shell.component.css'
 })
@@ -49,6 +50,15 @@ export class AdminShellComponent {
     }
 
     return store.isActive ? 'Tienda activa' : 'Tienda inactiva';
+  });
+  readonly publicStoreUrl = computed(() => {
+    const slug = this.currentStore()?.slug?.trim().replace(/^\/+|\/+$/g, '');
+
+    if (!slug) {
+      return null;
+    }
+
+    return `https://bienhelodias.qzz.io/${encodeURIComponent(slug)}`;
   });
   readonly navigation = computed(() => {
     const items = [

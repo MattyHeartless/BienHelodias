@@ -76,7 +76,7 @@
       } @else {
         @if (filteredProducts().length) {
           @for (product of filteredProducts(); track product.id) {
-            <article class="product-card">
+            <article class="product-card" [class.product-card--muted]="!product.isActive">
               <div class="product-card-content">
                 <div class="flex items-start justify-between gap-4">
                   <div>

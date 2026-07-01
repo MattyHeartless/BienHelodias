@@ -63,43 +63,60 @@
           </article>
         </div>
 
-        <article class="glass-panel p-6">
-          <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <p class="eyebrow">Identidad</p>
-              <h3 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">{{ currentStore.name }}</h3>
-              <p class="store-identity-slug mt-3 text-xs uppercase tracking-[0.26em] text-on-surface-variant">{{ currentStore.slug }}</p>
-            </div>
+        <article class="glass-panel t-acc p-6" [attr.data-open]="identityPanelOpen()">
+          <button
+            class="t-acc-head flex w-full items-start justify-between gap-4 text-left"
+            type="button"
+            (click)="toggleIdentityPanel()"
+            [attr.aria-expanded]="identityPanelOpen()"
+            aria-controls="store-identity-panel"
+          >
+            <span class="min-w-0">
+              <span class="eyebrow block">Identidad</span>
+              <span class="mt-3 block font-display text-3xl font-bold tracking-[-0.05em] text-white">{{ currentStore.name }}</span>
+              <span class="store-identity-slug mt-3 block text-xs uppercase tracking-[0.26em] text-on-surface-variant">{{ currentStore.slug }}</span>
+            </span>
 
-            <p class="store-status-badge rounded-full bg-white/8 px-3 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-primary">
-              {{ currentStore.isActive ? 'Tienda activa' : 'Tienda inactiva' }}
-            </p>
+            <span class="flex shrink-0 items-center gap-3">
+              <span class="store-status-badge rounded-full bg-white/8 px-3 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-primary">
+                {{ currentStore.isActive ? 'Tienda activa' : 'Tienda inactiva' }}
+              </span>
+              <span class="t-acc-chevron rounded-full border border-white/10 bg-white/5 p-2 text-primary" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M4 6.5L8 10.5L12 6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </span>
+          </button>
+
+          <div class="t-acc-panel" id="store-identity-panel">
+            <div class="t-acc-panel-inner">
+              <form class="mt-6 space-y-4" [formGroup]="welcomeForm" (ngSubmit)="saveWelcomePhrase()">
+                <div class="field-block">
+                  <label class="field-label" for="welcome-phrase">Frase de entrada</label>
+                  <textarea
+                    id="welcome-phrase"
+                    class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
+                    [attr.rows]="welcomePhraseRows()"
+                    formControlName="welcomePhrase"
+                    placeholder="Ej. Bienvenido a la mejor selección de licores para tu noche."
+                  ></textarea>
+                  <p class="field-help">Este texto aparece como mensaje principal al entrar a la tienda.</p>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                  <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">
+                    {{ welcomeForm.get('welcomePhrase')?.value?.length ?? 0 }}/280 caracteres
+                  </p>
+
+                  <button class="liquid-button welcome-save-button !justify-center" type="submit" [disabled]="submittingWelcome()">
+                    <span class="material-symbols-outlined text-base">save</span>
+                    {{ submittingWelcome() ? 'Guardando...' : 'Guardar frase' }}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-
-          <form class="mt-6 space-y-4" [formGroup]="welcomeForm" (ngSubmit)="saveWelcomePhrase()">
-            <div class="field-block">
-              <label class="field-label" for="welcome-phrase">Frase de entrada</label>
-              <textarea
-                id="welcome-phrase"
-                class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
-                [attr.rows]="welcomePhraseRows()"
-                formControlName="welcomePhrase"
-                placeholder="Ej. Bienvenido a la mejor selección de licores para tu noche."
-              ></textarea>
-              <p class="field-help">Este texto aparece como mensaje principal al entrar a la tienda.</p>
-            </div>
-
-            <div class="flex flex-wrap items-center justify-between gap-3">
-              <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">
-                {{ welcomeForm.get('welcomePhrase')?.value?.length ?? 0 }}/280 caracteres
-              </p>
-
-              <button class="liquid-button welcome-save-button !justify-center" type="submit" [disabled]="submittingWelcome()">
-                <span class="material-symbols-outlined text-base">save</span>
-                {{ submittingWelcome() ? 'Guardando...' : 'Guardar frase' }}
-              </button>
-            </div>
-          </form>
         </article>
       </section>
 
@@ -131,7 +148,7 @@
               </article>
             } @else {
               @for (banner of orderedBanners(); track banner.bannerId) {
-                <article class="banner-card">
+                <article class="banner-card banner-card--banner" [class.banner-card--muted]="!banner.status">
                   <div class="banner-card-content">
                     <div class="flex items-start justify-between gap-4">
                       <div>
@@ -224,7 +241,7 @@
               </article>
             } @else {
               @for (deliveryUser of deliveryUsers(); track deliveryUser.id) {
-                <article class="banner-card">
+                <article class="banner-card banner-card--delivery" [class.banner-card--muted]="!deliveryUser.isActive">
                   <div class="banner-card-content">
                     <div class="flex items-start justify-between gap-4">
                       <div>

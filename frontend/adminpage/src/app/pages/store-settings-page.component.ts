@@ -28,6 +28,7 @@ export class StoreSettingsPageComponent {
   readonly error = signal<string | null>(null);
   readonly feedback = signal<string | null>(null);
   readonly welcomePhraseRows = signal(1);
+  readonly identityPanelOpen = signal(false);
   readonly store = signal<StoreDto | null>(null);
   readonly banners = signal<BannerDto[]>([]);
   readonly products = signal<ProductDto[]>([]);
@@ -127,6 +128,10 @@ export class StoreSettingsPageComponent {
   @HostListener('window:resize')
   onResize(): void {
     this.syncWelcomeTextareaRows();
+  }
+
+  toggleIdentityPanel(): void {
+    this.identityPanelOpen.update((open) => !open);
   }
 
   load(): void {

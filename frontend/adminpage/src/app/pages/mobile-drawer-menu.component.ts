@@ -35,6 +35,7 @@ export class MobileDrawerMenuComponent {
   @Input({ required: true }) title = '';
   @Input({ required: true }) description = '';
   @Input({ required: true }) navigation: MobileNavigationItem[] = [];
+  @Input() storeUrl: string | null = null;
 
   @Output() readonly closeMenu = new EventEmitter<void>();
   @Output() readonly logout = new EventEmitter<void>();

@@ -34,6 +34,18 @@
           {{ item.label }}
         </a>
       }
+
+      @if (storeUrl) {
+        <a
+          #drawerItem
+          class="mobile-drawer-nav-item"
+          [href]="storeUrl"
+          (click)="close()"
+        >
+          <span class="material-symbols-outlined text-[1.05rem]">storefront</span>
+          Ver tienda
+        </a>
+      }
     </nav>
 
     <button #drawerItem class="liquid-button w-full !justify-center" type="button" (click)="requestLogout()">
