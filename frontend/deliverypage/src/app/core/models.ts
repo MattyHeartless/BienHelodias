@@ -49,6 +49,7 @@ export interface OrderItemDto {
   id: string;
   productId: string;
   productNameSnapshot: string;
+  imageUrl?: string | null;
   unitPrice: number;
   quantity: number;
   subtotal: number;

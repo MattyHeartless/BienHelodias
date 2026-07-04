@@ -13,17 +13,84 @@
         </div>
 
         <nav class="delivery-nav-cluster" aria-label="Navegacion principal">
-          <button class="delivery-nav-pill delivery-nav-pill-active" type="button">
+          <button class="delivery-nav-pill" type="button" [class.delivery-nav-pill-active]="activeView() === 'orders'" (click)="switchView('orders')">
             <span class="material-symbols-outlined text-[1.05rem]">receipt_long</span>
             Pedidos
           </button>
-          <button class="delivery-nav-pill delivery-nav-pill-muted" type="button" disabled>
+          <button class="delivery-nav-pill" type="button" [class.delivery-nav-pill-active]="activeView() === 'routes'" (click)="switchView('routes')">
             <span class="material-symbols-outlined text-[1.05rem]">route</span>
             Rutas
           </button>
         </nav>
 
         <div class="delivery-nav-actions">
+          <div class="delivery-desktop-notifications">
+            <button
+              class="delivery-icon-button"
+              type="button"
+              aria-label="Notificaciones"
+              [attr.aria-expanded]="desktopNotificationsOpen()"
+              (click)="toggleDesktopNotifications()"
+            >
+              <span class="material-symbols-outlined text-[1.2rem]">notifications</span>
+            </button>
+
+            <div
+              class="delivery-desktop-notifications-panel t-dropdown"
+              data-origin="top-right"
+              [class.is-open]="desktopNotificationsOpen() && !desktopNotificationsClosing()"
+              [class.is-closing]="desktopNotificationsClosing()"
+            >
+              <div class="delivery-desktop-notifications-head">
+                <div>
+                  <p class="delivery-drawer-section-label">Notificaciones</p>
+                  <p class="delivery-desktop-notifications-copy">{{ pushSubscribeLabel() }}</p>
+                </div>
+
+                <span class="delivery-drawer-status-row" aria-label="Estado de avisos">
+                  <span
+                    class="delivery-drawer-status-dot"
+                    [class.is-active]="pushState().availability === 'supported'"
+                    [class.is-error]="pushState().availability !== 'supported'"
+                  ></span>
+                  <span
+                    class="delivery-drawer-status-dot"
+                    [class.is-active]="pushState().isSubscribed"
+                  ></span>
+                  <span
+                    class="delivery-drawer-status-dot"
+                    [class.is-active]="pushState().backendSynchronized"
+                  ></span>
+                </span>
+              </div>
+
+              <div class="delivery-desktop-notifications-actions">
+                <button
+                  class="liquid-button w-full !justify-center"
+                  type="button"
+                  [disabled]="pushSubscribeDisabled()"
+                  [class.opacity-50]="pushSubscribeDisabled()"
+                  [class.pointer-events-none]="pushSubscribeDisabled()"
+                  (click)="enablePushNotifications()"
+                >
+                  <span class="material-symbols-outlined text-base">notifications_active</span>
+                  {{ pushSubscribeLabel() }}
+                </button>
+                <button
+                  class="ghost-button w-full !justify-center"
+                  type="button"
+                  [disabled]="pushState().isRegistering || !pushState().isSubscribed"
+                  [class.opacity-50]="pushState().isRegistering || !pushState().isSubscribed"
+                  [class.pointer-events-none]="pushState().isRegistering || !pushState().isSubscribed"
+                  (click)="disablePushNotifications()"
+                >
+                  <span class="material-symbols-outlined text-base">notifications_off</span>
+                  Apagar avisos
+                </button>
+              </div>
+            </div>
+          </div>
+
           <button class="delivery-icon-button" type="button" aria-label="Poner al dia" (click)="load()">
             <span class="material-symbols-outlined text-[1.2rem]">refresh</span>
           </button>
@@ -42,7 +109,7 @@
 
       <aside class="delivery-drawer-panel" role="dialog" aria-modal="true" aria-label="Menu de navegacion">
         <div class="delivery-drawer-header">
-          <div>
+          <div class="delivery-drawer-header-copy">
             <p class="delivery-drawer-kicker">MENU</p>
             <h2>Reparto</h2>
             <p>{{ email() }}</p>
@@ -54,16 +121,75 @@
         </div>
 
         <nav class="delivery-drawer-nav" aria-label="Navegacion mobile">
-          <button class="delivery-drawer-item delivery-drawer-item-active" type="button" (click)="closeMenu()">
+          <button class="delivery-drawer-item" type="button" [class.delivery-drawer-item-active]="activeView() === 'orders'" (click)="switchView('orders')">
             <span class="material-symbols-outlined text-[1.1rem]">receipt_long</span>
             Pedidos
           </button>
-          <button class="delivery-drawer-item" type="button" disabled>
+          <button class="delivery-drawer-item" type="button" [class.delivery-drawer-item-active]="activeView() === 'routes'" (click)="switchView('routes')">
             <span class="material-symbols-outlined text-[1.1rem]">route</span>
             Rutas
-            <span class="delivery-drawer-badge">Pronto</span>
           </button>
         </nav>
+
+        <section class="delivery-drawer-notifications t-acc" [attr.data-open]="notificationsOpen()" aria-label="Notificaciones">
+          <button class="delivery-drawer-notifications-head t-acc-head" type="button" [attr.aria-expanded]="notificationsOpen()" (click)="toggleNotifications()">
+            <div class="delivery-drawer-notifications-label">
+              <span class="material-symbols-outlined text-[1.1rem]">notifications</span>
+              <span>Notificaciones</span>
+            </div>
+
+            <div class="delivery-drawer-notifications-meta">
+              <span class="delivery-drawer-status-row" aria-label="Estado de avisos">
+                <span
+                  class="delivery-drawer-status-dot"
+                  [class.is-active]="pushState().availability === 'supported'"
+                  [class.is-error]="pushState().availability !== 'supported'"
+                ></span>
+                <span
+                  class="delivery-drawer-status-dot"
+                  [class.is-active]="pushState().isSubscribed"
+                ></span>
+                <span
+                  class="delivery-drawer-status-dot"
+                  [class.is-active]="pushState().backendSynchronized"
+                ></span>
+              </span>
+
+              <span class="delivery-drawer-notifications-chevron t-acc-chevron" aria-hidden="true">
+                <svg viewBox="0 0 16 16">
+                  <path d="M4 6.5L8 10.5L12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+            </div>
+          </button>
+
+          <div class="t-acc-panel">
+            <div class="delivery-drawer-notifications-actions t-acc-panel-inner">
+              <button
+                class="liquid-button w-full !justify-center"
+                type="button"
+                [disabled]="pushSubscribeDisabled()"
+                [class.opacity-50]="pushSubscribeDisabled()"
+                [class.pointer-events-none]="pushSubscribeDisabled()"
+                (click)="enablePushNotifications()"
+              >
+                <span class="material-symbols-outlined text-base">notifications_active</span>
+                {{ pushSubscribeLabel() }}
+              </button>
+              <button
+                class="ghost-button w-full !justify-center"
+                type="button"
+                [disabled]="pushState().isRegistering || !pushState().isSubscribed"
+                [class.opacity-50]="pushState().isRegistering || !pushState().isSubscribed"
+                [class.pointer-events-none]="pushState().isRegistering || !pushState().isSubscribed"
+                (click)="disablePushNotifications()"
+              >
+                <span class="material-symbols-outlined text-base">notifications_off</span>
+                Apagar avisos
+              </button>
+            </div>
+          </div>
+        </section>
 
         <div class="delivery-drawer-footer">
           <button class="ghost-button w-full !justify-center" type="button" (click)="load(); closeMenu()">
@@ -78,6 +204,7 @@
       </aside>
     </div>
 
+    @if (activeView() === 'orders') {
     <section class="availability-strip" aria-label="Disponibilidad del repartidor">
       <div class="availability-summary">
         <p>Disponibilidad</p>
@@ -99,75 +226,7 @@
         }
       </div>
     </section>
-    <section class="mb-8">
-      <article class="notification-accordion t-acc" [attr.data-open]="notificationsOpen()">
-        <button class="notification-accordion-head t-acc-head" type="button" [attr.aria-expanded]="notificationsOpen()" (click)="toggleNotifications()">
-          <span class="notification-accordion-title">Notificaciones</span>
-
-          <span class="notification-status-row" aria-label="Estado de avisos">
-            <span
-              class="notification-status-dot"
-              [class.is-active]="pushState().availability === 'supported'"
-              [class.is-error]="pushState().availability !== 'supported'"
-              [attr.aria-label]="pushState().availability === 'supported' ? 'Navegador listo para avisos' : 'Avisos no disponibles'"
-              [title]="pushState().availability === 'supported' ? 'Navegador listo para avisos' : 'Avisos no disponibles'"
-            >
-              <span class="material-symbols-outlined text-[1rem]">phonelink_ring</span>
-            </span>
-            <span
-              class="notification-status-dot"
-              [class.is-active]="pushState().isSubscribed"
-              [attr.aria-label]="pushState().isSubscribed ? 'Avisos activos' : 'Avisos apagados'"
-              [title]="pushState().isSubscribed ? 'Avisos activos' : 'Avisos apagados'"
-            >
-              <span class="material-symbols-outlined text-[1rem]">notifications_active</span>
-            </span>
-            <span
-              class="notification-status-dot"
-              [class.is-active]="pushState().backendSynchronized"
-              [attr.aria-label]="pushState().backendSynchronized ? 'Dispositivo sincronizado' : 'Dispositivo pendiente de sincronizar'"
-              [title]="pushState().backendSynchronized ? 'Dispositivo sincronizado' : 'Dispositivo pendiente de sincronizar'"
-            >
-              <span class="material-symbols-outlined text-[1rem]">sync_saved_locally</span>
-            </span>
-          </span>
-
-          <span class="notification-chevron t-acc-chevron" aria-hidden="true">
-            <svg viewBox="0 0 16 16">
-              <path d="M4 6.5L8 10.5L12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </span>
-        </button>
-
-        <div class="t-acc-panel">
-          <div class="notification-accordion-body t-acc-panel-inner">
-            <button
-              class="liquid-button w-full !justify-center"
-              type="button"
-              [disabled]="pushSubscribeDisabled()"
-              [class.opacity-50]="pushSubscribeDisabled()"
-              [class.pointer-events-none]="pushSubscribeDisabled()"
-              (click)="enablePushNotifications()"
-            >
-              <span class="material-symbols-outlined text-base">notifications_active</span>
-              {{ pushSubscribeLabel() }}
-            </button>
-            <button
-              class="ghost-button w-full !justify-center"
-              type="button"
-              [disabled]="pushState().isRegistering || !pushState().isSubscribed"
-              [class.opacity-50]="pushState().isRegistering || !pushState().isSubscribed"
-              [class.pointer-events-none]="pushState().isRegistering || !pushState().isSubscribed"
-              (click)="disablePushNotifications()"
-            >
-              <span class="material-symbols-outlined text-base">notifications_off</span>
-              Apagar avisos en este cel
-            </button>
-          </div>
-        </div>
-      </article>
-    </section>
-
+    }
     @if (loading()) {
       <div class="grid gap-6 md:grid-cols-2">
         @for (item of [1, 2, 3, 4]; track item) {
@@ -176,53 +235,84 @@
       </div>
     } @else {
       <div class="space-y-8">
-        <section>
-          <div class="flex items-end justify-between px-1">
+        @if (activeView() === 'orders') {
+        <section class="delivery-available-section t-acc" [attr.data-open]="availableOrdersOpen()">
+          <div class="flex items-end justify-between gap-3 px-1">
             <div>
               <p class="eyebrow">Pedidos disponibles</p>
-              <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Ya van saliendo</h2>
+              <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Para llevar</h2>
             </div>
-            <span class="rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-xs uppercase tracking-[0.24em] text-primary">
-              <span class="sm:hidden"><app-animated-number [value]="availableOrders().length" /> DISP.</span>
-              <span class="hidden sm:inline"><app-animated-number [value]="availableOrders().length" /> disponibles</span>
-            </span>
+            <div class="delivery-available-actions">
+              <span class="rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-xs uppercase tracking-[0.24em] text-primary">
+                <span class="sm:hidden"><app-animated-number [value]="availableOrders().length" /> DISP.</span>
+                <span class="hidden sm:inline"><app-animated-number [value]="availableOrders().length" /> disponibles</span>
+              </span>
+              <button
+                class="delivery-available-toggle t-acc-head"
+                type="button"
+                [attr.aria-expanded]="availableOrdersOpen()"
+                [attr.aria-label]="availableOrdersOpen() ? 'Ocultar pedidos disponibles' : 'Mostrar pedidos disponibles'"
+                (click)="toggleAvailableOrders()"
+              >
+                <span class="delivery-available-toggle-copy">{{ availableOrdersOpen() ? 'Ocultar' : 'Mostrar' }}</span>
+                <span class="t-acc-chevron" aria-hidden="true">
+                  <svg viewBox="0 0 16 16" fill="none">
+                    <path d="M4 6.5L8 10.5L12 6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </span>
+              </button>
+            </div>
           </div>
 
-          <div class="mt-4 space-y-4">
-            @for (order of availableOrders(); track order.id) {
-              <article
-                class="delivery-order-card"
-                role="button"
-                tabindex="0"
-                [class.delivery-order-card-active]="isSelected(order.id)"
-                (click)="selectOrder(order)"
-                (keydown.enter)="selectOrder(order)"
-                (keydown.space)="selectOrder(order); $event.preventDefault()"
-              >
-                <div class="flex items-start justify-between gap-4">
-                  <div>
-                    <p class="font-display text-2xl font-bold tracking-[-0.05em]">{{ order.customerName }}</p>
-                    <p class="mt-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">
-                      {{ order.items.length }} productos · {{ getOrderUnitCount(order) }} piezas
-                    </p>
-                  </div>
-                  <p class="font-display text-2xl font-bold text-primary">{{ order.total | currency: 'MXN':'symbol-narrow':'1.0-0' }}</p>
-                </div>
-                <p class="mt-4 text-sm leading-7 text-on-surface-variant">{{ order.deliveryAddress }}</p>
-                <div class="mt-5 flex gap-3">
-                  <button class="liquid-button flex-1 !justify-center" type="button" (click)="takeOrder(order.id); $event.stopPropagation()">
-                    <span class="material-symbols-outlined text-base">near_me</span>
-                    Me lo llevo
-                  </button>
-                </div>
-              </article>
-            }
+          <div class="t-acc-panel">
+            <div class="t-acc-panel-inner">
+              <div class="mt-4 space-y-4">
+                @for (order of availableOrders(); track order.id) {
+                  <article
+                    class="delivery-order-card"
+                    role="button"
+                    tabindex="0"
+                    [class.delivery-order-card-active]="isSelected(order.id)"
+                    (click)="selectOrder(order)"
+                    (keydown.enter)="selectOrder(order)"
+                    (keydown.space)="selectOrder(order); $event.preventDefault()"
+                  >
+                    <div class="flex items-start justify-between gap-4">
+                      <div>
+                        <p class="font-display text-2xl font-bold tracking-[-0.05em]">{{ order.customerName }}</p>
+                        <p class="mt-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">
+                          {{ order.items.length }} productos · {{ getOrderUnitCount(order) }} piezas
+                        </p>
+                      </div>
+                      <div class="delivery-available-card-side">
+                        <p class="font-display text-2xl font-bold text-primary">{{ order.total | currency: 'MXN':'symbol-narrow':'1.0-0' }}</p>
+                        <button
+                          class="liquid-button delivery-available-card-cta-desktop !justify-center"
+                          type="button"
+                          (click)="takeOrder(order.id); $event.stopPropagation()"
+                        >
+                          <span class="material-symbols-outlined text-base">near_me</span>
+                          Me lo llevo
+                        </button>
+                      </div>
+                    </div>
+                    <p class="mt-4 text-sm leading-7 text-on-surface-variant">{{ order.deliveryAddress }}</p>
+                    <div class="delivery-available-card-cta-mobile mt-5 flex gap-3">
+                      <button class="liquid-button flex-1 !justify-center" type="button" (click)="takeOrder(order.id); $event.stopPropagation()">
+                        <span class="material-symbols-outlined text-base">near_me</span>
+                        Me lo llevo
+                      </button>
+                    </div>
+                  </article>
+                }
 
-            @if (availableOrders().length === 0) {
-              <div class="rounded-[1.5rem] border border-dashed border-white/10 px-5 py-8 text-center text-sm leading-7 text-on-surface-variant">
-                Ahorita no hay salidas listas, pero ya casi.
+                @if (availableOrders().length === 0) {
+                  <div class="rounded-[1.5rem] border border-dashed border-white/10 px-5 py-8 text-center text-sm leading-7 text-on-surface-variant">
+                    Ahorita no hay salidas listas, pero ya casi.
+                  </div>
+                }
               </div>
-            }
+            </div>
           </div>
         </section>
 
@@ -260,6 +350,9 @@
                     <p class="mt-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">{{ getOrderStatusLabel(order.status) }}</p>
                   </div>
                 </div>
+                <p class="mt-4 text-xs uppercase tracking-[0.24em] text-on-surface-variant">
+                  {{ order.items.length }} productos · {{ getOrderUnitCount(order) }} piezas
+                </p>
                 <p class="mt-4 text-sm leading-7 text-on-surface-variant">{{ order.deliveryAddress }}</p>
                 <div class="mt-5 flex gap-3">
                   <button
@@ -280,7 +373,8 @@
                     [class.pointer-events-none]="!canMarkDelivered(order)"
                     (click)="markDelivered(order.id); $event.stopPropagation()"
                   >
-                    Ya quedo
+                    <span class="material-symbols-outlined text-base">check_circle</span>
+                    Ya quedó
                   </button>
                 </div>
               </article>
@@ -293,9 +387,204 @@
             }
           </div>
         </section>
+        } @else {
+        <section class="route-layout">
+          <div class="route-pick-list">
+            <div class="route-section-head">
+              <div class="route-selection-copy">
+                <div class="route-selection-head-row">
+                  <p class="eyebrow">Seleccion</p>
+                  <span class="route-section-chip">{{ selectedRouteOrders().length }} activos</span>
+                </div>
+                <h3 class="route-section-title">Pedidos para esta salida</h3>
+              </div>
+            </div>
+
+            <div class="mt-4 space-y-4">
+              @for (order of myOrders(); track order.id) {
+                <article
+                  class="delivery-order-card route-order-card"
+                  role="button"
+                  tabindex="0"
+                  [class.route-order-card-off]="!isRouteOrderSelected(order.id)"
+                  (click)="toggleRouteOrder(order.id)"
+                  (keydown.enter)="toggleRouteOrder(order.id)"
+                  (keydown.space)="toggleRouteOrder(order.id); $event.preventDefault()"
+                >
+                  <div class="route-order-toggle">
+                    <span class="material-symbols-outlined text-[1rem]">{{ isRouteOrderSelected(order.id) ? 'check' : 'remove' }}</span>
+                  </div>
+                  <div class="route-order-main">
+                    <div class="flex items-start justify-between gap-4">
+                      <div>
+                        <p class="font-display text-2xl font-bold tracking-[-0.05em]">{{ order.customerName }}</p>
+                        <p class="mt-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">
+                          {{ order.items.length }} productos · {{ getOrderUnitCount(order) }} piezas
+                        </p>
+                      </div>
+                      <div class="text-right">
+                        <p class="font-display text-2xl font-bold text-primary">{{ order.total | currency: 'MXN':'symbol-narrow':'1.0-0' }}</p>
+                        <p class="mt-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">{{ getOrderStatusLabel(order.status) }}</p>
+                      </div>
+                    </div>
+                    <p class="mt-4 text-sm leading-7 text-on-surface-variant">{{ order.deliveryAddress }}</p>
+                  </div>
+                </article>
+              }
+
+              @if (myOrders().length === 0) {
+                <div class="rounded-[1.5rem] border border-dashed border-white/10 px-5 py-8 text-center text-sm leading-7 text-on-surface-variant">
+                  No tienes pedidos activos para armar una ruta.
+                </div>
+              }
+            </div>
+          </div>
+
+          <aside class="route-preview-shell">
+            <div class="route-preview-card">
+              <div class="route-section-head route-preview-head">
+                <p class="eyebrow">Orden sugerido</p>
+                <span class="route-section-chip">
+                  <span class="route-section-chip-shimmer t-shimmer" [attr.data-text]="routePreviewOrders().length + ' paradas'">
+                    {{ routePreviewOrders().length }} paradas
+                  </span>
+                </span>
+              </div>
+
+              <div class="route-preview-list">
+                @for (order of routePreviewOrders(); track order.id; let index = $index) {
+                  <article class="route-preview-row">
+                    <div class="route-preview-index">{{ index + 1 }}</div>
+                    <div class="route-preview-main">
+                      <p>{{ order.customerName }}</p>
+                      <span>{{ order.deliveryAddress }}</span>
+                    </div>
+                  </article>
+                }
+
+                @if (routePreviewOrders().length === 0) {
+                  <div class="rounded-[1.35rem] border border-dashed border-white/10 px-5 py-7 text-center text-sm leading-7 text-on-surface-variant">
+                    Cuando dejes al menos un pedido marcado, aqui sale el orden sugerido.
+                  </div>
+                }
+              </div>
+
+              <button class="ghost-button mt-5 w-full !justify-center" type="button" (click)="requestCurrentLocation()">
+                <span class="material-symbols-outlined text-base">my_location</span>
+                Actualizar ubicacion
+              </button>
+
+              <button
+                class="liquid-button mt-5 w-full !justify-center"
+                type="button"
+                [disabled]="!canNavigateRoute()"
+                [class.opacity-50]="!canNavigateRoute()"
+                [class.pointer-events-none]="!canNavigateRoute()"
+                (click)="navigateRouteInGoogleMaps()"
+              >
+                <span class="material-symbols-outlined text-base">map</span>
+                Navegar con Google
+              </button>
+
+              @if (canCompleteActiveRoute()) {
+                <button
+                  class="ghost-button mt-3 w-full !justify-center"
+                  type="button"
+                  (click)="openRouteCompletionModal()"
+                >
+                  <span class="material-symbols-outlined text-base">done_all</span>
+                  Marcar como terminados
+                </button>
+              }
+            </div>
+          </aside>
+        </section>
+        }
       </div>
     }
   </div>
+
+  @if (showScrollTopFab() && !menuOpen() && !selectedOrder() && !routeCompletionModalOpen()) {
+    <button
+      class="scroll-top-fab"
+      type="button"
+      aria-label="Ir arriba"
+      title="Ir arriba"
+      (click)="scrollToTop()"
+    >
+      <span class="material-symbols-outlined text-[1.2rem]">arrow_upward</span>
+    </button>
+  }
+
+  @if (routeCompletionModalOpen()) {
+    <div class="fixed inset-0 z-50 overflow-hidden bg-black/70 px-4 py-6 backdrop-blur-sm sm:px-6 lg:px-8" (click)="closeRouteCompletionModal()">
+      <div class="mx-auto flex h-full max-w-3xl items-center justify-center">
+        <div
+          class="glass-panel t-modal flex max-h-full w-full flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-surface-container-low shadow-[0_40px_120px_rgba(0,0,0,0.48)]"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Marcar pedidos como terminados"
+          [class.is-open]="!routeCompletionModalClosing()"
+          [class.is-closing]="routeCompletionModalClosing()"
+          (click)="$event.stopPropagation()"
+        >
+          <div class="flex items-start justify-between gap-4 border-b border-white/8 px-6 py-5 sm:px-8">
+            <div>
+              <p class="eyebrow">Entregados</p>
+              <p class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Frias entregadas</p>
+            </div>
+
+            <button class="ghost-button !px-4 !py-2" type="button" [disabled]="routeFinishing()" (click)="closeRouteCompletionModal()">
+              <span class="material-symbols-outlined text-base">close</span>
+            </button>
+          </div>
+
+          <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-6 sm:px-8 sm:pb-8">
+            <div class="space-y-4">
+              @for (order of activeRouteOrders(); track order.id) {
+                <article
+                  class="route-complete-row"
+                  role="button"
+                  tabindex="0"
+                  [class.route-complete-row-off]="!isRouteCompletionOrderSelected(order.id)"
+                  (click)="toggleRouteCompletionOrder(order.id)"
+                  (keydown.enter)="toggleRouteCompletionOrder(order.id)"
+                  (keydown.space)="toggleRouteCompletionOrder(order.id); $event.preventDefault()"
+                >
+                  <div class="route-complete-check">
+                    <span class="material-symbols-outlined text-base">{{ isRouteCompletionOrderSelected(order.id) ? 'check' : 'remove' }}</span>
+                  </div>
+                  <div class="route-complete-main">
+                    <div class="flex items-start justify-between gap-4">
+                      <div>
+                        <p class="font-display text-2xl font-bold tracking-[-0.05em]">{{ order.customerName }}</p>
+                      </div>
+                      <p class="font-display text-2xl font-bold text-primary">{{ order.total | currency: 'MXN':'symbol-narrow':'1.0-0' }}</p>
+                    </div>
+                    <p class="mt-4 text-sm leading-7 text-on-surface-variant">{{ order.deliveryAddress }}</p>
+                  </div>
+                </article>
+              }
+            </div>
+          </div>
+
+          <div class="border-t border-white/8 px-6 py-5 sm:px-8">
+            <button
+              class="liquid-button w-full !justify-center"
+              type="button"
+              [disabled]="routeFinishing() || selectedCompletionOrders().length === 0"
+              [class.opacity-50]="routeFinishing() || selectedCompletionOrders().length === 0"
+              [class.pointer-events-none]="routeFinishing() || selectedCompletionOrders().length === 0"
+              (click)="markActiveRouteDelivered()"
+            >
+              <span class="material-symbols-outlined text-base">done_all</span>
+              {{ routeFinishing() ? 'Cerrando pedidos...' : 'Ya estan entregados' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
 
   @if (selectedOrder(); as order) {
     <div class="fixed inset-0 z-50 overflow-hidden bg-black/70 px-4 py-6 backdrop-blur-sm sm:px-6 lg:px-8" (click)="closeOrderDetail()">
@@ -319,7 +608,10 @@
             </div>
 
             <div class="flex items-center gap-3">
-              <div class="detail-status-badge rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-xs uppercase tracking-[0.2em] text-primary">
+              <div
+                class="detail-status-badge rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-xs uppercase tracking-[0.2em] text-primary"
+                [class.detail-status-badge-compact]="getOrderStatusLabel(order.status) === 'En camino'"
+              >
                 <span class="t-shimmer" [attr.data-text]="getOrderStatusLabel(order.status)">
                   {{ getOrderStatusLabel(order.status) }}
                 </span>
@@ -398,9 +690,23 @@
               </div>
 
               <div class="detail-item-list">
-                @for (item of order.items; track item.id; let index = $index) {
+                @for (item of order.items; track item.id) {
                   <article class="detail-item-row">
-                    <div class="detail-item-index">{{ index + 1 }}</div>
+                    <div class="detail-item-thumb">
+                      @if (hasOrderItemImage(item)) {
+                        <img
+                          [src]="item.imageUrl!"
+                          [alt]="item.productNameSnapshot"
+                          class="detail-item-thumb-image"
+                          loading="lazy"
+                          (error)="markOrderItemImageError(item.id)"
+                        />
+                      } @else {
+                        <div class="detail-item-thumb-fallback" aria-hidden="true">
+                          <span class="material-symbols-outlined">local_bar</span>
+                        </div>
+                      }
+                    </div>
                     <div class="detail-item-main">
                       <p>{{ item.productNameSnapshot }}</p>
                       <span>{{ item.quantity }} x {{ item.unitPrice | currency: 'MXN':'symbol-narrow':'1.0-0' }}</span>

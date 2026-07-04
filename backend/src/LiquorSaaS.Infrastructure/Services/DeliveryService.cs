@@ -29,6 +29,7 @@ public sealed class DeliveryService(
 
         return await dbContext.Orders.AsNoTracking()
             .Include(x => x.Items)
+            .ThenInclude(x => x.Product)
             .Where(x => x.StoreId == storeId && x.Status == OrderStatus.Pending && x.DeliveryUserId == null)
             .OrderByDescending(x => x.CreatedAtUtc)
             .Select(x => x.ToDto(null))
@@ -49,6 +50,7 @@ public sealed class DeliveryService(
 
         return await dbContext.Orders.AsNoTracking()
             .Include(x => x.Items)
+            .ThenInclude(x => x.Product)
             .Where(x =>
                 x.DeliveryUserId == deliveryProfile.Id
                 && x.Status != OrderStatus.Delivered

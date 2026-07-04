@@ -18,7 +18,7 @@ public sealed record CreateOrderRequest(
 
 public sealed record UpdateOrderStatusRequest(OrderStatus Status);
 
-public sealed record OrderItemDto(Guid Id, Guid ProductId, string ProductNameSnapshot, decimal UnitPrice, int Quantity, decimal Subtotal);
+public sealed record OrderItemDto(Guid Id, Guid ProductId, string ProductNameSnapshot, string? ImageUrl, decimal UnitPrice, int Quantity, decimal Subtotal);
 
 public sealed record OrderDeliveryAssigneeDto(
     Guid Id,

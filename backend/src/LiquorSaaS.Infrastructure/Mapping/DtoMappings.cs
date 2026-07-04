@@ -80,6 +80,7 @@ internal static class DtoMappings
                 item.Id,
                 item.ProductId,
                 item.ProductNameSnapshot,
+                item.Product?.ImageUrl,
                 item.UnitPrice,
                 item.Quantity,
                 item.Subtotal)).ToArray(),

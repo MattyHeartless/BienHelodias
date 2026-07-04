@@ -119,6 +119,10 @@ public sealed class LiquorSaaSDbContext(DbContextOptions<LiquorSaaSDbContext> op
             entity.Property(x => x.Subtotal).HasColumnType("decimal(18,2)");
             entity.HasIndex(x => x.OrderId);
             entity.HasIndex(x => x.ProductId);
+            entity.HasOne(x => x.Product)
+                .WithMany()
+                .HasForeignKey(x => x.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<DeliveryUser>(entity =>

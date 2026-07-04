@@ -10,6 +10,14 @@ import { DeliveryApiService } from '../services/delivery-api.service';
 import { PushNotificationService } from '../services/push-notification.service';
 import { AnimatedNumberComponent } from '../shared/animated-number.component';
 
+type PanelView = 'orders' | 'routes';
+
+type RouteLocationState =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'ready'; latitude: number; longitude: number; accuracy: number | null }
+  | { status: 'error'; message: string };
+
 @Component({
   selector: 'app-panel-page',
   standalone: true,
@@ -29,7 +37,20 @@ export class PanelPageComponent implements OnDestroy {
   readonly loading = signal(true);
   readonly menuOpen = signal(false);
   readonly notificationsOpen = signal(false);
+  readonly desktopNotificationsOpen = signal(false);
+  readonly desktopNotificationsClosing = signal(false);
+  readonly availableOrdersOpen = signal(true);
   readonly modalClosing = signal(false);
+  readonly routeCompletionModalOpen = signal(false);
+  readonly routeCompletionModalClosing = signal(false);
+  readonly activeView = signal<PanelView>('orders');
+  readonly showScrollTopFab = signal(false);
+  readonly detailItemImageErrors = signal<Record<string, true>>({});
+  readonly routeSelection = signal<Record<string, boolean>>({});
+  readonly routeLocation = signal<RouteLocationState>({ status: 'idle' });
+  readonly activeRouteOrderIds = signal<string[]>([]);
+  readonly routeCompletionSelection = signal<Record<string, boolean>>({});
+  readonly routeFinishing = signal(false);
   readonly profile = signal<DeliveryUserDto | null>(null);
   readonly availableOrders = signal<OrderDto[]>([]);
   readonly myOrders = signal<OrderDto[]>([]);
@@ -45,6 +66,8 @@ export class PanelPageComponent implements OnDestroy {
   readonly pushState = this.pushNotifications.state;
   readonly workspaceTitle = computed(() => this.profile()?.storeName?.trim() || 'Bien Helodias Reparto');
   private modalCloseTimer: number | null = null;
+  private routeCompletionModalCloseTimer: number | null = null;
+  private desktopNotificationsCloseTimer: number | null = null;
 
   readonly selectedOrder = computed(() => {
     const selectedOrderId = this.selectedOrderId();
@@ -77,16 +100,52 @@ export class PanelPageComponent implements OnDestroy {
 
     return 'Quiero que me avisen';
   });
+  readonly selectedRouteOrders = computed(() =>
+    this.myOrders().filter((order) => this.routeSelection()[order.id] !== false)
+  );
+  readonly routePreviewOrders = computed(() => this.buildRoutePreview(this.selectedRouteOrders(), this.routeLocation()));
+  readonly activeRouteOrders = computed(() => {
+    const activeRouteOrderIds = new Set(this.activeRouteOrderIds());
+    return this.myOrders().filter((order) => activeRouteOrderIds.has(order.id));
+  });
+  readonly selectedCompletionOrders = computed(() =>
+    this.activeRouteOrders().filter((order) => this.routeCompletionSelection()[order.id] !== false)
+  );
+  readonly canNavigateRoute = computed(() => {
+    const location = this.routeLocation();
+    return location.status === 'ready' && this.routePreviewOrders().length > 0;
+  });
+  readonly canCompleteActiveRoute = computed(() => this.activeRouteOrders().length > 0);
+  readonly googleMapsRouteUrl = computed(() => {
+    const location = this.routeLocation();
+    const ordered = this.routePreviewOrders();
+
+    if (location.status !== 'ready' || ordered.length === 0) {
+      return null;
+    }
+
+    return this.buildGoogleMapsRouteUrl(location.latitude, location.longitude, ordered);
+  });
 
   constructor() {
     effect(() => {
-      this.document.body.classList.toggle('modal-open', Boolean(this.selectedOrder()) || this.menuOpen());
+      this.document.body.classList.toggle(
+        'modal-open',
+        Boolean(this.selectedOrder()) || this.menuOpen() || this.routeCompletionModalOpen()
+      );
+    });
+
+    effect(() => {
+      if (this.activeView() === 'routes' && this.routeLocation().status === 'idle') {
+        this.requestCurrentLocation();
+      }
     });
 
     this.pushNotifications.initialize();
 
     this.route.queryParamMap.subscribe((params) => {
       this.selectedOrderId.set(params.get('orderId'));
+      this.activeView.set(params.get('view') === 'routes' ? 'routes' : 'orders');
     });
 
     this.load();
@@ -94,8 +153,18 @@ export class PanelPageComponent implements OnDestroy {
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
+    if (this.desktopNotificationsOpen()) {
+      this.closeDesktopNotifications();
+      return;
+    }
+
     if (this.menuOpen()) {
       this.closeMenu();
+      return;
+    }
+
+    if (this.routeCompletionModalOpen()) {
+      this.closeRouteCompletionModal();
       return;
     }
 
@@ -104,8 +173,23 @@ export class PanelPageComponent implements OnDestroy {
     }
   }
 
+  @HostListener('window:scroll')
+  onWindowScroll(): void {
+    const documentElement = this.document.documentElement;
+    const scrollableHeight = documentElement.scrollHeight - window.innerHeight;
+
+    if (scrollableHeight <= 0) {
+      this.showScrollTopFab.set(false);
+      return;
+    }
+
+    this.showScrollTopFab.set(window.scrollY / scrollableHeight >= 0.3);
+  }
+
   ngOnDestroy(): void {
     this.clearModalCloseTimer();
+    this.clearRouteCompletionModalCloseTimer();
+    this.clearDesktopNotificationsCloseTimer();
   }
 
   load(): void {
@@ -121,6 +205,7 @@ export class PanelPageComponent implements OnDestroy {
         this.availability.set(response.profile.data.currentAvailability);
         this.availableOrders.set(response.available.data.items);
         this.myOrders.set(response.mine.data.items);
+        this.syncRouteSelection();
         this.syncSelectedOrder();
         this.loading.set(false);
       },
@@ -238,6 +323,48 @@ export class PanelPageComponent implements OnDestroy {
     this.notificationsOpen.update((open) => !open);
   }
 
+  toggleDesktopNotifications(): void {
+    if (this.desktopNotificationsOpen()) {
+      this.closeDesktopNotifications();
+      return;
+    }
+
+    this.clearDesktopNotificationsCloseTimer();
+    this.desktopNotificationsClosing.set(false);
+    this.desktopNotificationsOpen.set(true);
+  }
+
+  closeDesktopNotifications(): void {
+    if (!this.desktopNotificationsOpen() || this.desktopNotificationsClosing()) {
+      return;
+    }
+
+    this.desktopNotificationsClosing.set(true);
+    this.desktopNotificationsCloseTimer = window.setTimeout(() => {
+      this.desktopNotificationsCloseTimer = null;
+      this.desktopNotificationsClosing.set(false);
+      this.desktopNotificationsOpen.set(false);
+    }, this.getDropdownCloseDurationMs());
+  }
+
+  toggleAvailableOrders(): void {
+    this.availableOrdersOpen.update((open) => !open);
+  }
+
+  switchView(view: PanelView): void {
+    if (this.activeView() === view) {
+      this.closeMenu();
+      return;
+    }
+
+    this.closeMenu();
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { view },
+      queryParamsHandling: 'merge'
+    });
+  }
+
   enablePushNotifications(): void {
     if (this.pushSubscribeDisabled()) {
       return;
@@ -250,9 +377,139 @@ export class PanelPageComponent implements OnDestroy {
     void this.pushNotifications.unsubscribeCurrentDevice();
   }
 
+  isRouteOrderSelected(orderId: string): boolean {
+    return this.routeSelection()[orderId] !== false;
+  }
+
+  toggleRouteOrder(orderId: string): void {
+    this.routeSelection.update((selection) => ({
+      ...selection,
+      [orderId]: selection[orderId] === false
+        ? true
+        : false
+    }));
+  }
+
+  requestCurrentLocation(): void {
+    if (!('geolocation' in navigator)) {
+      this.routeLocation.set({ status: 'error', message: 'Este dispositivo no deja sacar tu ubicacion.' });
+      return;
+    }
+
+    this.routeLocation.set({ status: 'loading' });
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        this.routeLocation.set({
+          status: 'ready',
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: Number.isFinite(position.coords.accuracy) ? position.coords.accuracy : null
+        });
+      },
+      (error) => {
+        this.routeLocation.set({
+          status: 'error',
+          message: this.getGeolocationErrorMessage(error)
+        });
+      },
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
+    );
+  }
+
+  scrollToTop(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  navigateRouteInGoogleMaps(): void {
+    const routeUrl = this.googleMapsRouteUrl();
+
+    if (!routeUrl) {
+      return;
+    }
+
+    this.activeRouteOrderIds.set(this.routePreviewOrders().map((order) => order.id));
+    window.open(routeUrl, '_blank', 'noopener,noreferrer');
+  }
+
+  openRouteCompletionModal(): void {
+    if (!this.canCompleteActiveRoute()) {
+      return;
+    }
+
+    this.clearRouteCompletionModalCloseTimer();
+    this.routeCompletionModalClosing.set(false);
+    this.routeCompletionSelection.set(
+      Object.fromEntries(this.activeRouteOrders().map((order) => [order.id, true]))
+    );
+    this.routeCompletionModalOpen.set(true);
+  }
+
+  closeRouteCompletionModal(): void {
+    if (this.routeFinishing() || !this.routeCompletionModalOpen() || this.routeCompletionModalClosing()) {
+      return;
+    }
+
+    this.routeCompletionModalClosing.set(true);
+    this.routeCompletionModalCloseTimer = window.setTimeout(() => {
+      this.routeCompletionModalCloseTimer = null;
+      this.routeCompletionModalClosing.set(false);
+      this.routeCompletionModalOpen.set(false);
+      this.routeCompletionSelection.set({});
+    }, this.getModalCloseDurationMs());
+  }
+
+  isRouteCompletionOrderSelected(orderId: string): boolean {
+    return this.routeCompletionSelection()[orderId] !== false;
+  }
+
+  toggleRouteCompletionOrder(orderId: string): void {
+    this.routeCompletionSelection.update((selection) => ({
+      ...selection,
+      [orderId]: selection[orderId] === false ? true : false
+    }));
+  }
+
+  markActiveRouteDelivered(): void {
+    const routeOrders = this.selectedCompletionOrders();
+
+    if (routeOrders.length === 0 || this.routeFinishing()) {
+      return;
+    }
+
+    this.routeFinishing.set(true);
+    forkJoin(routeOrders.map((order) => this.deliveryApi.markDelivered(order.id))).subscribe({
+      next: () => {
+        this.routeFinishing.set(false);
+        this.routeCompletionModalClosing.set(false);
+        this.routeCompletionModalOpen.set(false);
+        this.activeRouteOrderIds.set([]);
+        this.routeCompletionSelection.set({});
+        this.notifications.success({
+          summary: routeOrders.length === 1 ? 'Pedido entregado' : 'Pedidos entregados'
+        });
+        this.load();
+      },
+      error: (error) => {
+        this.routeFinishing.set(false);
+        this.notifications.error({
+          summary: getApiErrorMessage(error, 'No se pudieron cerrar los pedidos')
+        });
+      }
+    });
+  }
+
+  hasOrderItemImage(item: OrderDto['items'][number]): boolean {
+    return Boolean(item.imageUrl && !this.detailItemImageErrors()[item.id]);
+  }
+
+  markOrderItemImageError(itemId: string): void {
+    this.detailItemImageErrors.update((errors) => ({ ...errors, [itemId]: true }));
+  }
+
   selectOrder(order: OrderDto): void {
     this.clearModalCloseTimer();
     this.modalClosing.set(false);
+    this.detailItemImageErrors.set({});
     this.selectedOrderId.set(order.id);
     void this.router.navigate([], {
       relativeTo: this.route,
@@ -270,6 +527,7 @@ export class PanelPageComponent implements OnDestroy {
     this.modalCloseTimer = window.setTimeout(() => {
       this.modalCloseTimer = null;
       this.modalClosing.set(false);
+      this.detailItemImageErrors.set({});
       this.selectedOrderId.set(null);
       void this.router.navigate([], {
         relativeTo: this.route,
@@ -347,6 +605,108 @@ export class PanelPageComponent implements OnDestroy {
     }
 
     this.selectedOrderId.set(null);
+    this.detailItemImageErrors.set({});
+  }
+
+  private syncRouteSelection(): void {
+    const currentSelection = this.routeSelection();
+    const nextSelection: Record<string, boolean> = {};
+
+    for (const order of this.myOrders()) {
+      nextSelection[order.id] = currentSelection[order.id] !== false;
+    }
+
+    this.routeSelection.set(nextSelection);
+  }
+
+  private buildRoutePreview(orders: OrderDto[], location: RouteLocationState): OrderDto[] {
+    if (orders.length <= 1 || location.status !== 'ready') {
+      return orders;
+    }
+
+    const remaining = [...orders];
+    const ordered: OrderDto[] = [];
+    let currentLatitude = location.latitude;
+    let currentLongitude = location.longitude;
+
+    while (remaining.length > 0) {
+      let nearestIndex = 0;
+      let nearestDistance = Number.POSITIVE_INFINITY;
+
+      for (let index = 0; index < remaining.length; index += 1) {
+        const order = remaining[index];
+        const distance = this.getDistanceKm(
+          currentLatitude,
+          currentLongitude,
+          order.deliveryLatitude ?? currentLatitude,
+          order.deliveryLongitude ?? currentLongitude
+        );
+
+        if (distance < nearestDistance) {
+          nearestDistance = distance;
+          nearestIndex = index;
+        }
+      }
+
+      const [nearestOrder] = remaining.splice(nearestIndex, 1);
+      ordered.push(nearestOrder);
+      currentLatitude = nearestOrder.deliveryLatitude ?? currentLatitude;
+      currentLongitude = nearestOrder.deliveryLongitude ?? currentLongitude;
+    }
+
+    return ordered;
+  }
+
+  private buildGoogleMapsRouteUrl(latitude: number, longitude: number, orders: OrderDto[]): string {
+    const waypoints = orders
+      .slice(0, -1)
+      .map((order) => `${order.deliveryLatitude},${order.deliveryLongitude}`)
+      .join('|');
+    const destinationOrder = orders[orders.length - 1];
+    const params = new URLSearchParams({
+      api: '1',
+      origin: `${latitude},${longitude}`,
+      destination: `${destinationOrder.deliveryLatitude},${destinationOrder.deliveryLongitude}`,
+      travelmode: 'driving'
+    });
+
+    if (waypoints) {
+      params.set('waypoints', waypoints);
+    } else {
+      params.set('dir_action', 'navigate');
+    }
+
+    return `https://www.google.com/maps/dir/?${params.toString()}`;
+  }
+
+  private getDistanceKm(originLatitude: number, originLongitude: number, destinationLatitude: number, destinationLongitude: number): number {
+    const earthRadiusKm = 6371;
+    const dLat = this.toRadians(destinationLatitude - originLatitude);
+    const dLng = this.toRadians(destinationLongitude - originLongitude);
+    const lat1 = this.toRadians(originLatitude);
+    const lat2 = this.toRadians(destinationLatitude);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.sin(dLng / 2) * Math.sin(dLng / 2) * Math.cos(lat1) * Math.cos(lat2);
+
+    return 2 * earthRadiusKm * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  private toRadians(value: number): number {
+    return (value * Math.PI) / 180;
+  }
+
+  private getGeolocationErrorMessage(error: GeolocationPositionError): string {
+    switch (error.code) {
+      case error.PERMISSION_DENIED:
+        return 'Activa tu ubicacion para poder armar la ruta.';
+      case error.POSITION_UNAVAILABLE:
+        return 'No pude ubicarte ahorita. Intenta otra vez.';
+      case error.TIMEOUT:
+        return 'La ubicacion tardo demasiado. Reintenta.';
+      default:
+        return 'No se pudo conseguir tu ubicacion.';
+    }
   }
 
   private clearModalCloseTimer(): void {
@@ -358,9 +718,46 @@ export class PanelPageComponent implements OnDestroy {
     this.modalCloseTimer = null;
   }
 
+  private clearRouteCompletionModalCloseTimer(): void {
+    if (this.routeCompletionModalCloseTimer === null) {
+      return;
+    }
+
+    window.clearTimeout(this.routeCompletionModalCloseTimer);
+    this.routeCompletionModalCloseTimer = null;
+  }
+
+  private clearDesktopNotificationsCloseTimer(): void {
+    if (this.desktopNotificationsCloseTimer === null) {
+      return;
+    }
+
+    window.clearTimeout(this.desktopNotificationsCloseTimer);
+    this.desktopNotificationsCloseTimer = null;
+  }
+
   private getModalCloseDurationMs(): number {
     const modalElement = this.document.querySelector<HTMLElement>('.t-modal');
     const duration = getComputedStyle(modalElement ?? this.document.documentElement).getPropertyValue('--modal-close-dur').trim();
+
+    if (!duration) {
+      return 150;
+    }
+
+    if (duration.endsWith('ms')) {
+      return Number.parseFloat(duration) || 150;
+    }
+
+    if (duration.endsWith('s')) {
+      return (Number.parseFloat(duration) || 0.15) * 1000;
+    }
+
+    return Number.parseFloat(duration) || 150;
+  }
+
+  private getDropdownCloseDurationMs(): number {
+    const dropdownElement = this.document.querySelector<HTMLElement>('.t-dropdown');
+    const duration = getComputedStyle(dropdownElement ?? this.document.documentElement).getPropertyValue('--dropdown-close-dur').trim();
 
     if (!duration) {
       return 150;
