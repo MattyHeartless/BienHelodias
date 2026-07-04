@@ -1,6 +1,12 @@
 @import "primeicons/primeicons.css";
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Hyperwave";
+  src: url("/brand/Hyperwave.otf") format("opentype");
+  font-display: swap;
+}
+
 @theme {
   --font-display: "Space Grotesk", sans-serif;
   --font-body: "Manrope", sans-serif;
@@ -40,4 +46,5 @@
   .liquid-button { @apply inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-br from-primary to-primary-container px-6 py-3 font-semibold text-on-primary shadow-[0_0_28px_rgba(210,253,110,0.22)] transition duration-300 hover:scale-[1.02]; }
   .ghost-button { @apply inline-flex items-center justify-center gap-2 rounded-full border border-outline-variant/40 bg-transparent px-5 py-3 text-sm font-semibold text-on-surface transition hover:border-primary/60 hover:bg-white/4 hover:text-primary; }
   .eyebrow { @apply text-[0.72rem] font-semibold uppercase tracking-[0.28em] text-primary; }
+  .font-hyperwave { font-family: "Hyperwave", var(--font-display); }
 }
