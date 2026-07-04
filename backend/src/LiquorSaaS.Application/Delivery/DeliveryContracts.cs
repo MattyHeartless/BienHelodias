@@ -9,6 +9,7 @@ public sealed record DeliveryUserDto(
     Guid Id,
     Guid UserId,
     Guid StoreId,
+    string? StoreName,
     string FullName,
     string Phone,
     string Email,

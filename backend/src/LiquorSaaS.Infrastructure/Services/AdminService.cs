@@ -613,7 +613,7 @@ public sealed class AdminService(
             .AsNoTracking()
             .Where(x => x.StoreId == storeId)
             .OrderBy(x => x.FullName)
-            .Select(x => x.ToDto())
+            .Select(x => x.ToDto(null))
             .ToListAsync(cancellationToken);
     }
 

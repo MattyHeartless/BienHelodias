@@ -1,96 +1,146 @@
-<div class="min-h-screen px-6 pb-16 pt-8 lg:px-10">
+<div class="min-h-screen px-4 pb-16 pt-4 sm:px-6 lg:px-10 lg:pt-6">
   <div class="mx-auto max-w-7xl">
-    <header class="mb-8 flex flex-col gap-4 rounded-[2.2rem] bg-surface-container-low px-8 py-8 shadow-[0_35px_110px_rgba(0,0,0,0.4)] lg:flex-row lg:items-end lg:justify-between">
-      <div>
-        <p class="eyebrow">Panel de reparto</p>
-        <h1 class="mt-4 font-display text-5xl font-black tracking-[-0.06em]">Tus salidas bien helodias.</h1>
-        <p class="mt-3 max-w-2xl text-sm leading-7 text-on-surface-variant">
-          {{ email() }}. Desde aqui ves lo que ya va saliendo y lo que traes en ruta.
-        </p>
-      </div>
+    <header class="delivery-topbar">
+      <div class="delivery-nav-shell">
+        <div class="delivery-nav-brand">
+          <div class="delivery-nav-mark">
+            <span class="material-symbols-outlined">local_bar</span>
+          </div>
+          <div>
+            <p class="delivery-nav-title">{{ workspaceTitle() }}</p>
+            <p class="delivery-nav-subtitle">{{ email() }}</p>
+          </div>
+        </div>
 
-      <div class="grid w-full grid-cols-2 gap-3 lg:w-auto lg:flex lg:flex-wrap">
-        <button class="ghost-button w-full" type="button" (click)="load()">
-          <span class="material-symbols-outlined text-base">refresh</span>
-          Poner al dia
-        </button>
-        <button class="liquid-button w-full" type="button" (click)="logout()">
-          <span class="material-symbols-outlined text-base">logout</span>
-          Cerrar sesion
-        </button>
+        <nav class="delivery-nav-cluster" aria-label="Navegacion principal">
+          <button class="delivery-nav-pill delivery-nav-pill-active" type="button">
+            <span class="material-symbols-outlined text-[1.05rem]">receipt_long</span>
+            Pedidos
+          </button>
+          <button class="delivery-nav-pill delivery-nav-pill-muted" type="button" disabled>
+            <span class="material-symbols-outlined text-[1.05rem]">route</span>
+            Rutas
+          </button>
+        </nav>
+
+        <div class="delivery-nav-actions">
+          <button class="delivery-icon-button" type="button" aria-label="Poner al dia" (click)="load()">
+            <span class="material-symbols-outlined text-[1.2rem]">refresh</span>
+          </button>
+          <button class="delivery-icon-button delivery-logout-button" type="button" aria-label="Cerrar sesion" (click)="logout()">
+            <span class="material-symbols-outlined text-[1.2rem]">logout</span>
+          </button>
+          <button class="delivery-icon-button delivery-menu-button" type="button" aria-label="Abrir menu" (click)="openMenu()" [attr.aria-expanded]="menuOpen()">
+            <span class="material-symbols-outlined text-[1.3rem]">menu</span>
+          </button>
+        </div>
       </div>
     </header>
 
-    <section class="mb-8">
-      <article class="relative overflow-hidden rounded-[2.2rem] bg-surface-container-low px-8 py-10 shadow-[0_35px_110px_rgba(0,0,0,0.38)]">
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_60%_50%,rgba(210,253,110,0.12),transparent_45%)]"></div>
-        <div class="absolute inset-0 opacity-30" style="background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 24px 24px;"></div>
-        <div class="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+    <div class="delivery-drawer-root" [class.is-open]="menuOpen()" [attr.aria-hidden]="!menuOpen()" [attr.inert]="menuOpen() ? null : ''">
+      <button class="delivery-drawer-overlay" type="button" aria-label="Cerrar menu" (click)="closeMenu()"></button>
+
+      <aside class="delivery-drawer-panel" role="dialog" aria-modal="true" aria-label="Menu de navegacion">
+        <div class="delivery-drawer-header">
           <div>
-            <p class="eyebrow">Como andas</p>
-            <h2 class="mt-4 font-display text-5xl font-black tracking-[-0.06em]">{{ availabilityLabel() }}</h2>
-            <p class="mt-4 max-w-xl text-sm leading-7 text-on-surface-variant">
-              Marca si andas libre, ocupado o fuera de jugada para que las salidas caigan donde si las pueden mover.
-            </p>
+            <p class="delivery-drawer-kicker">MENU</p>
+            <h2>Reparto</h2>
+            <p>{{ email() }}</p>
           </div>
 
-          <div class="w-full max-w-xl">
-            <p class="text-xs font-semibold uppercase tracking-[0.24em] text-on-surface-variant">Disponibilidad</p>
-            <div class="mt-4 rounded-[1.4rem] border border-white/10 bg-black/20 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-              <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                @for (option of availabilityOptions; track option.value) {
-                  <button
-                    type="button"
-                    class="inline-flex items-center justify-center rounded-[1rem] px-5 py-4 text-sm font-semibold transition duration-200"
-                    [ngClass]="availability() === option.value
-                      ? 'bg-primary text-on-primary shadow-[0_0_24px_rgba(210,253,110,0.24)]'
-                      : 'bg-transparent text-on-surface-variant hover:bg-white/5 hover:text-on-surface'"
-                    (click)="updateAvailability(option.value)"
-                  >
-                    {{ option.label }}
-                  </button>
-                }
-              </div>
-            </div>
-          </div>
+          <button class="delivery-drawer-close" type="button" aria-label="Cerrar menu" (click)="closeMenu()">
+            <span class="material-symbols-outlined text-[1.25rem]">close</span>
+          </button>
         </div>
-      </article>
+
+        <nav class="delivery-drawer-nav" aria-label="Navegacion mobile">
+          <button class="delivery-drawer-item delivery-drawer-item-active" type="button" (click)="closeMenu()">
+            <span class="material-symbols-outlined text-[1.1rem]">receipt_long</span>
+            Pedidos
+          </button>
+          <button class="delivery-drawer-item" type="button" disabled>
+            <span class="material-symbols-outlined text-[1.1rem]">route</span>
+            Rutas
+            <span class="delivery-drawer-badge">Pronto</span>
+          </button>
+        </nav>
+
+        <div class="delivery-drawer-footer">
+          <button class="ghost-button w-full !justify-center" type="button" (click)="load(); closeMenu()">
+            <span class="material-symbols-outlined text-base">refresh</span>
+            Poner al dia
+          </button>
+          <button class="liquid-button w-full !justify-center" type="button" (click)="logout()">
+            <span class="material-symbols-outlined text-base">logout</span>
+            Cerrar sesion
+          </button>
+        </div>
+      </aside>
+    </div>
+
+    <section class="availability-strip" aria-label="Disponibilidad del repartidor">
+      <div class="availability-summary">
+        <p>Disponibilidad</p>
+        <h1>
+          <span class="availability-shimmer t-shimmer" [attr.data-text]="availabilityLabel()">{{ availabilityLabel() }}</span>
+        </h1>
+      </div>
+
+      <div class="availability-control" role="group" aria-label="Cambiar disponibilidad">
+        @for (option of availabilityOptions; track option.value) {
+          <button
+            type="button"
+            class="availability-option"
+            [class.is-active]="availability() === option.value"
+            (click)="updateAvailability(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        }
+      </div>
     </section>
-
     <section class="mb-8">
-      <article class="glass-panel overflow-hidden p-6">
-        <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div class="max-w-2xl">
-            <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Avisos cuando cae pedido</h2>
-            <div class="mt-4 inline-flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.22em]">
-              <span
-                class="rounded-full border px-4 py-2"
-                [ngClass]="pushState().availability === 'supported'
-                  ? 'border-primary/20 bg-primary/10 text-primary'
-                  : 'border-error/30 bg-error/10 text-white'"
-              >
-                {{ pushState().availability === 'supported' ? 'Listo para avisos' : 'No disponible' }}
-              </span>
-              <span
-                class="rounded-full border px-4 py-2"
-                [ngClass]="pushState().isSubscribed
-                  ? 'border-primary/20 bg-primary/10 text-primary'
-                  : 'border-white/10 bg-white/4 text-on-surface-variant'"
-              >
-                {{ pushState().isSubscribed ? 'Avisos activos' : 'Avisos apagados' }}
-              </span>
-              <span
-                class="rounded-full border px-4 py-2"
-                [ngClass]="pushState().backendSynchronized
-                  ? 'border-primary/20 bg-primary/10 text-primary'
-                  : 'border-white/10 bg-white/4 text-on-surface-variant'"
-              >
-                {{ pushState().backendSynchronized ? 'Todo en orden' : 'Falta amarrarlo' }}
-              </span>
-            </div>
-          </div>
+      <article class="notification-accordion t-acc" [attr.data-open]="notificationsOpen()">
+        <button class="notification-accordion-head t-acc-head" type="button" [attr.aria-expanded]="notificationsOpen()" (click)="toggleNotifications()">
+          <span class="notification-accordion-title">Notificaciones</span>
 
-          <div class="flex w-full flex-col gap-3 lg:w-auto lg:min-w-80">
+          <span class="notification-status-row" aria-label="Estado de avisos">
+            <span
+              class="notification-status-dot"
+              [class.is-active]="pushState().availability === 'supported'"
+              [class.is-error]="pushState().availability !== 'supported'"
+              [attr.aria-label]="pushState().availability === 'supported' ? 'Navegador listo para avisos' : 'Avisos no disponibles'"
+              [title]="pushState().availability === 'supported' ? 'Navegador listo para avisos' : 'Avisos no disponibles'"
+            >
+              <span class="material-symbols-outlined text-[1rem]">phonelink_ring</span>
+            </span>
+            <span
+              class="notification-status-dot"
+              [class.is-active]="pushState().isSubscribed"
+              [attr.aria-label]="pushState().isSubscribed ? 'Avisos activos' : 'Avisos apagados'"
+              [title]="pushState().isSubscribed ? 'Avisos activos' : 'Avisos apagados'"
+            >
+              <span class="material-symbols-outlined text-[1rem]">notifications_active</span>
+            </span>
+            <span
+              class="notification-status-dot"
+              [class.is-active]="pushState().backendSynchronized"
+              [attr.aria-label]="pushState().backendSynchronized ? 'Dispositivo sincronizado' : 'Dispositivo pendiente de sincronizar'"
+              [title]="pushState().backendSynchronized ? 'Dispositivo sincronizado' : 'Dispositivo pendiente de sincronizar'"
+            >
+              <span class="material-symbols-outlined text-[1rem]">sync_saved_locally</span>
+            </span>
+          </span>
+
+          <span class="notification-chevron t-acc-chevron" aria-hidden="true">
+            <svg viewBox="0 0 16 16">
+              <path d="M4 6.5L8 10.5L12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+        </button>
+
+        <div class="t-acc-panel">
+          <div class="notification-accordion-body t-acc-panel-inner">
             <button
               class="liquid-button w-full !justify-center"
               type="button"
@@ -126,37 +176,41 @@
       </div>
     } @else {
       <div class="space-y-8">
-        <section class="glass-panel p-6">
-          <div class="flex items-end justify-between">
+        <section>
+          <div class="flex items-end justify-between px-1">
             <div>
               <p class="eyebrow">Pedidos disponibles</p>
               <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Ya van saliendo</h2>
             </div>
             <span class="rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-xs uppercase tracking-[0.24em] text-primary">
-              <span class="sm:hidden">{{ availableOrders().length }} DISP.</span>
-              <span class="hidden sm:inline">{{ availableOrders().length }} disponibles</span>
+              <span class="sm:hidden"><app-animated-number [value]="availableOrders().length" /> DISP.</span>
+              <span class="hidden sm:inline"><app-animated-number [value]="availableOrders().length" /> disponibles</span>
             </span>
           </div>
 
-          <div class="mt-6 space-y-4">
+          <div class="mt-4 space-y-4">
             @for (order of availableOrders(); track order.id) {
               <article
-                class="rounded-[1.6rem] border p-5 transition"
-                [ngClass]="isSelected(order.id) ? 'border-primary/35 bg-primary/8' : 'border-white/6 bg-white/4'"
+                class="delivery-order-card"
+                role="button"
+                tabindex="0"
+                [class.delivery-order-card-active]="isSelected(order.id)"
+                (click)="selectOrder(order)"
+                (keydown.enter)="selectOrder(order)"
+                (keydown.space)="selectOrder(order); $event.preventDefault()"
               >
                 <div class="flex items-start justify-between gap-4">
                   <div>
                     <p class="font-display text-2xl font-bold tracking-[-0.05em]">{{ order.customerName }}</p>
-                    <p class="mt-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">{{ order.id }}</p>
+                    <p class="mt-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">
+                      {{ order.items.length }} productos · {{ getOrderUnitCount(order) }} piezas
+                    </p>
                   </div>
                   <p class="font-display text-2xl font-bold text-primary">{{ order.total | currency: 'MXN':'symbol-narrow':'1.0-0' }}</p>
                 </div>
                 <p class="mt-4 text-sm leading-7 text-on-surface-variant">{{ order.deliveryAddress }}</p>
                 <div class="mt-5 flex gap-3">
-                  <button class="ghost-button flex-1 !justify-center" type="button" (click)="selectOrder(order)">
-                    Ver detalle
-                  </button>
-                  <button class="liquid-button flex-1 !justify-center" type="button" (click)="takeOrder(order.id)">
+                  <button class="liquid-button flex-1 !justify-center" type="button" (click)="takeOrder(order.id); $event.stopPropagation()">
                     <span class="material-symbols-outlined text-base">near_me</span>
                     Me lo llevo
                   </button>
@@ -172,27 +226,34 @@
           </div>
         </section>
 
-        <section class="glass-panel p-6">
-          <div class="flex items-end justify-between">
+        <section>
+          <div class="flex items-end justify-between px-1">
             <div>
               <p class="eyebrow">Mis pedidos</p>
               <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Traigo estas frías</h2>
             </div>
             <span class="rounded-full border border-white/10 bg-white/4 px-4 py-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">
-              {{ myOrders().length }} activos
+              <app-animated-number [value]="myOrders().length" /> activos
             </span>
           </div>
 
-          <div class="mt-6 space-y-4">
+          <div class="mt-4 space-y-4">
             @for (order of myOrders(); track order.id) {
               <article
-                class="rounded-[1.6rem] border p-5 transition"
-                [ngClass]="isSelected(order.id) ? 'border-primary/35 bg-primary/8' : 'border-white/6 bg-white/4'"
+                class="delivery-order-card"
+                role="button"
+                tabindex="0"
+                [class.delivery-order-card-active]="isSelected(order.id)"
+                (click)="selectOrder(order)"
+                (keydown.enter)="selectOrder(order)"
+                (keydown.space)="selectOrder(order); $event.preventDefault()"
               >
                 <div class="flex items-start justify-between gap-4">
                   <div>
                     <p class="font-display text-2xl font-bold tracking-[-0.05em]">{{ order.customerName }}</p>
-                    <p class="mt-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">{{ order.id }}</p>
+                    <p class="mt-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">
+                      {{ order.createdAtUtc | date: 'dd MMM, HH:mm' }}
+                    </p>
                   </div>
                   <div class="text-right">
                     <p class="font-display text-2xl font-bold text-primary">{{ order.total | currency: 'MXN':'symbol-narrow':'1.0-0' }}</p>
@@ -201,14 +262,13 @@
                 </div>
                 <p class="mt-4 text-sm leading-7 text-on-surface-variant">{{ order.deliveryAddress }}</p>
                 <div class="mt-5 flex gap-3">
-                  <button class="ghost-button flex-1 !justify-center" type="button" (click)="selectOrder(order)">Ver detalle</button>
                   <button
                     class="ghost-button flex-1 !justify-center"
                     type="button"
                     [disabled]="!canRelease(order)"
                     [class.opacity-50]="!canRelease(order)"
                     [class.pointer-events-none]="!canRelease(order)"
-                    (click)="releaseOrder(order.id)"
+                    (click)="releaseOrder(order.id); $event.stopPropagation()"
                   >
                     Soltar pedido
                   </button>
@@ -218,7 +278,7 @@
                     [disabled]="!canMarkDelivered(order)"
                     [class.opacity-50]="!canMarkDelivered(order)"
                     [class.pointer-events-none]="!canMarkDelivered(order)"
-                    (click)="markDelivered(order.id)"
+                    (click)="markDelivered(order.id); $event.stopPropagation()"
                   >
                     Ya quedo
                   </button>
@@ -243,19 +303,26 @@
         class="mx-auto flex h-full max-w-4xl items-center justify-center"
       >
         <div
-          class="glass-panel flex max-h-full w-full flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-surface-container-low shadow-[0_40px_120px_rgba(0,0,0,0.48)]"
+          class="glass-panel t-modal flex max-h-full w-full flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-surface-container-low shadow-[0_40px_120px_rgba(0,0,0,0.48)]"
+          role="dialog"
+          aria-modal="true"
+          [class.is-open]="!modalClosing()"
+          [class.is-closing]="modalClosing()"
           (click)="$event.stopPropagation()"
         >
           <div class="flex items-start justify-between gap-4 border-b border-white/8 px-6 py-5 sm:px-8">
             <div>
-              <p class="eyebrow">Detalle del pedido</p>
-              <h2 class="mt-3 font-display text-3xl font-black tracking-[-0.05em]">{{ order.customerName }}</h2>
-              <p class="mt-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">{{ order.id }}</p>
+              <p class="eyebrow">Detalle</p>
+              <p class="mt-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">
+                {{ order.createdAtUtc | date: 'dd MMM, HH:mm' }}
+              </p>
             </div>
 
             <div class="flex items-center gap-3">
-              <div class="rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-xs uppercase tracking-[0.2em] text-primary">
-                {{ getOrderStatusLabel(order.status) }}
+              <div class="detail-status-badge rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-xs uppercase tracking-[0.2em] text-primary">
+                <span class="t-shimmer" [attr.data-text]="getOrderStatusLabel(order.status)">
+                  {{ getOrderStatusLabel(order.status) }}
+                </span>
               </div>
               <button class="ghost-button !px-4 !py-2" type="button" (click)="closeOrderDetail()">
                 <span class="material-symbols-outlined text-base">close</span>
@@ -264,118 +331,104 @@
           </div>
 
           <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-6 sm:px-8 sm:pb-8">
-            <div class="grid gap-4 sm:grid-cols-2">
-              <div class="rounded-[1.4rem] bg-white/4 p-4">
-                <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Cliente</p>
-                <p class="mt-3 text-lg font-semibold text-on-surface">{{ order.customerName }}</p>
-                <p class="mt-2 text-sm text-on-surface-variant">{{ order.customerPhone }}</p>
+            <section class="detail-section detail-section-top">
+              <div class="detail-info-grid">
+                <div>
+                  <p class="detail-label detail-label-with-icon">
+                    <span class="material-symbols-outlined">person</span>
+                    Cliente
+                  </p>
+                  <p class="detail-customer-name">{{ order.customerName }}</p>
+                  <a class="detail-phone" [href]="'tel:' + order.customerPhone">
+                    <span class="material-symbols-outlined">call</span>
+                    {{ order.customerPhone }}
+                  </a>
+                </div>
+                <div>
+                  <p class="detail-label detail-label-with-icon">
+                    <span class="material-symbols-outlined">payments</span>
+                    Total
+                  </p>
+                  <p class="detail-total">{{ order.total | currency: 'MXN':'symbol-narrow':'1.0-0' }}</p>
+                </div>
               </div>
+            </section>
 
-              <div class="rounded-[1.4rem] bg-white/4 p-4">
-                <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Total</p>
-                <p class="mt-3 font-display text-3xl font-black text-primary">
-                  {{ order.total | currency: 'MXN':'symbol-narrow':'1.0-0' }}
-                </p>
-              </div>
-            </div>
-
-            <div class="mt-4 rounded-[1.6rem] bg-white/4 p-5">
-              <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Direccion de entrega</p>
-              <p class="mt-3 text-sm leading-7 text-on-surface">{{ order.deliveryAddress }}</p>
+            <section class="detail-section">
+              <p class="detail-label detail-label-with-icon">
+                <span class="material-symbols-outlined">location_on</span>
+                Direccion de entrega
+              </p>
+              <p class="detail-copy">{{ order.deliveryAddress }}</p>
               @if (hasDeliveryCoordinates(order)) {
-                <button class="liquid-button mt-4" type="button" (click)="openGoogleMapsNavigation(order)">
+                <button class="liquid-button mt-4 w-full !justify-center" type="button" (click)="openGoogleMapsNavigation(order)">
                   <span class="material-symbols-outlined text-base">map</span>
-                  Llevarme con Maps
+                  Abrir google maps
                 </button>
               }
-            </div>
+            </section>
 
-            <div class="mt-4 rounded-[1.6rem] bg-white/4 p-5">
-              <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Notas</p>
-              <p class="mt-3 text-sm leading-7 text-on-surface-variant">
-                {{ order.notes || 'Sin notas extra en este pedido.' }}
+            <section class="detail-section">
+              <p class="detail-label detail-label-with-icon">
+                <span class="material-symbols-outlined">sticky_note_2</span>
+                Notas
               </p>
-            </div>
+              <p class="detail-copy detail-muted">{{ order.notes || 'Sin notas extra en este pedido.' }}</p>
+            </section>
 
-            <div class="mt-4 rounded-[1.6rem] bg-white/4 p-5">
-              <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <section class="detail-section">
+              <div class="detail-section-heading">
                 <div>
-                  <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Detalle del pedido</p>
-                  <h3 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em] text-on-surface">Asi va la ronda</h3>
-                  <p class="mt-2 text-sm leading-7 text-on-surface-variant">
-                    Todo lo que llevas en este pedido para que no se te vaya ni una fria.
+                  <p class="detail-label detail-label-with-icon">
+                    <span class="material-symbols-outlined">receipt_long</span>
+                    Detalle del pedido
                   </p>
+                  <h3>Asi va la ronda</h3>
                 </div>
-
-                <div class="grid grid-cols-2 gap-3 sm:min-w-72">
-                  <div class="rounded-[1.2rem] border border-white/8 bg-black/12 px-4 py-3">
-                    <p class="text-[0.65rem] uppercase tracking-[0.24em] text-on-surface-variant">Productos</p>
-                    <p class="mt-2 font-display text-2xl font-black text-primary">{{ order.items.length }}</p>
+                <div class="detail-metrics">
+                  <div>
+                    <p>Productos</p>
+                    <strong>{{ order.items.length }}</strong>
                   </div>
-                  <div class="rounded-[1.2rem] border border-white/8 bg-black/12 px-4 py-3">
-                    <p class="text-[0.65rem] uppercase tracking-[0.24em] text-on-surface-variant">Piezas</p>
-                    <p class="mt-2 font-display text-2xl font-black text-primary">{{ getOrderUnitCount(order) }}</p>
+                  <div>
+                    <p>Piezas</p>
+                    <strong>{{ getOrderUnitCount(order) }}</strong>
                   </div>
                 </div>
               </div>
 
-              <div class="mt-5 grid gap-3">
+              <div class="detail-item-list">
                 @for (item of order.items; track item.id; let index = $index) {
-                  <article class="overflow-hidden rounded-[1.35rem] border border-white/8 bg-linear-to-r from-black/18 via-white/3 to-primary/8">
-                    <div class="flex flex-col gap-4 px-4 py-4 sm:px-5">
-                      <div class="flex items-start justify-between gap-4">
-                        <div class="flex items-start gap-3">
-                          <div class="flex h-11 w-11 items-center justify-center rounded-[1rem] border border-primary/18 bg-primary/10 text-sm font-bold text-primary">
-                            {{ index + 1 }}
-                          </div>
-                          <div>
-                            <p class="font-semibold leading-6 text-on-surface">{{ item.productNameSnapshot }}</p>
-                            <p class="mt-1 text-sm text-on-surface-variant">Van {{ item.quantity }} en esta salida.</p>
-                          </div>
-                        </div>
-
-                        <div class="text-right">
-                          <p class="text-[0.65rem] uppercase tracking-[0.22em] text-on-surface-variant">Subtotal</p>
-                          <p class="mt-2 font-display text-2xl font-black text-primary">
-                            {{ item.subtotal | currency: 'MXN':'symbol-narrow':'1.0-0' }}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div class="grid gap-3 sm:grid-cols-3">
-                        <div class="rounded-[1rem] border border-white/8 bg-black/16 px-3 py-3">
-                          <p class="text-[0.65rem] uppercase tracking-[0.22em] text-on-surface-variant">Cantidad</p>
-                          <p class="mt-2 text-lg font-semibold text-on-surface">{{ item.quantity }}</p>
-                        </div>
-                        <div class="rounded-[1rem] border border-white/8 bg-black/16 px-3 py-3">
-                          <p class="text-[0.65rem] uppercase tracking-[0.22em] text-on-surface-variant">Cada uno</p>
-                          <p class="mt-2 text-lg font-semibold text-on-surface">
-                            {{ item.unitPrice | currency: 'MXN':'symbol-narrow':'1.0-0' }}
-                          </p>
-                        </div>
-                        <div class="rounded-[1rem] border border-white/8 bg-primary/8 px-3 py-3">
-                          <p class="text-[0.65rem] uppercase tracking-[0.22em] text-on-surface-variant">Lo que suma</p>
-                          <p class="mt-2 text-lg font-semibold text-primary">
-                            {{ item.quantity }} x {{ item.unitPrice | currency: 'MXN':'symbol-narrow':'1.0-0' }}
-                          </p>
-                        </div>
-                      </div>
+                  <article class="detail-item-row">
+                    <div class="detail-item-index">{{ index + 1 }}</div>
+                    <div class="detail-item-main">
+                      <p>{{ item.productNameSnapshot }}</p>
+                      <span>{{ item.quantity }} x {{ item.unitPrice | currency: 'MXN':'symbol-narrow':'1.0-0' }}</span>
                     </div>
+                    <p class="detail-item-total">{{ item.subtotal | currency: 'MXN':'symbol-narrow':'1.0-0' }}</p>
                   </article>
                 }
               </div>
-            </div>
+            </section>
 
-            <div class="mt-4 grid gap-4 pb-6 sm:grid-cols-2 sm:pb-8">
-              <div class="rounded-[1.4rem] bg-white/4 p-4">
-                <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Creado</p>
-                <p class="mt-3 text-sm text-on-surface">{{ order.createdAtUtc | date:'medium' }}</p>
+            <section class="detail-section detail-section-bottom">
+              <div class="detail-info-grid">
+                <div>
+                  <p class="detail-label detail-label-with-icon">
+                    <span class="material-symbols-outlined">schedule</span>
+                    Creado
+                  </p>
+                  <p class="detail-copy">{{ order.createdAtUtc | date:'medium' }}</p>
+                </div>
+                <div>
+                  <p class="detail-label detail-label-with-icon">
+                    <span class="material-symbols-outlined">update</span>
+                    Actualizado
+                  </p>
+                  <p class="detail-copy">{{ order.updatedAtUtc | date:'medium' }}</p>
+                </div>
               </div>
-              <div class="rounded-[1.4rem] bg-white/4 p-4">
-                <p class="text-xs uppercase tracking-[0.22em] text-on-surface-variant">Actualizado</p>
-                <p class="mt-3 text-sm text-on-surface">{{ order.updatedAtUtc | date:'medium' }}</p>
-              </div>
-            </div>
+            </section>
           </div>
         </div>
       </div>

@@ -18,7 +18,8 @@ public sealed class DeliveryService(
     public async Task<DeliveryUserDto> GetCurrentAsync(CancellationToken cancellationToken)
     {
         var deliveryUser = await GetCurrentDeliveryUserAsync(cancellationToken);
-        return deliveryUser.ToDto();
+        var storeName = await GetStoreNameAsync(deliveryUser.StoreId, cancellationToken);
+        return deliveryUser.ToDto(storeName);
     }
 
     public async Task<PagedResult<Application.Orders.OrderDto>> GetAvailableOrdersAsync(PaginationRequest request, CancellationToken cancellationToken)
@@ -30,7 +31,7 @@ public sealed class DeliveryService(
             .Include(x => x.Items)
             .Where(x => x.StoreId == storeId && x.Status == OrderStatus.Pending && x.DeliveryUserId == null)
             .OrderByDescending(x => x.CreatedAtUtc)
-            .Select(x => x.ToDto())
+            .Select(x => x.ToDto(null))
             .ToPagedResultAsync(request, cancellationToken);
     }
 
@@ -53,7 +54,7 @@ public sealed class DeliveryService(
                 && x.Status != OrderStatus.Delivered
                 && x.Status != OrderStatus.Cancelled)
             .OrderByDescending(x => x.CreatedAtUtc)
-            .Select(x => x.ToDto())
+            .Select(x => x.ToDto(null))
             .ToPagedResultAsync(request, cancellationToken);
     }
 
@@ -62,7 +63,8 @@ public sealed class DeliveryService(
         var entity = await GetCurrentDeliveryUserAsync(cancellationToken);
         entity.UpdateAvailability(request.Availability);
         await dbContext.SaveChangesAsync(cancellationToken);
-        return entity.ToDto();
+        var storeName = await GetStoreNameAsync(entity.StoreId, cancellationToken);
+        return entity.ToDto(storeName);
     }
 
     private void EnsureDeliveryUser()
@@ -83,5 +85,13 @@ public sealed class DeliveryService(
 
         return await dbContext.DeliveryUsers.SingleOrDefaultAsync(x => x.UserId == currentUserService.UserId.Value, cancellationToken)
             ?? throw new NotFoundException("Delivery profile not found.");
+    }
+
+    private async Task<string?> GetStoreNameAsync(Guid storeId, CancellationToken cancellationToken)
+    {
+        return await dbContext.Stores.AsNoTracking()
+            .Where(x => x.Id == storeId)
+            .Select(x => x.Name)
+            .SingleOrDefaultAsync(cancellationToken);
     }
 }

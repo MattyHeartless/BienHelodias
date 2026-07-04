@@ -1,5 +1,5 @@
 import { CommonModule, CurrencyPipe, DatePipe, DOCUMENT } from '@angular/common';
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, HostListener, OnDestroy, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { DeliveryAvailability, DeliveryUserDto, OrderDto, OrderStatus } from '../core/models';
@@ -8,15 +8,16 @@ import { DeliverySessionService } from '../core/delivery-session.service';
 import { NotificationUiService } from '../core/notification-ui.service';
 import { DeliveryApiService } from '../services/delivery-api.service';
 import { PushNotificationService } from '../services/push-notification.service';
+import { AnimatedNumberComponent } from '../shared/animated-number.component';
 
 @Component({
   selector: 'app-panel-page',
   standalone: true,
-  imports: [CommonModule, CurrencyPipe, DatePipe],
+  imports: [CommonModule, CurrencyPipe, DatePipe, AnimatedNumberComponent],
   templateUrl: './panel-page.component.html',
   styleUrl: './panel-page.component.css'
 })
-export class PanelPageComponent {
+export class PanelPageComponent implements OnDestroy {
   private readonly document = inject(DOCUMENT);
   private readonly deliveryApi = inject(DeliveryApiService);
   private readonly pushNotifications = inject(PushNotificationService);
@@ -26,6 +27,9 @@ export class PanelPageComponent {
   private readonly router = inject(Router);
 
   readonly loading = signal(true);
+  readonly menuOpen = signal(false);
+  readonly notificationsOpen = signal(false);
+  readonly modalClosing = signal(false);
   readonly profile = signal<DeliveryUserDto | null>(null);
   readonly availableOrders = signal<OrderDto[]>([]);
   readonly myOrders = signal<OrderDto[]>([]);
@@ -39,6 +43,9 @@ export class PanelPageComponent {
 
   readonly email = this.session.email;
   readonly pushState = this.pushNotifications.state;
+  readonly workspaceTitle = computed(() => this.profile()?.storeName?.trim() || 'Bien Helodias Reparto');
+  private modalCloseTimer: number | null = null;
+
   readonly selectedOrder = computed(() => {
     const selectedOrderId = this.selectedOrderId();
     if (!selectedOrderId) {
@@ -73,7 +80,7 @@ export class PanelPageComponent {
 
   constructor() {
     effect(() => {
-      this.document.body.classList.toggle('modal-open', Boolean(this.selectedOrder()));
+      this.document.body.classList.toggle('modal-open', Boolean(this.selectedOrder()) || this.menuOpen());
     });
 
     this.pushNotifications.initialize();
@@ -83,6 +90,22 @@ export class PanelPageComponent {
     });
 
     this.load();
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.menuOpen()) {
+      this.closeMenu();
+      return;
+    }
+
+    if (this.selectedOrder()) {
+      this.closeOrderDetail();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.clearModalCloseTimer();
   }
 
   load(): void {
@@ -199,7 +222,20 @@ export class PanelPageComponent {
   }
 
   logout(): void {
+    this.closeMenu();
     void this.session.logout().then(() => this.router.navigate(['/login']));
+  }
+
+  openMenu(): void {
+    this.menuOpen.set(true);
+  }
+
+  closeMenu(): void {
+    this.menuOpen.set(false);
+  }
+
+  toggleNotifications(): void {
+    this.notificationsOpen.update((open) => !open);
   }
 
   enablePushNotifications(): void {
@@ -215,6 +251,8 @@ export class PanelPageComponent {
   }
 
   selectOrder(order: OrderDto): void {
+    this.clearModalCloseTimer();
+    this.modalClosing.set(false);
     this.selectedOrderId.set(order.id);
     void this.router.navigate([], {
       relativeTo: this.route,
@@ -224,12 +262,21 @@ export class PanelPageComponent {
   }
 
   closeOrderDetail(): void {
-    this.selectedOrderId.set(null);
-    void this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { orderId: null },
-      queryParamsHandling: 'merge'
-    });
+    if (!this.selectedOrder() || this.modalClosing()) {
+      return;
+    }
+
+    this.modalClosing.set(true);
+    this.modalCloseTimer = window.setTimeout(() => {
+      this.modalCloseTimer = null;
+      this.modalClosing.set(false);
+      this.selectedOrderId.set(null);
+      void this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { orderId: null },
+        queryParamsHandling: 'merge'
+      });
+    }, this.getModalCloseDurationMs());
   }
 
   hasDeliveryCoordinates(order: OrderDto): boolean {
@@ -300,5 +347,33 @@ export class PanelPageComponent {
     }
 
     this.selectedOrderId.set(null);
+  }
+
+  private clearModalCloseTimer(): void {
+    if (this.modalCloseTimer === null) {
+      return;
+    }
+
+    window.clearTimeout(this.modalCloseTimer);
+    this.modalCloseTimer = null;
+  }
+
+  private getModalCloseDurationMs(): number {
+    const modalElement = this.document.querySelector<HTMLElement>('.t-modal');
+    const duration = getComputedStyle(modalElement ?? this.document.documentElement).getPropertyValue('--modal-close-dur').trim();
+
+    if (!duration) {
+      return 150;
+    }
+
+    if (duration.endsWith('ms')) {
+      return Number.parseFloat(duration) || 150;
+    }
+
+    if (duration.endsWith('s')) {
+      return (Number.parseFloat(duration) || 0.15) * 1000;
+    }
+
+    return Number.parseFloat(duration) || 150;
   }
 }

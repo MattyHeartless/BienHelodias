@@ -1,3 +1,84 @@
 :host {
   display: block;
 }
+
+.mobile-brand-icon {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 40px;
+}
+
+@property --login-card-glow-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.login-card-glow {
+  isolation: isolate;
+}
+
+.login-card-glow::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 1px;
+  background:
+    conic-gradient(
+      from var(--login-card-glow-angle),
+      transparent 0deg,
+      rgb(210 253 110 / 0.06) 55deg,
+      rgb(210 253 110 / 0.88) 88deg,
+      rgb(231 233 89 / 0.38) 120deg,
+      transparent 160deg,
+      transparent 360deg
+    );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: login-card-glow-spin 8s linear infinite;
+}
+
+.login-card-glow::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  z-index: -2;
+  border-radius: inherit;
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgb(210 253 110 / 0.14),
+      transparent 58%
+    );
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+@keyframes login-card-glow-spin {
+  to {
+    --login-card-glow-angle: 360deg;
+  }
+}
+
+@media (min-width: 640px) {
+  .login-card-glow::before,
+  .login-card-glow::after {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-card-glow::before {
+    animation: none;
+  }
+}

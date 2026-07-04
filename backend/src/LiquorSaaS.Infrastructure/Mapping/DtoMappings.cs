@@ -93,11 +93,12 @@ internal static class DtoMappings
                     deliveryAssignee.IsActive,
                     (int)deliveryAssignee.CurrentAvailability));
 
-    public static DeliveryUserDto ToDto(this DeliveryUser entity) =>
+    public static DeliveryUserDto ToDto(this DeliveryUser entity, string? storeName = null) =>
         new(
             entity.Id,
             entity.UserId,
             entity.StoreId,
+            storeName,
             entity.FullName,
             entity.Phone,
             entity.Email,

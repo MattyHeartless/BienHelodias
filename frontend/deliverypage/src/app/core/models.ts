@@ -75,6 +75,7 @@ export interface DeliveryUserDto {
   id: string;
   userId: string;
   storeId: string;
+  storeName: string | null;
   fullName: string;
   phone: string;
   email: string;
