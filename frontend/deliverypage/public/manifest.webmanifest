@@ -1,12 +1,12 @@
 {
   "name": "BienHelodias Reparto",
   "short_name": "BH Reparto",
-  "id": "/deliverypage",
+  "id": "/",
   "theme_color": "#0e0e0e",
   "background_color": "#0e0e0e",
   "display": "standalone",
   "scope": "/",
-  "start_url": "/login",
+  "start_url": "/",
   "lang": "es-MX",
   "description": "App de reparto para sacar bien helodias al tiro.",
   "icons": [
