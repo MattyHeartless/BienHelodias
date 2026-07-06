@@ -36,7 +36,10 @@ export class PanelPageComponent implements OnDestroy {
 
   readonly loading = signal(true);
   readonly menuOpen = signal(false);
+  readonly availabilityOpen = signal(false);
   readonly notificationsOpen = signal(false);
+  readonly desktopAvailabilityOpen = signal(false);
+  readonly desktopAvailabilityClosing = signal(false);
   readonly desktopNotificationsOpen = signal(false);
   readonly desktopNotificationsClosing = signal(false);
   readonly availableOrdersOpen = signal(true);
@@ -57,7 +60,7 @@ export class PanelPageComponent implements OnDestroy {
   readonly selectedOrderId = signal<string | null>(null);
   readonly availability = signal(DeliveryAvailability.Unavailable);
   readonly availabilityOptions = [
-    { label: 'Fuera de jugada', value: DeliveryAvailability.Unavailable },
+    { label: 'Fuera', value: DeliveryAvailability.Unavailable },
     { label: 'Al tiro', value: DeliveryAvailability.Available },
     { label: 'Ocupado', value: DeliveryAvailability.Busy }
   ];
@@ -67,6 +70,7 @@ export class PanelPageComponent implements OnDestroy {
   readonly workspaceTitle = computed(() => this.profile()?.storeName?.trim() || 'Bien Helodias Reparto');
   private modalCloseTimer: number | null = null;
   private routeCompletionModalCloseTimer: number | null = null;
+  private desktopAvailabilityCloseTimer: number | null = null;
   private desktopNotificationsCloseTimer: number | null = null;
 
   readonly selectedOrder = computed(() => {
@@ -99,6 +103,22 @@ export class PanelPageComponent implements OnDestroy {
     }
 
     return 'Quiero que me avisen';
+  });
+  readonly pushSubscribeCompactLabel = computed(() => {
+    const state = this.pushState();
+    if (state.isRegistering) {
+      return 'Activando';
+    }
+
+    if (state.isSubscribed && state.backendSynchronized) {
+      return 'Activos';
+    }
+
+    if (state.isSubscribed && !state.backendSynchronized) {
+      return 'Finalizar';
+    }
+
+    return 'Activar';
   });
   readonly selectedRouteOrders = computed(() =>
     this.myOrders().filter((order) => this.routeSelection()[order.id] !== false)
@@ -153,6 +173,11 @@ export class PanelPageComponent implements OnDestroy {
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
+    if (this.desktopAvailabilityOpen()) {
+      this.closeDesktopAvailability();
+      return;
+    }
+
     if (this.desktopNotificationsOpen()) {
       this.closeDesktopNotifications();
       return;
@@ -189,6 +214,7 @@ export class PanelPageComponent implements OnDestroy {
   ngOnDestroy(): void {
     this.clearModalCloseTimer();
     this.clearRouteCompletionModalCloseTimer();
+    this.clearDesktopAvailabilityCloseTimer();
     this.clearDesktopNotificationsCloseTimer();
   }
 
@@ -312,15 +338,60 @@ export class PanelPageComponent implements OnDestroy {
   }
 
   openMenu(): void {
+    this.availabilityOpen.set(false);
+    this.notificationsOpen.set(false);
     this.menuOpen.set(true);
   }
 
   closeMenu(): void {
+    this.availabilityOpen.set(false);
+    this.notificationsOpen.set(false);
     this.menuOpen.set(false);
   }
 
   toggleNotifications(): void {
-    this.notificationsOpen.update((open) => !open);
+    const nextOpen = !this.notificationsOpen();
+    this.notificationsOpen.set(nextOpen);
+
+    if (nextOpen) {
+      this.availabilityOpen.set(false);
+    }
+  }
+
+  toggleAvailability(): void {
+    const nextOpen = !this.availabilityOpen();
+    this.availabilityOpen.set(nextOpen);
+
+    if (nextOpen) {
+      this.notificationsOpen.set(false);
+    }
+  }
+
+  toggleDesktopAvailability(): void {
+    if (this.desktopAvailabilityOpen()) {
+      this.closeDesktopAvailability();
+      return;
+    }
+
+    this.clearDesktopNotificationsCloseTimer();
+    this.desktopNotificationsClosing.set(false);
+    this.desktopNotificationsOpen.set(false);
+    this.clearDesktopAvailabilityCloseTimer();
+    this.desktopAvailabilityClosing.set(false);
+    this.desktopAvailabilityOpen.set(true);
+  }
+
+  closeDesktopAvailability(): void {
+    if (!this.desktopAvailabilityOpen() || this.desktopAvailabilityClosing()) {
+      return;
+    }
+
+    this.desktopAvailabilityClosing.set(true);
+    this.desktopAvailabilityCloseTimer = window.setTimeout(() => {
+      this.desktopAvailabilityCloseTimer = null;
+      this.desktopAvailabilityClosing.set(false);
+      this.desktopAvailabilityOpen.set(false);
+    }, this.getDropdownCloseDurationMs());
   }
 
   toggleDesktopNotifications(): void {
@@ -329,6 +400,9 @@ export class PanelPageComponent implements OnDestroy {
       return;
     }
 
+    this.clearDesktopAvailabilityCloseTimer();
+    this.desktopAvailabilityClosing.set(false);
+    this.desktopAvailabilityOpen.set(false);
     this.clearDesktopNotificationsCloseTimer();
     this.desktopNotificationsClosing.set(false);
     this.desktopNotificationsOpen.set(true);
@@ -375,6 +449,18 @@ export class PanelPageComponent implements OnDestroy {
 
   disablePushNotifications(): void {
     void this.pushNotifications.unsubscribeCurrentDevice();
+  }
+
+  isAvailabilityAvailable(): boolean {
+    return this.availability() === DeliveryAvailability.Available;
+  }
+
+  isAvailabilityWarning(): boolean {
+    return this.availability() === DeliveryAvailability.Busy;
+  }
+
+  isAvailabilityError(): boolean {
+    return this.availability() === DeliveryAvailability.Unavailable;
   }
 
   isRouteOrderSelected(orderId: string): boolean {
@@ -725,6 +811,15 @@ export class PanelPageComponent implements OnDestroy {
 
     window.clearTimeout(this.routeCompletionModalCloseTimer);
     this.routeCompletionModalCloseTimer = null;
+  }
+
+  private clearDesktopAvailabilityCloseTimer(): void {
+    if (this.desktopAvailabilityCloseTimer === null) {
+      return;
+    }
+
+    window.clearTimeout(this.desktopAvailabilityCloseTimer);
+    this.desktopAvailabilityCloseTimer = null;
   }
 
   private clearDesktopNotificationsCloseTimer(): void {

@@ -24,6 +24,60 @@
         </nav>
 
         <div class="delivery-nav-actions">
+          <div class="delivery-desktop-availability">
+            <button
+              class="delivery-icon-button"
+              type="button"
+              aria-label="Disponibilidad"
+              [attr.aria-expanded]="desktopAvailabilityOpen()"
+              (click)="toggleDesktopAvailability()"
+            >
+              <span class="material-symbols-outlined text-[1.2rem]">bolt</span>
+            </button>
+
+            <div
+              class="delivery-desktop-availability-panel t-dropdown"
+              data-origin="top-right"
+              [class.is-open]="desktopAvailabilityOpen() && !desktopAvailabilityClosing()"
+              [class.is-closing]="desktopAvailabilityClosing()"
+            >
+              <div class="delivery-desktop-availability-head">
+                <div>
+                  <p class="delivery-drawer-section-label">Disponibilidad</p>
+                  <p
+                    class="delivery-desktop-availability-copy"
+                    [class.is-active]="isAvailabilityAvailable()"
+                    [class.is-warning]="isAvailabilityWarning()"
+                    [class.is-error]="isAvailabilityError()"
+                  >
+                    <span
+                      class="delivery-availability-state-dot"
+                      [class.is-active]="isAvailabilityAvailable()"
+                      [class.is-warning]="isAvailabilityWarning()"
+                      [class.is-error]="isAvailabilityError()"
+                    ></span>
+                    {{ availabilityLabel() }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="delivery-desktop-availability-actions">
+                <div class="availability-control" role="group" aria-label="Cambiar disponibilidad">
+                  @for (option of availabilityOptions; track option.value) {
+                    <button
+                      type="button"
+                      class="availability-option"
+                      [class.is-active]="availability() === option.value"
+                      (click)="updateAvailability(option.value)"
+                    >
+                      {{ option.label }}
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="delivery-desktop-notifications">
             <button
               class="delivery-icon-button"
@@ -111,7 +165,6 @@
         <div class="delivery-drawer-header">
           <div class="delivery-drawer-header-copy">
             <p class="delivery-drawer-kicker">MENU</p>
-            <h2>Reparto</h2>
             <p>{{ email() }}</p>
           </div>
 
@@ -130,6 +183,54 @@
             Rutas
           </button>
         </nav>
+
+        <section class="delivery-drawer-availability t-acc" [attr.data-open]="availabilityOpen()" aria-label="Disponibilidad">
+          <button class="delivery-drawer-availability-head t-acc-head" type="button" [attr.aria-expanded]="availabilityOpen()" (click)="toggleAvailability()">
+            <div class="delivery-drawer-availability-label">
+              <span class="material-symbols-outlined text-[1.1rem]">bolt</span>
+              <span>Disponibilidad</span>
+            </div>
+
+            <div class="delivery-drawer-availability-meta">
+              <span
+                class="delivery-drawer-availability-copy"
+                [class.is-active]="isAvailabilityAvailable()"
+                [class.is-warning]="isAvailabilityWarning()"
+                [class.is-error]="isAvailabilityError()"
+              >
+                <span
+                  class="delivery-availability-state-dot"
+                  [class.is-active]="isAvailabilityAvailable()"
+                  [class.is-warning]="isAvailabilityWarning()"
+                  [class.is-error]="isAvailabilityError()"
+                ></span>
+                {{ availabilityLabel() }}
+              </span>
+              <span class="delivery-drawer-availability-chevron t-acc-chevron" aria-hidden="true">
+                <svg viewBox="0 0 16 16">
+                  <path d="M4 6.5L8 10.5L12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+            </div>
+          </button>
+
+          <div class="t-acc-panel">
+            <div class="delivery-drawer-availability-actions t-acc-panel-inner">
+              <div class="availability-control" role="group" aria-label="Cambiar disponibilidad">
+                @for (option of availabilityOptions; track option.value) {
+                  <button
+                    type="button"
+                    class="availability-option"
+                    [class.is-active]="availability() === option.value"
+                    (click)="updateAvailability(option.value)"
+                  >
+                    {{ option.label }}
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+        </section>
 
         <section class="delivery-drawer-notifications t-acc" [attr.data-open]="notificationsOpen()" aria-label="Notificaciones">
           <button class="delivery-drawer-notifications-head t-acc-head" type="button" [attr.aria-expanded]="notificationsOpen()" (click)="toggleNotifications()">
@@ -164,29 +265,31 @@
           </button>
 
           <div class="t-acc-panel">
-            <div class="delivery-drawer-notifications-actions t-acc-panel-inner">
-              <button
-                class="liquid-button w-full !justify-center"
-                type="button"
-                [disabled]="pushSubscribeDisabled()"
-                [class.opacity-50]="pushSubscribeDisabled()"
-                [class.pointer-events-none]="pushSubscribeDisabled()"
-                (click)="enablePushNotifications()"
-              >
-                <span class="material-symbols-outlined text-base">notifications_active</span>
-                {{ pushSubscribeLabel() }}
-              </button>
-              <button
-                class="ghost-button w-full !justify-center"
-                type="button"
-                [disabled]="pushState().isRegistering || !pushState().isSubscribed"
-                [class.opacity-50]="pushState().isRegistering || !pushState().isSubscribed"
-                [class.pointer-events-none]="pushState().isRegistering || !pushState().isSubscribed"
-                (click)="disablePushNotifications()"
-              >
-                <span class="material-symbols-outlined text-base">notifications_off</span>
-                Apagar avisos
-              </button>
+            <div class="t-acc-panel-inner">
+              <div class="delivery-drawer-notifications-actions">
+                <button
+                  class="ghost-button w-full !justify-center"
+                  type="button"
+                  [disabled]="pushState().isRegistering || !pushState().isSubscribed"
+                  [class.opacity-50]="pushState().isRegistering || !pushState().isSubscribed"
+                  [class.pointer-events-none]="pushState().isRegistering || !pushState().isSubscribed"
+                  (click)="disablePushNotifications()"
+                >
+                  <span class="material-symbols-outlined text-base">notifications_off</span>
+                  Apagar
+                </button>
+                <button
+                  class="liquid-button w-full !justify-center"
+                  type="button"
+                  [disabled]="pushSubscribeDisabled()"
+                  [class.opacity-50]="pushSubscribeDisabled()"
+                  [class.pointer-events-none]="pushSubscribeDisabled()"
+                  (click)="enablePushNotifications()"
+                >
+                  <span class="material-symbols-outlined text-base">notifications_active</span>
+                  {{ pushSubscribeCompactLabel() }}
+                </button>
+              </div>
             </div>
           </div>
         </section>
@@ -204,29 +307,6 @@
       </aside>
     </div>
 
-    @if (activeView() === 'orders') {
-    <section class="availability-strip" aria-label="Disponibilidad del repartidor">
-      <div class="availability-summary">
-        <p>Disponibilidad</p>
-        <h1>
-          <span class="availability-shimmer t-shimmer" [attr.data-text]="availabilityLabel()">{{ availabilityLabel() }}</span>
-        </h1>
-      </div>
-
-      <div class="availability-control" role="group" aria-label="Cambiar disponibilidad">
-        @for (option of availabilityOptions; track option.value) {
-          <button
-            type="button"
-            class="availability-option"
-            [class.is-active]="availability() === option.value"
-            (click)="updateAvailability(option.value)"
-          >
-            {{ option.label }}
-          </button>
-        }
-      </div>
-    </section>
-    }
     @if (loading()) {
       <div class="grid gap-6 md:grid-cols-2">
         @for (item of [1, 2, 3, 4]; track item) {
@@ -237,10 +317,9 @@
       <div class="space-y-8">
         @if (activeView() === 'orders') {
         <section class="delivery-available-section t-acc" [attr.data-open]="availableOrdersOpen()">
-          <div class="flex items-end justify-between gap-3 px-1">
+          <div class="flex items-center justify-between gap-3 px-1">
             <div>
               <p class="eyebrow">Pedidos disponibles</p>
-              <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Para llevar</h2>
             </div>
             <div class="delivery-available-actions">
               <span class="rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-xs uppercase tracking-[0.24em] text-primary">
@@ -307,8 +386,15 @@
                 }
 
                 @if (availableOrders().length === 0) {
-                  <div class="rounded-[1.5rem] border border-dashed border-white/10 px-5 py-8 text-center text-sm leading-7 text-on-surface-variant">
-                    Ahorita no hay salidas listas, pero ya casi.
+                  <div class="delivery-orders-empty">
+                    <div class="delivery-orders-empty-icon" aria-hidden="true">
+                      <span class="material-symbols-outlined">receipt_long</span>
+                    </div>
+                    <p class="delivery-orders-empty-copy">
+                      <span class="delivery-orders-empty-shimmer t-shimmer" data-text="Aguantala, ya mero caen los pedidos.">
+                        Aguantala, ya mero caen los pedidos.
+                      </span>
+                    </p>
                   </div>
                 }
               </div>
@@ -317,10 +403,9 @@
         </section>
 
         <section>
-          <div class="flex items-end justify-between px-1">
+          <div class="flex items-center justify-between px-1">
             <div>
               <p class="eyebrow">Mis pedidos</p>
-              <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Traigo estas frías</h2>
             </div>
             <span class="rounded-full border border-white/10 bg-white/4 px-4 py-2 text-xs uppercase tracking-[0.24em] text-on-surface-variant">
               <app-animated-number [value]="myOrders().length" /> activos
@@ -381,8 +466,15 @@
             }
 
             @if (myOrders().length === 0) {
-              <div class="rounded-[1.5rem] border border-dashed border-white/10 px-5 py-8 text-center text-sm leading-7 text-on-surface-variant">
-                Todavia no traes pedidos asignados.
+              <div class="delivery-orders-empty">
+                <div class="delivery-orders-empty-icon" aria-hidden="true">
+                  <span class="material-symbols-outlined">local_shipping</span>
+                </div>
+                <p class="delivery-orders-empty-copy">
+                  <span class="delivery-orders-empty-shimmer t-shimmer" data-text="Aqui aparecen los que vas tomando.">
+                    Aqui aparecen los que vas tomando.
+                  </span>
+                </p>
               </div>
             }
           </div>
@@ -393,10 +485,9 @@
             <div class="route-section-head">
               <div class="route-selection-copy">
                 <div class="route-selection-head-row">
-                  <p class="eyebrow">Seleccion</p>
+                  <p class="eyebrow">Pedidos para esta salida</p>
                   <span class="route-section-chip">{{ selectedRouteOrders().length }} activos</span>
                 </div>
-                <h3 class="route-section-title">Pedidos para esta salida</h3>
               </div>
             </div>
 
@@ -433,8 +524,15 @@
               }
 
               @if (myOrders().length === 0) {
-                <div class="rounded-[1.5rem] border border-dashed border-white/10 px-5 py-8 text-center text-sm leading-7 text-on-surface-variant">
-                  No tienes pedidos activos para armar una ruta.
+                <div class="delivery-orders-empty">
+                  <div class="delivery-orders-empty-icon" aria-hidden="true">
+                    <span class="material-symbols-outlined">route</span>
+                  </div>
+                  <p class="delivery-orders-empty-copy">
+                    <span class="delivery-orders-empty-shimmer t-shimmer" data-text="Toma pedidos pa' iniciar el viaje.">
+                      Toma pedidos pa' iniciar el viaje.
+                    </span>
+                  </p>
                 </div>
               }
             </div>
@@ -463,8 +561,15 @@
                 }
 
                 @if (routePreviewOrders().length === 0) {
-                  <div class="rounded-[1.35rem] border border-dashed border-white/10 px-5 py-7 text-center text-sm leading-7 text-on-surface-variant">
-                    Cuando dejes al menos un pedido marcado, aqui sale el orden sugerido.
+                  <div class="delivery-orders-empty delivery-orders-empty-compact">
+                    <div class="delivery-orders-empty-icon" aria-hidden="true">
+                      <span class="material-symbols-outlined">map</span>
+                    </div>
+                    <p class="delivery-orders-empty-copy">
+                      <span class="delivery-orders-empty-shimmer t-shimmer" data-text="Toma pedidos para sugerirte el orden.">
+                        Toma pedidos para sugerirte el orden.
+                      </span>
+                    </p>
                   </div>
                 }
               </div>

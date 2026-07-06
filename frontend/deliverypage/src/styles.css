@@ -24,7 +24,18 @@
 }
 
 @layer base {
-  :root { color-scheme: dark; }
+  :root {
+    color-scheme: dark;
+    --dropdown-open-dur: 250ms;
+    --dropdown-close-dur: 150ms;
+    --dropdown-pre-scale: 0.97;
+    --dropdown-closing-scale: 0.99;
+    --dropdown-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --acc-expand: 250ms;
+    --acc-collapse: 250ms;
+    --acc-chevron: 250ms;
+    --acc-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
   * { box-sizing: border-box; }
   body {
     margin: 0;

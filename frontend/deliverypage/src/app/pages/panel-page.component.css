@@ -140,6 +140,7 @@
   gap: 0.45rem;
 }
 
+.delivery-desktop-availability,
 .delivery-desktop-notifications {
   position: relative;
   display: none;
@@ -303,6 +304,7 @@
   gap: 0.65rem;
 }
 
+.delivery-drawer-availability,
 .delivery-drawer-notifications {
   overflow: hidden;
   border: 1px solid rgb(255 255 255 / 0.08);
@@ -310,6 +312,11 @@
   background: rgb(255 255 255 / 0.04);
 }
 
+.delivery-drawer-availability:not([data-open="true"]) {
+  height: 3.45rem;
+}
+
+.delivery-drawer-availability-head,
 .delivery-drawer-notifications-head {
   display: flex;
   align-items: center;
@@ -324,6 +331,7 @@
   text-align: left;
 }
 
+.delivery-drawer-availability-label,
 .delivery-drawer-notifications-label {
   display: inline-flex;
   align-items: center;
@@ -335,10 +343,66 @@
   line-height: 1.1;
 }
 
+.delivery-drawer-availability-meta,
 .delivery-drawer-notifications-meta {
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
+}
+
+.delivery-drawer-availability-copy,
+.delivery-drawer-section-label {
+  color: var(--color-on-surface-variant);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.delivery-drawer-availability-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #d2fd6e;
+}
+
+.delivery-drawer-availability-copy.is-active,
+.delivery-desktop-availability-copy.is-active {
+  color: #d2fd6e;
+}
+
+.delivery-drawer-availability-copy.is-warning,
+.delivery-desktop-availability-copy.is-warning {
+  color: #ffb547;
+}
+
+.delivery-drawer-availability-copy.is-error,
+.delivery-desktop-availability-copy.is-error {
+  color: #ff7351;
+}
+
+.delivery-availability-state-dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.18);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08);
+  flex-shrink: 0;
+}
+
+.delivery-availability-state-dot.is-active {
+  background: #d2fd6e;
+  box-shadow: 0 0 14px rgb(210 253 110 / 0.28);
+}
+
+.delivery-availability-state-dot.is-warning {
+  background: #ffb547;
+  box-shadow: 0 0 14px rgb(255 181 71 / 0.24);
+}
+
+.delivery-availability-state-dot.is-error {
+  background: #ff7351;
+  box-shadow: 0 0 14px rgb(255 115 81 / 0.22);
 }
 
 .delivery-drawer-status-row {
@@ -365,12 +429,18 @@
   box-shadow: 0 0 14px rgb(255 115 81 / 0.22);
 }
 
+.delivery-drawer-availability-actions,
 .delivery-drawer-notifications-actions {
   display: grid;
   gap: 0.65rem;
   padding: 0 1rem 1rem;
 }
 
+.delivery-drawer-notifications-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.delivery-desktop-availability-panel,
 .delivery-desktop-notifications-panel {
   position: absolute;
   top: calc(100% + 0.75rem);
@@ -386,6 +456,7 @@
   padding: 1rem;
 }
 
+.delivery-desktop-availability-head,
 .delivery-desktop-notifications-head {
   display: flex;
   align-items: flex-start;
@@ -393,6 +464,7 @@
   gap: 0.85rem;
 }
 
+.delivery-desktop-availability-copy,
 .delivery-desktop-notifications-copy {
   margin-top: 0.45rem;
   color: #fff;
@@ -403,12 +475,20 @@
   line-height: 1.2;
 }
 
+.delivery-desktop-availability-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.delivery-desktop-availability-actions,
 .delivery-desktop-notifications-actions {
   display: grid;
   gap: 0.65rem;
   margin-top: 1rem;
 }
 
+.delivery-drawer-availability-chevron,
 .delivery-drawer-notifications-chevron {
   display: inline-flex;
   width: 1rem;
@@ -416,6 +496,7 @@
   color: #d2fd6e;
 }
 
+.delivery-drawer-availability-chevron svg,
 .delivery-drawer-notifications-chevron svg {
   width: 100%;
   height: 100%;
@@ -606,6 +687,26 @@
   transform: translateY(1px);
 }
 
+.delivery-drawer-availability-actions .availability-control {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.delivery-drawer-availability-actions .availability-option {
+  min-height: 2.55rem;
+  font-size: 0.72rem;
+  padding: 0 0.35rem;
+}
+
+.delivery-desktop-availability-actions .availability-control {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.delivery-desktop-availability-actions .availability-option {
+  min-height: 2.55rem;
+  font-size: 0.72rem;
+  padding: 0 0.35rem;
+}
+
 .delivery-order-card {
   border: 1px solid rgb(255 255 255 / 0.08);
   border-radius: 1.5rem;
@@ -629,6 +730,59 @@
 .delivery-order-card-active {
   border-color: rgb(210 253 110 / 0.45);
   background: linear-gradient(135deg, rgb(210 253 110 / 0.12), rgb(135 173 38 / 0.1));
+}
+
+.delivery-orders-empty {
+  border: 1px dashed rgb(210 253 110 / 0.18);
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(circle at top center, rgb(210 253 110 / 0.1), transparent 48%),
+    rgb(255 255 255 / 0.03);
+  padding: 2rem 1.25rem;
+  text-align: center;
+}
+
+.delivery-orders-empty-compact {
+  padding: 1.5rem 1rem;
+}
+
+.delivery-orders-empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4.2rem;
+  height: 4.2rem;
+  border: 1px solid rgb(210 253 110 / 0.18);
+  border-radius: 1.3rem;
+  background:
+    linear-gradient(145deg, rgb(210 253 110 / 0.14), rgb(255 255 255 / 0.03)),
+    rgb(255 255 255 / 0.02);
+  color: #d2fd6e;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.14),
+    0 14px 34px rgb(0 0 0 / 0.22);
+}
+
+.delivery-orders-empty-icon .material-symbols-outlined {
+  font-size: 2rem;
+}
+
+.delivery-orders-empty-copy {
+  margin-top: 1rem;
+  color: var(--color-on-surface);
+  font-size: 0.92rem;
+  line-height: 1.75;
+}
+
+.delivery-orders-empty-shimmer {
+  --shimmer-dur: 1400ms;
+  --shimmer-base: rgb(255 255 255 / 0.22);
+  --shimmer-highlight: #d2fd6e;
+  --shimmer-band: 520%;
+  display: inline-block;
+  max-width: 100%;
+  font-weight: 700;
+  letter-spacing: 0.01em;
 }
 
 .delivery-available-actions {
@@ -1280,11 +1434,34 @@
   padding: 0 1rem 1rem;
 }
 
-:host {
-  --acc-expand: 250ms;
-  --acc-collapse: 250ms;
-  --acc-chevron: 250ms;
-  --acc-ease: cubic-bezier(0.22, 1, 0.36, 1);
+.t-dropdown {
+  transform-origin: top left;
+  transform: scale(var(--dropdown-pre-scale));
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--dropdown-open-dur) var(--dropdown-ease),
+    opacity var(--dropdown-open-dur) var(--dropdown-ease);
+  will-change: transform, opacity;
+}
+.t-dropdown[data-origin="top-right"] { transform-origin: top right; }
+.t-dropdown[data-origin="top-center"] { transform-origin: top center; }
+.t-dropdown[data-origin="bottom-left"] { transform-origin: bottom left; }
+.t-dropdown[data-origin="bottom-center"] { transform-origin: bottom center; }
+.t-dropdown[data-origin="bottom-right"] { transform-origin: bottom right; }
+
+.t-dropdown.is-open {
+  transform: scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+.t-dropdown.is-closing {
+  transform: scale(var(--dropdown-closing-scale));
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--dropdown-close-dur) var(--dropdown-ease),
+    opacity var(--dropdown-close-dur) var(--dropdown-ease);
 }
 
 /* grid-template-rows 0fr -> 1fr gives a clean height animation
@@ -1299,23 +1476,34 @@
   transition: grid-template-rows var(--acc-expand) var(--acc-ease);
 }
 .t-acc-panel-inner {
+  min-height: 0;
   overflow: hidden;
   opacity: 0;
   filter: blur(2px);
+  pointer-events: none;
+  visibility: hidden;
   transition:
     opacity var(--acc-collapse) var(--acc-ease),
-    filter var(--acc-collapse) var(--acc-ease);
+    filter var(--acc-collapse) var(--acc-ease),
+    visibility 0ms linear var(--acc-collapse);
 }
 .t-acc[data-open="true"] .t-acc-panel-inner {
   opacity: 1;
   filter: blur(0);
+  pointer-events: auto;
+  visibility: visible;
   transition:
     opacity var(--acc-expand) var(--acc-ease),
-    filter var(--acc-expand) var(--acc-ease);
+    filter var(--acc-expand) var(--acc-ease),
+    visibility 0ms linear 0ms;
 }
 /* Flip the chevron vertically to turn the "v" into a "^".
    scaleY(-1) about the centre passes through a flat line at
-   the midpoint and animates consistently across browsers. */
+   the midpoint (same look as a `d:` path morph) but animates
+   in every browser, unlike CSS `d:` morphing (Chromium only).
+   The chevron path is symmetric about the 16x16 viewBox
+   centre, so the flip lands exactly on the "^"; non-scaling
+   -stroke keeps the stroke width constant through the flip. */
 .t-acc-chevron {
   display: inline-flex;
   transform: scaleY(1);
@@ -1328,6 +1516,10 @@
 }
 
 @media (min-width: 900px) {
+  .delivery-topbar {
+    overflow: visible;
+  }
+
   .delivery-nav-shell {
     grid-template-columns: minmax(15rem, 1fr) auto auto;
   }
@@ -1354,6 +1546,7 @@
     display: none;
   }
 
+  .delivery-desktop-availability,
   .delivery-desktop-notifications {
     display: block;
   }
@@ -1393,6 +1586,7 @@
 }
 
 @media (max-width: 899px) {
+  .delivery-desktop-availability,
   .delivery-desktop-notifications {
     display: none;
   }
@@ -1437,9 +1631,11 @@
   .availability-option,
   .notification-status-dot,
   .t-modal,
-  .t-acc-panel,
-  .t-acc-panel-inner,
-  .t-acc-chevron {
+  .t-dropdown {
+    transition: none !important;
+  }
+
+  .t-acc-panel, .t-acc-panel-inner, .t-acc-chevron {
     transition: none !important;
   }
 
