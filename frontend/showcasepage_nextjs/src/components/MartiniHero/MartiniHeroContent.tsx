@@ -2,6 +2,9 @@
 
 import Image from "next/image";
 import type { FormEvent } from "react";
+import { FaultyTerminal } from "../ReactBits/FaultyTerminal";
+import { LetterGlitch } from "../ReactBits/LetterGlitch";
+import { Waves } from "../ReactBits/Waves";
 import { MartiniBeamsBackground } from "./MartiniBeamsBackground";
 
 const indicators = [
@@ -10,6 +13,35 @@ const indicators = [
   { value: "14", label: "municipios cubiertos" },
   { value: "220+", label: "repartidores al tiro" },
 ];
+
+const commissionPanels = [
+  { label: "OLVIDATE" },
+  { label: "DEL" },
+  { label: "33%", accent: true, detail: "Que cobran las plataformas de comida" },
+  { label: "Tu tienes los medios" },
+  { label: "Nosotros te damos la tecnología" },
+];
+
+const commissionWaveThemes = [
+  {
+    className: "commission-waves commission-waves--orange",
+    panelClassName: "commission-panel--waves-orange",
+    lineColor: "rgba(255, 255, 255, 0.82)",
+    backgroundColor: "#FF8F00",
+  },
+  {
+    className: "commission-waves commission-waves--red",
+    panelClassName: "commission-panel--waves-red",
+    lineColor: "rgba(255, 255, 255, 0.82)",
+    backgroundColor: "#FF441F",
+  },
+  {
+    className: "commission-waves commission-waves--green",
+    panelClassName: "commission-panel--waves-green",
+    lineColor: "rgba(0, 0, 0, 0.62)",
+    backgroundColor: "#06C167",
+  },
+] as const;
 
 const howSteps = ["Afíliate", "Deja todo listo", "Vende", "Manda las frías", "Crece"];
 
@@ -99,6 +131,74 @@ export function MartiniHeroContent() {
               <span>{indicator.label}</span>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section className="martini-scene martini-scene--commission" aria-label="Olvidate del 33%">
+        <div className="commission-stack" aria-hidden="true">
+          {commissionPanels.map((panel, index) => {
+            const waveTheme = index <= 2 ? commissionWaveThemes[index] : null;
+            const hasFaultyTerminal = index === 3;
+            const hasLetterGlitch = index === 4;
+
+            return (
+              <article
+                className={`commission-panel${panel.accent ? " commission-panel--accent" : ""}${waveTheme ? ` commission-panel--waves ${waveTheme.panelClassName}` : ""}${hasFaultyTerminal ? " commission-panel--faulty" : ""}${hasLetterGlitch ? " commission-panel--letterglitch" : ""}`}
+                key={panel.label}
+                style={{ zIndex: index + 1 }}
+              >
+                {waveTheme ? (
+                  <Waves
+                    className={waveTheme.className}
+                    lineColor={waveTheme.lineColor}
+                    backgroundColor={waveTheme.backgroundColor}
+                    waveSpeedX={0.016}
+                    waveSpeedY={0.008}
+                    waveAmpX={28}
+                    waveAmpY={14}
+                    xGap={14}
+                    yGap={34}
+                    friction={0.92}
+                    tension={0.004}
+                    maxCursorMove={90}
+                  />
+                ) : null}
+                {hasFaultyTerminal ? (
+                  <FaultyTerminal
+                    className="commission-faulty-terminal"
+                    tint="#d2fd6e"
+                    brightness={1.2}
+                    gridMul={[3, 2]}
+                    digitSize={1.2}
+                    scanlineIntensity={0.18}
+                    glitchAmount={1.05}
+                    flickerAmount={0.7}
+                    noiseAmp={1.05}
+                    chromaticAberration={0}
+                    curvature={0.08}
+                    mouseStrength={0.12}
+                    pageLoadAnimation={false}
+                  />
+                ) : null}
+                {hasLetterGlitch ? (
+                  <LetterGlitch
+                    className="commission-letterglitch"
+                    glitchColors={["#5f8f13", "#95da08", "#c8ff3d"]}
+                    glitchSpeed={60}
+                    outerVignette
+                    centerVignette={false}
+                    smooth
+                  />
+                ) : null}
+                <div className="commission-panel__content">
+                  <strong className={panel.accent ? "commission-panel__flicker" : undefined}>
+                    {panel.label}
+                  </strong>
+                  {panel.detail ? <span className="commission-panel__detail">{panel.detail}</span> : null}
+                </div>
+              </article>
+            );
+          })}
         </div>
       </section>
 

@@ -4,7 +4,7 @@ const degToRad = (degrees: number) => (degrees * Math.PI) / 180;
 
 export const SCROLL_TRIGGER = {
   start: "top top",
-  end: "+=7200",
+  end: "+=8400",
   scrub: 0.45,
   pin: true,
 };
@@ -17,6 +17,8 @@ export const SCENE_DURATION = {
   copyIn: 1,
   indicatorsIn: 1,
   transition: 0.8,
+  commissionIn: 1,
+  commissionPanels: 4.4,
   platformIn: 1,
   howItWorksIn: 1.2,
   ecosystemIn: 1,
@@ -27,6 +29,7 @@ export const SCENE_DURATION = {
 export const SCENE_HOLD = {
   heroIntro: 1.2,
   operation: 1.5,
+  commission: 0.8,
   platform: 1.35,
   howItWorks: 1.4,
   ecosystem: 1.35,

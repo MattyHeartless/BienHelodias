@@ -1,0 +1,28 @@
+.reactbits-waves {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.reactbits-waves::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: transparent;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.reactbits-waves__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

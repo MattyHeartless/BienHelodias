@@ -7,6 +7,7 @@ import { applyGlassState, glassStates, SCROLL_TRIGGER } from "./martiniTimeline.
 import {
   addAffiliateScene,
   addBrandScene,
+  addCommissionScene,
   addEcosystemScene,
   addFinalScene,
   addGlassIntroScene,
@@ -29,6 +30,7 @@ export function createMartiniScrollTimeline(root: HTMLElement, glass: Object3D) 
         ".operation-copy",
         ".operation-indicators",
         ".operation-indicator",
+        ".commission-stack",
         ".platform-copy",
         ".platform-drinks",
         ".platform-stonks",
@@ -63,6 +65,7 @@ export function createMartiniScrollTimeline(root: HTMLElement, glass: Object3D) 
     addGlassIntroScene(scrollTl, glass);
     addBrandScene(scrollTl);
     addOperationScene(scrollTl, glass);
+    addCommissionScene(scrollTl);
     addPlatformScene(scrollTl);
     addHowItWorksScene(scrollTl);
     addEcosystemScene(scrollTl);

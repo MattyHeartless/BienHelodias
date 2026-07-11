@@ -233,6 +233,88 @@ export function addOperationScene(scrollTl: MartiniTimeline, glass: Object3D) {
     );
 }
 
+export function addCommissionScene(scrollTl: MartiniTimeline) {
+  const panels = gsap.utils.toArray<HTMLElement>(".commission-panel");
+  const commissionStepWeights = [1, 1.3, 1, 1];
+  const totalCommissionWeight = commissionStepWeights.reduce((sum, weight) => sum + weight, 0);
+
+  gsap.set(panels, { yPercent: 100, autoAlpha: 1 });
+  if (panels[0]) {
+    gsap.set(panels[0], { yPercent: 0 });
+  }
+
+  scrollTl.addLabel("commissionIn");
+  scrollTl
+    .fromTo(
+      ".commission-stack",
+      { opacity: 0, y: 48, scale: 0.96 },
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: SCENE_DURATION.commissionIn,
+        ease: "power2.out",
+      },
+      "commissionIn"
+    );
+
+  scrollTl.addLabel("commissionPanels");
+  panels.slice(1).forEach((panel, index) => {
+    const position = index === 0 ? "commissionPanels" : ">";
+
+    scrollTl.to(
+      panel,
+      {
+        yPercent: 0,
+        duration: SCENE_DURATION.commissionPanels * (commissionStepWeights[index] / totalCommissionWeight),
+        ease: "power1.inOut",
+      },
+      position
+    );
+
+    if (index === 3) {
+      scrollTl.to(
+        ".hero-logo",
+        {
+          color: "#ffffff",
+          textShadow:
+            "0 8px 24px rgba(0, 0, 0, 0.42), 0 0 16px rgba(255, 255, 255, 0.2), 0 0 42px rgba(255, 255, 255, 0.14)",
+          duration: 0.45,
+          ease: "power2.inOut",
+        },
+        position
+      );
+    }
+  });
+
+  addSceneHold(scrollTl, SCENE_HOLD.commission, "commissionHold");
+
+  scrollTl.addLabel("commissionOut");
+  scrollTl
+    .to(
+      ".hero-logo",
+      {
+        color: "var(--martini-lime)",
+        textShadow:
+          "0 8px 24px rgba(0, 0, 0, 0.42), 0 0 16px rgba(200, 255, 61, 0.18), 0 0 42px rgba(200, 255, 61, 0.12)",
+        duration: 0.35,
+        ease: "power2.inOut",
+      },
+      "commissionOut"
+    )
+    .to(
+      ".commission-stack",
+      {
+        opacity: 0,
+        y: -32,
+        scale: 0.98,
+        duration: SCENE_DURATION.transition,
+        ease: "power2.inOut",
+      },
+      "commissionOut"
+    );
+}
+
 export function addPlatformScene(scrollTl: MartiniTimeline) {
   const { fadeUpFrom, fadeUpTo, fadeDownFrom, fadeLeftFrom } = animationPresets;
 

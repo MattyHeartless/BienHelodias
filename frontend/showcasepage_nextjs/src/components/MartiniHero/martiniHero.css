@@ -259,6 +259,18 @@
   line-height: 0.9;
 }
 
+.hero-overlay h2,
+.hero-main-copy,
+.operation-copy h2,
+.commission-title,
+.platform-copy h2,
+.how-reinforce-copy,
+.ecosystem-copy h2,
+.affiliate-title__plain,
+.final-cta h2 {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5) !important;
+}
+
 .hero-overlay span {
   color: var(--martini-muted);
   font-size: 0.78rem;
@@ -331,6 +343,7 @@
   color: var(--martini-lime);
   white-space: nowrap;
   text-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.42),
     0 0 16px rgba(200, 255, 61, 0.18),
     0 0 42px rgba(200, 255, 61, 0.12);
 }
@@ -427,6 +440,323 @@
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.martini-scene--commission {
+  inset: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.commission-waves {
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.commission-faulty-terminal {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.commission-letterglitch {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.commission-stack {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.commission-title {
+  max-width: 8ch;
+  font-size: clamp(2.6rem, 5vw, 5.4rem);
+  text-align: left;
+}
+
+.commission-panel {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: clamp(1.5rem, 4vw, 4rem);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(200, 255, 61, 0.2), transparent 24%),
+    radial-gradient(circle at 78% 12%, rgba(83, 153, 63, 0.16), transparent 20%),
+    linear-gradient(180deg, #090d09 0%, #050706 100%);
+  text-align: center;
+}
+
+.commission-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(5, 7, 6, 0.08), transparent 16%, transparent 84%, rgba(5, 7, 6, 0.24)),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: auto, 6rem 6rem, 6rem 6rem;
+  pointer-events: none;
+}
+
+.commission-panel--waves {
+  background:
+    linear-gradient(180deg, rgb(244 247 235 / 0.8), rgb(244 247 235 / 0.68)),
+    rgb(244 247 235 / 0.72);
+}
+
+.commission-panel--waves::before {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.12), transparent 16%, transparent 84%, rgb(175 201 123 / 0.14)),
+    linear-gradient(90deg, rgb(113 171 29 / 0.06) 1px, transparent 1px),
+    linear-gradient(rgb(113 171 29 / 0.06) 1px, transparent 1px);
+}
+
+.commission-panel--waves-orange {
+  background:
+    linear-gradient(180deg, rgb(255 143 0 / 0.86), rgb(255 143 0 / 0.74)),
+    #ff8f00;
+}
+
+.commission-panel--waves-orange::before {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.12), transparent 16%, transparent 84%, rgb(122 61 0 / 0.14)),
+    linear-gradient(90deg, rgb(255 255 255 / 0.1) 1px, transparent 1px),
+    linear-gradient(rgb(255 255 255 / 0.1) 1px, transparent 1px);
+}
+
+.commission-panel--waves-red {
+  background:
+    linear-gradient(180deg, rgb(255 68 31 / 0.88), rgb(255 68 31 / 0.76)),
+    #ff441f;
+}
+
+.commission-panel--waves-red::before {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.12), transparent 16%, transparent 84%, rgb(140 28 7 / 0.14)),
+    linear-gradient(90deg, rgb(255 255 255 / 0.1) 1px, transparent 1px),
+    linear-gradient(rgb(255 255 255 / 0.1) 1px, transparent 1px);
+}
+
+.commission-panel--waves-green {
+  background:
+    linear-gradient(180deg, rgb(6 193 103 / 0.88), rgb(6 193 103 / 0.76)),
+    #06c167;
+}
+
+.commission-panel--waves-green::before {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.12), transparent 16%, transparent 84%, rgb(4 96 51 / 0.14)),
+    linear-gradient(90deg, rgb(255 255 255 / 0.1) 1px, transparent 1px),
+    linear-gradient(rgb(255 255 255 / 0.1) 1px, transparent 1px);
+}
+
+.commission-panel--faulty {
+  background:
+    radial-gradient(circle at 50% 18%, rgba(210, 253, 110, 0.08), transparent 20%),
+    linear-gradient(180deg, #020403 0%, #060806 100%);
+}
+
+.commission-panel--faulty::before {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 18%, transparent 82%, rgba(210, 253, 110, 0.05)),
+    linear-gradient(90deg, rgba(210, 253, 110, 0.03) 1px, transparent 1px),
+    linear-gradient(rgba(210, 253, 110, 0.03) 1px, transparent 1px);
+}
+
+.commission-panel--letterglitch {
+  background:
+    radial-gradient(circle at 50% 18%, rgba(200, 255, 61, 0.08), transparent 24%),
+    linear-gradient(180deg, #040704 0%, #020302 100%);
+}
+
+.commission-panel--letterglitch::before {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 18%, transparent 82%, rgba(200, 255, 61, 0.05)),
+    linear-gradient(90deg, rgba(200, 255, 61, 0.025) 1px, transparent 1px),
+    linear-gradient(rgba(200, 255, 61, 0.025) 1px, transparent 1px);
+}
+
+.commission-panel:nth-child(2) {
+  background:
+    radial-gradient(circle at 46% 18%, rgba(200, 255, 61, 0.15), transparent 22%),
+    radial-gradient(circle at 82% 16%, rgba(115, 177, 42, 0.14), transparent 18%),
+    linear-gradient(180deg, #0c130c 0%, #060806 100%);
+}
+
+.commission-panel:nth-child(3) {
+  background:
+    radial-gradient(circle at 50% 18%, rgba(200, 255, 61, 0.26), transparent 20%),
+    radial-gradient(circle at 25% 14%, rgba(89, 190, 120, 0.14), transparent 16%),
+    linear-gradient(180deg, #11180f 0%, #080a07 100%);
+}
+
+.commission-panel:nth-child(4),
+.commission-panel:nth-child(5) {
+  background:
+    radial-gradient(circle at 50% 16%, rgba(200, 255, 61, 0.16), transparent 22%),
+    radial-gradient(circle at 78% 12%, rgba(83, 153, 63, 0.14), transparent 16%),
+    linear-gradient(180deg, #0a0e09 0%, #050706 100%);
+}
+
+.commission-panel strong {
+  position: relative;
+  z-index: 1;
+  max-width: 12ch;
+  color: var(--martini-ink);
+  font-size: clamp(3.8rem, 10vw, 10rem);
+  font-weight: 900;
+  letter-spacing: -0.07em;
+  line-height: 0.85;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.commission-panel--waves strong {
+  color: #5a8d16;
+  text-shadow:
+    0 2px 0 rgb(255 255 255 / 0.65),
+    0 10px 24px rgb(90 141 22 / 0.18);
+}
+
+.commission-panel--waves-orange strong {
+  color: #fffdf8;
+  text-shadow:
+    0 2px 0 rgb(128 57 0 / 0.28),
+    0 10px 24px rgb(128 57 0 / 0.24);
+}
+
+.commission-panel--waves-red strong {
+  color: #fff7f3;
+  text-shadow:
+    0 2px 0 rgb(122 26 6 / 0.24),
+    0 10px 24px rgb(122 26 6 / 0.2);
+}
+
+.commission-panel--waves-green strong {
+  color: #f5fff9;
+  text-shadow:
+    0 2px 0 rgb(4 96 51 / 0.24),
+    0 10px 24px rgb(4 96 51 / 0.2);
+}
+
+.commission-panel__content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: 0.9rem;
+}
+
+.commission-panel--accent strong {
+  font-size: clamp(5.4rem, 18vw, 13rem);
+  font-weight: 900;
+}
+
+.commission-panel__detail {
+  max-width: 18ch;
+  color: rgba(245, 246, 239, 0.82);
+  font-size: clamp(1rem, 2vw, 1.6rem);
+  font-weight: 700;
+  line-height: 1.1;
+  text-transform: none;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.commission-panel--waves-orange .commission-panel__detail {
+  color: rgb(255 251 241 / 0.9);
+  text-shadow:
+    0 1px 0 rgb(128 57 0 / 0.24),
+    0 8px 18px rgb(128 57 0 / 0.16);
+}
+
+.commission-panel--waves-red .commission-panel__detail {
+  color: rgb(255 245 240 / 0.9);
+  text-shadow:
+    0 1px 0 rgb(122 26 6 / 0.22),
+    0 8px 18px rgb(122 26 6 / 0.14);
+}
+
+.commission-panel--waves-green .commission-panel__detail {
+  color: rgb(245 255 249 / 0.92);
+  text-shadow:
+    0 1px 0 rgb(4 96 51 / 0.22),
+    0 8px 18px rgb(4 96 51 / 0.14);
+}
+
+.commission-support {
+  position: absolute;
+  left: clamp(1rem, 3vw, 3rem);
+  right: auto;
+  bottom: clamp(1rem, 3vw, 2.6rem);
+  z-index: 8;
+  display: grid;
+  justify-items: start;
+  gap: 0.8rem;
+  width: min(100% - 2rem, 34rem);
+  padding: clamp(1rem, 2vw, 1.3rem);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(180deg, rgba(8, 12, 10, 0.8), rgba(8, 12, 10, 0.6)),
+    rgba(8, 12, 10, 0.72);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(16px);
+  text-align: left;
+}
+
+.commission-subtitle,
+.commission-detail {
+  max-width: 30rem;
+  color: var(--martini-muted);
+  font-size: clamp(0.98rem, 1.2vw, 1.05rem);
+  line-height: 1.4;
+}
+
+.commission-detail {
+  color: rgba(245, 246, 239, 0.82);
+}
+
+.commission-panel__flicker {
+  color: #6eab12;
+  animation: commissionFlicker 0.2s steps(2, end) infinite alternate;
+}
+
+@keyframes commissionFlicker {
+  0% {
+    opacity: 1;
+    text-shadow:
+      2px 2px 4px rgba(0, 0, 0, 0.5),
+      0 0 16px rgba(200, 255, 61, 0.18);
+  }
+
+  38% {
+    opacity: 0.82;
+    text-shadow:
+      2px 2px 4px rgba(0, 0, 0, 0.5),
+      0 0 28px rgba(200, 255, 61, 0.24);
+  }
+
+  40% {
+    opacity: 0.28;
+  }
+
+  44% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.92;
+    text-shadow:
+      2px 2px 4px rgba(0, 0, 0, 0.5),
+      0 0 34px rgba(200, 255, 61, 0.32);
+  }
 }
 
 .martini-scene--platform {
@@ -865,8 +1195,44 @@
     font-size: clamp(2.7rem, 17vw, 5.2rem);
   }
 
+  .commission-title {
+    max-width: 100%;
+    font-size: clamp(2.5rem, 14vw, 4.8rem);
+  }
+
+  .commission-subtitle,
+  .commission-detail {
+    font-size: 0.98rem;
+  }
+
+  .commission-panel {
+    padding: 1.2rem;
+  }
+
+  .commission-panel strong {
+    font-size: clamp(2.8rem, 14vw, 4.8rem);
+  }
+
+  .commission-panel--accent strong {
+    font-size: clamp(4rem, 22vw, 6.5rem);
+  }
+
+  .commission-panel__detail {
+    font-size: clamp(0.9rem, 4.2vw, 1.15rem);
+  }
+
+  .commission-support {
+    left: 0.8rem;
+    right: 0.8rem;
+    bottom: 0.8rem;
+    width: auto;
+    gap: 0.55rem;
+    padding: 0.9rem;
+  }
+
   .operation-copy h2,
   .platform-copy h2,
+  .commission-title,
   .how-reinforce-copy,
   .ecosystem-copy h2,
   .affiliate-title,
