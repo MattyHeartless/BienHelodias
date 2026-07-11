@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import type { FormEvent } from "react";
-import { LetterGlitch } from "../ReactBits/LetterGlitch";
 import { MartiniBeamsBackground } from "./MartiniBeamsBackground";
 
 const indicators = [
@@ -115,22 +114,22 @@ export function MartiniHeroContent() {
         <div className="commission-stack" aria-hidden="true">
           {commissionPanels.map((panel, index) => {
             const hasFaultyTerminal = index === 3;
-            const hasLetterGlitch = index === 4;
+            const hasMatrixBackground = index === 4;
 
             return (
               <article
-                className={`commission-panel${panel.accent ? " commission-panel--accent" : ""}${index === 0 ? " commission-panel--orange" : ""}${index === 1 ? " commission-panel--red" : ""}${index === 2 ? " commission-panel--black" : ""}${hasFaultyTerminal ? " commission-panel--simple" : ""}${hasLetterGlitch ? " commission-panel--letterglitch" : ""}`}
+                className={`commission-panel${panel.accent ? " commission-panel--accent" : ""}${index === 0 ? " commission-panel--orange" : ""}${index === 1 ? " commission-panel--red" : ""}${index === 2 ? " commission-panel--black" : ""}${hasFaultyTerminal ? " commission-panel--simple" : ""}${hasMatrixBackground ? " commission-panel--matrix" : ""}`}
                 key={panel.label}
                 style={{ zIndex: index + 1 }}
               >
-                {hasLetterGlitch ? (
-                  <LetterGlitch
-                    className="commission-letterglitch"
-                    glitchColors={["#5f8f13", "#95da08", "#c8ff3d"]}
-                    glitchSpeed={60}
-                    outerVignette
-                    centerVignette={false}
-                    smooth
+                {hasMatrixBackground ? (
+                  <Image
+                    className="commission-matrix-image"
+                    src="/scene/commission-tab5-matrix-bg.png"
+                    alt=""
+                    fill
+                    sizes="100vw"
+                    priority={false}
                   />
                 ) : null}
                 <div className="commission-panel__content">

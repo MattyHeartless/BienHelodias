@@ -448,11 +448,13 @@
   overflow: hidden;
 }
 
-.commission-letterglitch {
+.commission-matrix-image {
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  object-fit: cover;
+  opacity: 0.92;
 }
 
 .commission-stack {
@@ -534,13 +536,13 @@
     linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 18%, transparent 82%, rgba(210, 253, 110, 0.04));
 }
 
-.commission-panel--letterglitch {
+.commission-panel--matrix {
   background:
     radial-gradient(circle at 50% 18%, rgba(200, 255, 61, 0.08), transparent 24%),
     linear-gradient(180deg, #040704 0%, #020302 100%);
 }
 
-.commission-panel--letterglitch::before {
+.commission-panel--matrix::before {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 18%, transparent 82%, rgba(200, 255, 61, 0.05)),
     linear-gradient(90deg, rgba(200, 255, 61, 0.025) 1px, transparent 1px),
