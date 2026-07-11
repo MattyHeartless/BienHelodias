@@ -448,19 +448,6 @@
   overflow: hidden;
 }
 
-.commission-waves {
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.commission-faulty-terminal {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
 .commission-letterglitch {
   position: absolute;
   inset: 0;
@@ -506,69 +493,45 @@
   pointer-events: none;
 }
 
-.commission-panel--waves {
+.commission-panel--orange {
   background:
-    linear-gradient(180deg, rgb(244 247 235 / 0.8), rgb(244 247 235 / 0.68)),
-    rgb(244 247 235 / 0.72);
-}
-
-.commission-panel--waves::before {
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.12), transparent 16%, transparent 84%, rgb(175 201 123 / 0.14)),
-    linear-gradient(90deg, rgb(113 171 29 / 0.06) 1px, transparent 1px),
-    linear-gradient(rgb(113 171 29 / 0.06) 1px, transparent 1px);
-}
-
-.commission-panel--waves-orange {
-  background:
-    linear-gradient(180deg, rgb(255 143 0 / 0.86), rgb(255 143 0 / 0.74)),
+    linear-gradient(180deg, rgb(255 143 0 / 0.92), rgb(255 143 0 / 0.82)),
     #ff8f00;
 }
 
-.commission-panel--waves-orange::before {
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.12), transparent 16%, transparent 84%, rgb(122 61 0 / 0.14)),
-    linear-gradient(90deg, rgb(255 255 255 / 0.1) 1px, transparent 1px),
-    linear-gradient(rgb(255 255 255 / 0.1) 1px, transparent 1px);
+.commission-panel--orange::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 22%, transparent 78%, rgba(128, 57, 0, 0.14));
 }
 
-.commission-panel--waves-red {
+.commission-panel--red {
   background:
-    linear-gradient(180deg, rgb(255 68 31 / 0.88), rgb(255 68 31 / 0.76)),
+    linear-gradient(180deg, rgb(255 68 31 / 0.9), rgb(255 68 31 / 0.8)),
     #ff441f;
 }
 
-.commission-panel--waves-red::before {
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.12), transparent 16%, transparent 84%, rgb(140 28 7 / 0.14)),
-    linear-gradient(90deg, rgb(255 255 255 / 0.1) 1px, transparent 1px),
-    linear-gradient(rgb(255 255 255 / 0.1) 1px, transparent 1px);
+.commission-panel--red::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 22%, transparent 78%, rgba(122, 26, 6, 0.14));
 }
 
-.commission-panel--waves-green {
+.commission-panel--black {
   background:
-    linear-gradient(180deg, rgb(6 193 103 / 0.88), rgb(6 193 103 / 0.76)),
-    #06c167;
+    linear-gradient(180deg, rgb(7 10 8 / 0.96), rgb(4 6 5 / 0.92)),
+    #050706;
 }
 
-.commission-panel--waves-green::before {
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.12), transparent 16%, transparent 84%, rgb(4 96 51 / 0.14)),
-    linear-gradient(90deg, rgb(255 255 255 / 0.1) 1px, transparent 1px),
-    linear-gradient(rgb(255 255 255 / 0.1) 1px, transparent 1px);
+.commission-panel--black::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 20%, transparent 80%, rgba(200, 255, 61, 0.05));
 }
 
-.commission-panel--faulty {
+.commission-panel--simple {
   background:
-    radial-gradient(circle at 50% 18%, rgba(210, 253, 110, 0.08), transparent 20%),
-    linear-gradient(180deg, #020403 0%, #060806 100%);
+    radial-gradient(circle at 50% 18%, rgba(210, 253, 110, 0.06), transparent 22%),
+    linear-gradient(180deg, #050706 0%, #030403 100%);
 }
 
-.commission-panel--faulty::before {
+.commission-panel--simple::before {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 18%, transparent 82%, rgba(210, 253, 110, 0.05)),
-    linear-gradient(90deg, rgba(210, 253, 110, 0.03) 1px, transparent 1px),
-    linear-gradient(rgba(210, 253, 110, 0.03) 1px, transparent 1px);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 18%, transparent 82%, rgba(210, 253, 110, 0.04));
 }
 
 .commission-panel--letterglitch {
@@ -582,20 +545,6 @@
     linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 18%, transparent 82%, rgba(200, 255, 61, 0.05)),
     linear-gradient(90deg, rgba(200, 255, 61, 0.025) 1px, transparent 1px),
     linear-gradient(rgba(200, 255, 61, 0.025) 1px, transparent 1px);
-}
-
-.commission-panel:nth-child(2) {
-  background:
-    radial-gradient(circle at 46% 18%, rgba(200, 255, 61, 0.15), transparent 22%),
-    radial-gradient(circle at 82% 16%, rgba(115, 177, 42, 0.14), transparent 18%),
-    linear-gradient(180deg, #0c130c 0%, #060806 100%);
-}
-
-.commission-panel:nth-child(3) {
-  background:
-    radial-gradient(circle at 50% 18%, rgba(200, 255, 61, 0.26), transparent 20%),
-    radial-gradient(circle at 25% 14%, rgba(89, 190, 120, 0.14), transparent 16%),
-    linear-gradient(180deg, #11180f 0%, #080a07 100%);
 }
 
 .commission-panel:nth-child(4),
@@ -619,32 +568,25 @@
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-.commission-panel--waves strong {
-  color: #5a8d16;
-  text-shadow:
-    0 2px 0 rgb(255 255 255 / 0.65),
-    0 10px 24px rgb(90 141 22 / 0.18);
-}
-
-.commission-panel--waves-orange strong {
+.commission-panel--orange strong {
   color: #fffdf8;
   text-shadow:
     0 2px 0 rgb(128 57 0 / 0.28),
     0 10px 24px rgb(128 57 0 / 0.24);
 }
 
-.commission-panel--waves-red strong {
+.commission-panel--red strong {
   color: #fff7f3;
   text-shadow:
     0 2px 0 rgb(122 26 6 / 0.24),
     0 10px 24px rgb(122 26 6 / 0.2);
 }
 
-.commission-panel--waves-green strong {
-  color: #f5fff9;
+.commission-panel--black strong {
+  color: #95da08;
   text-shadow:
-    0 2px 0 rgb(4 96 51 / 0.24),
-    0 10px 24px rgb(4 96 51 / 0.2);
+    0 2px 0 rgb(5 7 6 / 0.42),
+    0 10px 24px rgb(149 218 8 / 0.18);
 }
 
 .commission-panel__content {
@@ -670,25 +612,25 @@
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-.commission-panel--waves-orange .commission-panel__detail {
+.commission-panel--orange .commission-panel__detail {
   color: rgb(255 251 241 / 0.9);
   text-shadow:
     0 1px 0 rgb(128 57 0 / 0.24),
     0 8px 18px rgb(128 57 0 / 0.16);
 }
 
-.commission-panel--waves-red .commission-panel__detail {
+.commission-panel--red .commission-panel__detail {
   color: rgb(255 245 240 / 0.9);
   text-shadow:
     0 1px 0 rgb(122 26 6 / 0.22),
     0 8px 18px rgb(122 26 6 / 0.14);
 }
 
-.commission-panel--waves-green .commission-panel__detail {
-  color: rgb(245 255 249 / 0.92);
+.commission-panel--black .commission-panel__detail {
+  color: rgb(219 251 160 / 0.92);
   text-shadow:
-    0 1px 0 rgb(4 96 51 / 0.22),
-    0 8px 18px rgb(4 96 51 / 0.14);
+    0 1px 0 rgb(5 7 6 / 0.28),
+    0 8px 18px rgb(149 218 8 / 0.12);
 }
 
 .commission-support {
