@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import type { FormEvent } from "react";
+import { useEffect, useRef, type FormEvent } from "react";
 import { MartiniBeamsBackground } from "./MartiniBeamsBackground";
 
 const indicators = [
@@ -12,7 +12,7 @@ const indicators = [
 ];
 
 const commissionPanels = [
-  { label: "OLVIDATE" },
+  { label: "OLVÍDATE" },
   { label: "DEL" },
   { label: "33%", accent: true, detail: "Que cobran las plataformas de comida" },
   { label: "Tu tienes los medios" },
@@ -22,9 +22,24 @@ const commissionPanels = [
 const howSteps = ["Afíliate", "Deja todo listo", "Vende", "Manda las frías", "Crece"];
 
 const ecosystemApps = [
-  { src: "/scene/eco_tienda.png", alt: "Sitio de compra de BienHelodias", label: "Tienda para pedir" },
-  { src: "/scene/eco_admin.png", alt: "Administrador de BienHelodias", label: "Admin al tiro" },
-  { src: "/scene/eco_envio.png", alt: "App de reparto de BienHelodias", label: "Reparto en corto" },
+  {
+    video: "/videos/bien-helodias-store-showcase.webm",
+    poster: "/scene/eco_tienda.png",
+    alt: "Recorrido por la tienda de BienHelodias",
+    label: "Tienda para pedir",
+  },
+  {
+    video: "/videos/bien-helodias-admin-showcase.webm",
+    poster: "/scene/eco_admin.png",
+    alt: "Recorrido por el administrador de BienHelodias",
+    label: "Admin al tiro",
+  },
+  {
+    video: "/videos/bien-helodias-delivery-showcase.webm",
+    poster: "/scene/eco_envio.png",
+    alt: "Recorrido por la app de reparto de BienHelodias",
+    label: "Reparto en corto",
+  },
 ];
 
 const whatsappPhone = "523318791893";
@@ -60,6 +75,43 @@ function handleAffiliateScroll() {
 }
 
 export function MartiniHeroContent() {
+  const ecosystemAppsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const ecosystemAppsElement = ecosystemAppsRef.current;
+    if (!ecosystemAppsElement) {
+      return;
+    }
+
+    const apps = Array.from(ecosystemAppsElement.querySelectorAll<HTMLElement>(".ecosystem-app"));
+    const videos = Array.from(ecosystemAppsElement.querySelectorAll<HTMLVideoElement>("video"));
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const syncPlayback = () => {
+      const isSceneVisible = apps.some((app) => Number.parseFloat(window.getComputedStyle(app).opacity) > 0.5);
+
+      videos.forEach((video) => {
+        if (isSceneVisible && !reducedMotion.matches) {
+          void video.play().catch(() => undefined);
+          return;
+        }
+
+        video.pause();
+      });
+    };
+
+    const sceneObserver = new MutationObserver(syncPlayback);
+    apps.forEach((app) => sceneObserver.observe(app, { attributes: true, attributeFilter: ["style"] }));
+    reducedMotion.addEventListener("change", syncPlayback);
+    syncPlayback();
+
+    return () => {
+      sceneObserver.disconnect();
+      reducedMotion.removeEventListener("change", syncPlayback);
+      videos.forEach((video) => video.pause());
+    };
+  }, []);
+
   return (
     <div className="martini-content">
       <div className="hero-overlay">
@@ -98,7 +150,7 @@ export function MartiniHeroContent() {
       <section className="martini-scene martini-scene--operation" aria-label="Operación">
         <div className="operation-copy">
           <p className="scene-kicker">Al tiro en la calle</p>
-          <h2>Pedidos reales, frías saliendo y todo bajo control</h2>
+          <h2>Pedidos entrando. Frías saliendo.</h2>
         </div>
         <div className="operation-indicators">
           {indicators.map((indicator) => (
@@ -110,7 +162,7 @@ export function MartiniHeroContent() {
         </div>
       </section>
 
-      <section className="martini-scene martini-scene--commission" aria-label="Olvidate del 33%">
+      <section className="martini-scene martini-scene--commission" aria-label="Olvídate del 33%">
         <div className="commission-stack" aria-hidden="true">
           {commissionPanels.map((panel, index) => {
             const hasFaultyTerminal = index === 3;
@@ -181,10 +233,20 @@ export function MartiniHeroContent() {
           <h2>Tres lados conectados. Un solo ritmo.</h2>
           <span>Tienda, admin y reparto jalando parejo.</span>
         </div>
-        <div className="ecosystem-apps">
+        <div className="ecosystem-apps" ref={ecosystemAppsRef}>
           {ecosystemApps.map((app) => (
             <article className="ecosystem-app" key={app.label}>
-              <Image src={app.src} alt={app.alt} width={700} height={700} />
+              <video
+                aria-label={app.alt}
+                loop
+                muted
+                playsInline
+                poster={app.poster}
+                preload="none"
+              >
+                <source src={app.video} type="video/webm" />
+                Tu navegador no puede reproducir este video.
+              </video>
               <p>{app.label}</p>
             </article>
           ))}
@@ -223,7 +285,7 @@ export function MartiniHeroContent() {
       <section className="martini-scene martini-scene--final" aria-label="CTA final">
         <div className="final-cta">
           <p className="scene-kicker">Listo para arrancar</p>
-          <h2>Tu licorería puede vender, coordinar y entregar al tiro desde el primer pedido.</h2>
+          <h2>Vende más. Coordina fácil. Entrega al tiro.</h2>
           <button type="button" onClick={handleAffiliateScroll}>
             <span>Afiliar mi licorería</span>
             <span className="action-icon" aria-hidden="true">→</span>
