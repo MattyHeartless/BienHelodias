@@ -8,7 +8,6 @@ import { applyGlassState, canvasConfig, glassStates } from "./martiniTimeline.co
 
 type MartiniHeroCanvasProps = {
   glass: Object3D;
-  suspendOnMobile?: boolean;
 };
 
 function createFallbackGlass() {
@@ -49,13 +48,13 @@ function normalizeModel(model: Object3D) {
   model.position.sub(center);
 }
 
-export function MartiniHeroCanvas({ glass, suspendOnMobile = false }: MartiniHeroCanvasProps) {
+export function MartiniHeroCanvas({ glass }: MartiniHeroCanvasProps) {
   const mountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const mount = mountRef.current;
     const isMobile = window.matchMedia("(max-width: 900px), (pointer: coarse)").matches;
-    if (!mount || (suspendOnMobile && isMobile)) {
+    if (!mount) {
       return;
     }
 
@@ -78,7 +77,7 @@ export function MartiniHeroCanvas({ glass, suspendOnMobile = false }: MartiniHer
       powerPreference: "high-performance",
     });
     renderer.setPixelRatio(
-      Math.min(window.devicePixelRatio, canvasConfig.renderer.maxPixelRatio)
+      Math.min(window.devicePixelRatio, isMobile ? 1 : canvasConfig.renderer.maxPixelRatio)
     );
     renderer.setSize(mount.clientWidth, mount.clientHeight);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -199,7 +198,7 @@ export function MartiniHeroCanvas({ glass, suspendOnMobile = false }: MartiniHer
       });
       mount.removeChild(renderer.domElement);
     };
-  }, [glass, suspendOnMobile]);
+  }, [glass]);
 
   return <div ref={mountRef} className="martini-canvas" aria-hidden="true" />;
 }

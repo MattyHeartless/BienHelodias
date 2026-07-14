@@ -1096,6 +1096,11 @@
 }
 
 @media (max-width: 900px) {
+  .martini-color-bends--scroll {
+    width: max(720px, 108vmax);
+    height: max(720px, 108vmax);
+  }
+
   .martini-scene {
     padding: 1.1rem;
   }

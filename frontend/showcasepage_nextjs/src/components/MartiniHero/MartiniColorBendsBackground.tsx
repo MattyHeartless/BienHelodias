@@ -21,7 +21,6 @@ type MartiniColorBendsBackgroundProps = {
   iterations?: number;
   intensity?: number;
   bandWidth?: number;
-  suspendOnMobile?: boolean;
 };
 
 const MAX_COLORS = 8 as const;
@@ -166,7 +165,6 @@ export function MartiniColorBendsBackground({
   iterations = 1,
   intensity = 1.5,
   bandWidth = 6,
-  suspendOnMobile = false,
 }: MartiniColorBendsBackgroundProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -194,7 +192,7 @@ export function MartiniColorBendsBackground({
   useEffect(() => {
     const container = containerRef.current;
     const isMobile = window.matchMedia("(max-width: 900px), (pointer: coarse)").matches;
-    if (!container || (suspendOnMobile && isMobile)) {
+    if (!container) {
       return;
     }
 
@@ -241,7 +239,7 @@ export function MartiniColorBendsBackground({
     });
     rendererRef.current = renderer;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 0.8 : 1.5));
     renderer.setClearColor(0x000000, initialProps.transparent ? 0 : 1);
     renderer.domElement.style.width = "100%";
     renderer.domElement.style.height = "100%";
@@ -262,7 +260,17 @@ export function MartiniColorBendsBackground({
     observer.observe(container);
     resizeObserverRef.current = observer;
 
-    const loop = () => {
+    const frameDuration = isMobile ? 1000 / 24 : 0;
+    let previousRenderTime = 0;
+
+    const loop = (time: number) => {
+      frameRef.current = window.requestAnimationFrame(loop);
+
+      if (frameDuration && time - previousRenderTime < frameDuration) {
+        return;
+      }
+
+      previousRenderTime = time;
       const delta = clock.getDelta();
       const elapsed = clock.elapsedTime;
       material.uniforms.uTime.value = elapsed;
@@ -276,7 +284,6 @@ export function MartiniColorBendsBackground({
       (material.uniforms.uPointer.value as THREE.Vector2).copy(pointer);
 
       renderer.render(scene, camera);
-      frameRef.current = window.requestAnimationFrame(loop);
     };
     frameRef.current = window.requestAnimationFrame(loop);
 
@@ -293,7 +300,7 @@ export function MartiniColorBendsBackground({
         container.removeChild(renderer.domElement);
       }
     };
-  }, [suspendOnMobile]);
+  }, []);
 
   useEffect(() => {
     const material = materialRef.current;
