@@ -21,6 +21,7 @@ type MartiniColorBendsBackgroundProps = {
   iterations?: number;
   intensity?: number;
   bandWidth?: number;
+  suspendOnMobile?: boolean;
 };
 
 const MAX_COLORS = 8 as const;
@@ -165,6 +166,7 @@ export function MartiniColorBendsBackground({
   iterations = 1,
   intensity = 1.5,
   bandWidth = 6,
+  suspendOnMobile = false,
 }: MartiniColorBendsBackgroundProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -191,7 +193,8 @@ export function MartiniColorBendsBackground({
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) {
+    const isMobile = window.matchMedia("(max-width: 900px), (pointer: coarse)").matches;
+    if (!container || (suspendOnMobile && isMobile)) {
       return;
     }
 
@@ -290,7 +293,7 @@ export function MartiniColorBendsBackground({
         container.removeChild(renderer.domElement);
       }
     };
-  }, []);
+  }, [suspendOnMobile]);
 
   useEffect(() => {
     const material = materialRef.current;

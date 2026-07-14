@@ -86,12 +86,21 @@ export function MartiniHeroContent() {
     const apps = Array.from(ecosystemAppsElement.querySelectorAll<HTMLElement>(".ecosystem-app"));
     const videos = Array.from(ecosystemAppsElement.querySelectorAll<HTMLVideoElement>("video"));
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const mobileViewport = window.matchMedia("(max-width: 900px), (pointer: coarse)");
+    let isPlaying = false;
 
     const syncPlayback = () => {
       const isSceneVisible = apps.some((app) => Number.parseFloat(window.getComputedStyle(app).opacity) > 0.5);
+      const shouldPlay = isSceneVisible && !reducedMotion.matches && !mobileViewport.matches;
+
+      if (shouldPlay === isPlaying) {
+        return;
+      }
+
+      isPlaying = shouldPlay;
 
       videos.forEach((video) => {
-        if (isSceneVisible && !reducedMotion.matches) {
+        if (shouldPlay) {
           void video.play().catch(() => undefined);
           return;
         }
@@ -103,11 +112,13 @@ export function MartiniHeroContent() {
     const sceneObserver = new MutationObserver(syncPlayback);
     apps.forEach((app) => sceneObserver.observe(app, { attributes: true, attributeFilter: ["style"] }));
     reducedMotion.addEventListener("change", syncPlayback);
+    mobileViewport.addEventListener("change", syncPlayback);
     syncPlayback();
 
     return () => {
       sceneObserver.disconnect();
       reducedMotion.removeEventListener("change", syncPlayback);
+      mobileViewport.removeEventListener("change", syncPlayback);
       videos.forEach((video) => video.pause());
     };
   }, []);
@@ -237,6 +248,7 @@ export function MartiniHeroContent() {
           {ecosystemApps.map((app) => (
             <article className="ecosystem-app" key={app.label}>
               <video
+                className="ecosystem-app__video"
                 aria-label={app.alt}
                 loop
                 muted
@@ -247,6 +259,13 @@ export function MartiniHeroContent() {
                 <source src={app.video} type="video/webm" />
                 Tu navegador no puede reproducir este video.
               </video>
+              <Image
+                className="ecosystem-app__poster"
+                src={app.poster}
+                alt={app.alt}
+                width={700}
+                height={700}
+              />
               <p>{app.label}</p>
             </article>
           ))}

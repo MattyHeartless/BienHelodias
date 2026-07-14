@@ -890,13 +890,21 @@
   z-index: 3;
 }
 
-.ecosystem-app video {
+.ecosystem-app__video,
+.ecosystem-app__poster {
   display: block;
   width: 100%;
   height: auto;
+  filter: drop-shadow(0 28px 36px rgba(0, 0, 0, 0.44));
+}
+
+.ecosystem-app__video {
   aspect-ratio: 16 / 9;
   object-fit: contain;
-  filter: drop-shadow(0 28px 36px rgba(0, 0, 0, 0.44));
+}
+
+.ecosystem-app__poster {
+  display: none;
 }
 
 .ecosystem-app p {
@@ -1136,6 +1144,14 @@
 
   .ecosystem-apps {
     min-height: 42vh;
+  }
+
+  .ecosystem-app__video {
+    display: none;
+  }
+
+  .ecosystem-app__poster {
+    display: block;
   }
 
   .ecosystem-app:nth-child(1) {

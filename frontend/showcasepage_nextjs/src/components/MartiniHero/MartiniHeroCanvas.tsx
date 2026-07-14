@@ -8,6 +8,7 @@ import { applyGlassState, canvasConfig, glassStates } from "./martiniTimeline.co
 
 type MartiniHeroCanvasProps = {
   glass: Object3D;
+  suspendOnMobile?: boolean;
 };
 
 function createFallbackGlass() {
@@ -48,12 +49,13 @@ function normalizeModel(model: Object3D) {
   model.position.sub(center);
 }
 
-export function MartiniHeroCanvas({ glass }: MartiniHeroCanvasProps) {
+export function MartiniHeroCanvas({ glass, suspendOnMobile = false }: MartiniHeroCanvasProps) {
   const mountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const mount = mountRef.current;
-    if (!mount) {
+    const isMobile = window.matchMedia("(max-width: 900px), (pointer: coarse)").matches;
+    if (!mount || (suspendOnMobile && isMobile)) {
       return;
     }
 
@@ -197,7 +199,7 @@ export function MartiniHeroCanvas({ glass }: MartiniHeroCanvasProps) {
       });
       mount.removeChild(renderer.domElement);
     };
-  }, [glass]);
+  }, [glass, suspendOnMobile]);
 
   return <div ref={mountRef} className="martini-canvas" aria-hidden="true" />;
 }

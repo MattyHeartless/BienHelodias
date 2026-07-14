@@ -28,6 +28,7 @@ export function MartiniHero() {
       <div className="martini-hero__backdrop" aria-hidden="true" />
       <MartiniColorBendsBackground
         className="martini-color-bends--scroll"
+        suspendOnMobile
         rotation={90}
         speed={0.2}
         colors={["#95da08", "#e1ff96", "#72ae02"]}
@@ -43,7 +44,7 @@ export function MartiniHero() {
         intensity={1.5}
         bandWidth={6}
       />
-      <MartiniHeroCanvas glass={glass} />
+      <MartiniHeroCanvas glass={glass} suspendOnMobile />
       <MartiniHeroContent />
       <MartiniIntroOverlay />
     </section>
