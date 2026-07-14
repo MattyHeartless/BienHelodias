@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ApiResponse, StorefrontContentDto, StorefrontStoreDto } from '../core/models';
+import { ApiResponse, StorefrontContentDto, StorefrontStoreDto, StorefrontStoreListItemDto } from '../core/models';
 import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -11,6 +11,17 @@ export class StorefrontContentApiService {
 
   getStoreBySlug(slug: string): Observable<ApiResponse<StorefrontStoreDto>> {
     return this.http.get<ApiResponse<StorefrontStoreDto>>(`${this.storefrontUrl}/stores/${encodeURIComponent(slug)}`);
+  }
+
+  getStores(latitude?: number, longitude?: number): Observable<ApiResponse<StorefrontStoreListItemDto[]>> {
+    const params: Record<string, string> = {};
+
+    if (typeof latitude === 'number' && typeof longitude === 'number') {
+      params['latitude'] = String(latitude);
+      params['longitude'] = String(longitude);
+    }
+
+    return this.http.get<ApiResponse<StorefrontStoreListItemDto[]>>(`${this.storefrontUrl}/stores`, { params });
   }
 
   getContent(): Observable<ApiResponse<StorefrontContentDto>> {

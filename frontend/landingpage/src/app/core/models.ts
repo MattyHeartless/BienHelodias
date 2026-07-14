@@ -46,6 +46,14 @@ export interface StoreDto {
   name: string;
   slug: string;
   welcomePhrase: string | null;
+  openingTime: string | null;
+  closingTime: string | null;
+  cartonPrice: number | null;
+  bucketPrice: number | null;
+  minimumPurchase: number | null;
+  businessAddress: string | null;
+  latitude: number | null;
+  longitude: number | null;
   isActive: boolean;
   subscriptionStatus: number;
   createdAtUtc: string;
@@ -56,6 +64,24 @@ export interface StorefrontStoreDto {
   name: string;
   slug: string;
   welcomePhrase: string | null;
+  openingTime: string | null;
+  closingTime: string | null;
+  cartonPrice: number | null;
+  bucketPrice: number | null;
+  minimumPurchase: number | null;
+  businessAddress: string | null;
+  latitude: number | null;
+  longitude: number | null;
+}
+
+export interface StorefrontStoreListItemDto {
+  id: string;
+  name: string;
+  slug: string;
+  businessAddress: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  distanceKm: number | null;
 }
 
 export interface BannerDto {

@@ -38,7 +38,22 @@ internal static class DtoMappings
             entity.ExpirationDate);
 
     public static StoreDto ToDto(this Store entity) =>
-        new(entity.Id, entity.Name, entity.Slug, entity.WelcomePhrase, entity.IsActive, entity.SubscriptionStatus, entity.CreatedAtUtc);
+        new(
+            entity.Id,
+            entity.Name,
+            entity.Slug,
+            entity.WelcomePhrase,
+            entity.OpeningTime,
+            entity.ClosingTime,
+            entity.CartonPrice,
+            entity.BucketPrice,
+            entity.MinimumPurchase,
+            entity.BusinessAddress,
+            entity.Latitude,
+            entity.Longitude,
+            entity.IsActive,
+            entity.SubscriptionStatus,
+            entity.CreatedAtUtc);
 
     public static ProductDto ToDto(this Product entity) =>
         new(

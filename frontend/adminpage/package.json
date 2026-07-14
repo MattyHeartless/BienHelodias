@@ -19,6 +19,7 @@
     "@angular/platform-browser": "19.2.20",
     "@angular/platform-browser-dynamic": "19.2.20",
     "@angular/router": "19.2.20",
+    "@googlemaps/js-api-loader": "^2.1.1",
     "@primeuix/themes": "^2.0.3",
     "@tailwindcss/postcss": "^4.2.2",
     "apexcharts": "^5.15.2",

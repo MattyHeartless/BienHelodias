@@ -151,6 +151,14 @@ export class StoreAdminApiService {
     slug: string;
     isActive: boolean;
     welcomePhrase: string | null;
+    openingTime: string | null;
+    closingTime: string | null;
+    cartonPrice: number | null;
+    bucketPrice: number | null;
+    minimumPurchase: number | null;
+    businessAddress: string | null;
+    latitude: number | null;
+    longitude: number | null;
   }): Observable<ApiResponse<StoreDto>> {
     return this.http.put<ApiResponse<StoreDto>>(`${this.storesUrl}/${this.requireStoreId()}`, request);
   }

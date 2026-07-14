@@ -2404,3 +2404,4 @@ C:/Users/Dev/My Web Sites/BienHelodias/backend/tests/LiquorSaaS.IntegrationTests
 C:/Users/Dev/My Web Sites/BienHelodias/backend/tests/LiquorSaaS.IntegrationTests/bin/Debug/net8.0/LiquorSaaS.Infrastructure.pdb
 C:/Users/Dev/My Web Sites/BienHelodias/backend/tests/LiquorSaaS.IntegrationTests/bin/Debug/net8.0/LiquorSaaS.Application.pdb
 C:/Users/Dev/My Web Sites/BienHelodias/backend/tests/LiquorSaaS.IntegrationTests/bin/Debug/net8.0/LiquorSaaS.Domain.pdb
+/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/tests/LiquorSaaS.IntegrationTests/bin/Debug/net8.0/LiquorSaaS.Api.staticwebassets.endpoints.json

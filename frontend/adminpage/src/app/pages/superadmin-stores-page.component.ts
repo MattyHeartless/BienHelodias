@@ -195,7 +195,15 @@ export class SuperadminStoresPageComponent {
       return;
     }
 
-    this.superadminApi.updateStore(store.id, this.editStoreForm.getRawValue()).subscribe({
+    this.superadminApi.updateStore(store.id, {
+      ...this.editStoreForm.getRawValue(),
+      welcomePhrase: store.welcomePhrase,
+      openingTime: store.openingTime,
+      closingTime: store.closingTime,
+      cartonPrice: store.cartonPrice,
+      bucketPrice: store.bucketPrice,
+      minimumPurchase: store.minimumPurchase
+    }).subscribe({
       next: (response) => {
         const message = `Licorería actualizada: ${response.data.name}`;
         this.feedback.set(message);

@@ -1,5 +1,5 @@
 import { CommonModule, CurrencyPipe } from '@angular/common';
-import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, OnDestroy, WritableSignal, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BannerDto, ProductDto } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
@@ -38,8 +38,13 @@ export class CatalogPageComponent {
   readonly banners = signal<BannerDto[]>([]);
   readonly activeBannerIndex = signal(0);
   readonly promoModalOpen = signal(false);
+  readonly promoModalActive = signal(false);
+  readonly promoModalClosing = signal(false);
   readonly promoModalBanner = signal<BannerDto | null>(null);
   readonly promoCodeCopied = signal(false);
+  readonly storeInfoModalOpen = signal(false);
+  readonly storeInfoModalActive = signal(false);
+  readonly storeInfoModalClosing = signal(false);
   readonly activeCategory = signal<string>('all');
   readonly searchQuery = signal('');
   readonly isBannerDragging = signal(false);
@@ -86,6 +91,33 @@ export class CatalogPageComponent {
     return banners[this.activeBannerIndex() % banners.length] ?? null;
   });
 
+  readonly storeInfoCards = computed(() => {
+    const store = this.tenant();
+
+    return [
+      {
+        icon: 'schedule',
+        label: 'Horario',
+        value: this.formatSchedule(store?.openingTime ?? null, store?.closingTime ?? null)
+      },
+      {
+        icon: 'shopping_bag',
+        label: 'Pedido minimo',
+        value: this.formatCurrencyLabel(store?.minimumPurchase ?? null, 'Sin minimo')
+      },
+      {
+        icon: 'inventory_2',
+        label: 'Importe carton',
+        value: this.formatCurrencyLabel(store?.cartonPrice ?? null, 'No definido')
+      },
+      {
+        icon: 'wine_bar',
+        label: 'Importe cubeta',
+        value: this.formatCurrencyLabel(store?.bucketPrice ?? null, 'No definido')
+      }
+    ];
+  });
+
   constructor() {
     this.route.paramMap.subscribe((params) => {
       const slug = params.get('slug');
@@ -99,6 +131,18 @@ export class CatalogPageComponent {
       this.cartSession.loadForSlug(slug);
       this.resolveStorefront(slug);
     });
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.promoModalOpen()) {
+      this.closePromotionModal();
+      return;
+    }
+
+    if (this.storeInfoModalOpen()) {
+      this.closeStoreInfoModal();
+    }
   }
 
   loadCatalog(): void {
@@ -173,13 +217,28 @@ export class CatalogPageComponent {
 
     this.promoModalBanner.set(banner);
     this.promoCodeCopied.set(false);
-    this.promoModalOpen.set(true);
+    this.openAnimatedModal(this.promoModalOpen, this.promoModalActive, this.promoModalClosing);
   }
 
   closePromotionModal(): void {
-    this.promoModalOpen.set(false);
-    this.promoModalBanner.set(null);
-    this.promoCodeCopied.set(false);
+    this.closeAnimatedModal(
+      this.promoModalOpen,
+      this.promoModalActive,
+      this.promoModalClosing,
+      () => {
+        this.promoModalBanner.set(null);
+        this.promoCodeCopied.set(false);
+      },
+      240
+    );
+  }
+
+  openStoreInfoModal(): void {
+    this.openAnimatedModal(this.storeInfoModalOpen, this.storeInfoModalActive, this.storeInfoModalClosing);
+  }
+
+  closeStoreInfoModal(): void {
+    this.closeAnimatedModal(this.storeInfoModalOpen, this.storeInfoModalActive, this.storeInfoModalClosing);
   }
 
   ngOnDestroy(): void {
@@ -397,6 +456,89 @@ export class CatalogPageComponent {
 
   private getLastOrderStorageKey(slug: string): string {
     return `bien-helodias-last-order:${slug}`;
+  }
+
+  private formatSchedule(openingTime: string | null, closingTime: string | null): string {
+    if (!openingTime && !closingTime) {
+      return 'Consulta horario';
+    }
+
+    if (openingTime && closingTime) {
+      return `${this.formatTime(openingTime)} - ${this.formatTime(closingTime)}`;
+    }
+
+    return openingTime
+      ? `Abre ${this.formatTime(openingTime)}`
+      : `Cierra ${this.formatTime(closingTime!)}`;
+  }
+
+  private formatCurrencyLabel(value: number | null, fallback: string): string {
+    if (value === null) {
+      return fallback;
+    }
+
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'MXN',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
+    }).format(value);
+  }
+
+  private formatTime(value: string): string {
+    return value.slice(0, 5);
+  }
+
+  private openAnimatedModal(
+    open: WritableSignal<boolean>,
+    active: WritableSignal<boolean>,
+    closing: WritableSignal<boolean>
+  ): void {
+    closing.set(false);
+    active.set(false);
+    open.set(true);
+    window.requestAnimationFrame(() => active.set(true));
+  }
+
+  private closeAnimatedModal(
+    open: WritableSignal<boolean>,
+    active: WritableSignal<boolean>,
+    closing: WritableSignal<boolean>,
+    afterClose?: () => void,
+    closeDurationMs?: number
+  ): void {
+    if (!open()) {
+      afterClose?.();
+      return;
+    }
+
+    if (closing()) {
+      return;
+    }
+
+    active.set(false);
+    closing.set(true);
+    window.setTimeout(() => {
+      open.set(false);
+      closing.set(false);
+      afterClose?.();
+    }, closeDurationMs ?? this.getModalCloseDurationMs());
+  }
+
+  private getModalCloseDurationMs(): number {
+    const rawValue = getComputedStyle(document.documentElement)
+      .getPropertyValue('--modal-close-dur')
+      .trim();
+
+    if (rawValue.endsWith('ms')) {
+      return Number.parseFloat(rawValue) || 150;
+    }
+
+    if (rawValue.endsWith('s')) {
+      return (Number.parseFloat(rawValue) || 0.15) * 1000;
+    }
+
+    return Number.parseFloat(rawValue) || 150;
   }
 
   private resetBannerPointerState(): void {

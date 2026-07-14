@@ -1,11 +1,12 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, ElementRef, HostListener, WritableSignal, computed, inject, signal } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, HostListener, OnDestroy, ViewChild, WritableSignal, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
-import { BannerDto, DeliveryAvailability, DeliveryUserDto, ProductDto, PromotionType, StoreDto } from '../core/models';
+import { AddressDraft, BannerDto, DeliveryAvailability, DeliveryUserDto, ProductDto, PromotionType, StoreDto } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
 import { shakeFieldBySelector, shakeInvalidFormControls } from '../core/form-error-shake.util';
 import { NotificationUiService } from '../core/notification-ui.service';
+import { GooglePlacesService } from '../services/google-places.service';
 import { StoreAdminApiService } from '../services/store-admin-api.service';
 
 @Component({
@@ -15,11 +16,17 @@ import { StoreAdminApiService } from '../services/store-admin-api.service';
   templateUrl: './store-settings-page.component.html',
   styleUrl: './store-settings-page.component.css'
 })
-export class StoreSettingsPageComponent {
+export class StoreSettingsPageComponent implements AfterViewChecked, OnDestroy {
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly storeAdminApi = inject(StoreAdminApiService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly notifications = inject(NotificationUiService);
+  private readonly googlePlaces = inject(GooglePlacesService);
+  private autocomplete: any = null;
+  private autocompleteInput: HTMLInputElement | null = null;
+  private autocompleteListener: { remove: () => void } | null = null;
+
+  @ViewChild('businessAddressInput') businessAddressInput?: ElementRef<HTMLInputElement>;
 
   readonly loading = signal(true);
   readonly submittingWelcome = signal(false);
@@ -29,6 +36,9 @@ export class StoreSettingsPageComponent {
   readonly feedback = signal<string | null>(null);
   readonly welcomePhraseRows = signal(1);
   readonly identityPanelOpen = signal(false);
+  readonly placesLoading = signal(false);
+  readonly placesError = signal<string | null>(null);
+  readonly selectedBusinessAddress = signal<AddressDraft | null>(null);
   readonly store = signal<StoreDto | null>(null);
   readonly banners = signal<BannerDto[]>([]);
   readonly products = signal<ProductDto[]>([]);
@@ -45,7 +55,15 @@ export class StoreSettingsPageComponent {
   readonly promotionType = PromotionType;
 
   readonly welcomeForm = this.formBuilder.nonNullable.group({
-    welcomePhrase: ['', [Validators.maxLength(280)]]
+    welcomePhrase: ['', [Validators.maxLength(280)]],
+    openingTime: [''],
+    closingTime: [''],
+    cartonPrice: [null as number | null, [Validators.min(0)]],
+    bucketPrice: [null as number | null, [Validators.min(0)]],
+    minimumPurchase: [null as number | null, [Validators.min(0)]],
+    businessAddress: ['', [Validators.maxLength(500)]],
+    latitude: [null as number | null],
+    longitude: [null as number | null]
   });
 
   readonly bannerForm = this.formBuilder.nonNullable.group({
@@ -134,6 +152,16 @@ export class StoreSettingsPageComponent {
     this.identityPanelOpen.update((open) => !open);
   }
 
+  ngAfterViewChecked(): void {
+    if (this.identityPanelOpen()) {
+      void this.initializeBusinessAddressAutocomplete();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.destroyAutocompleteListener();
+  }
+
   load(): void {
     this.loading.set(true);
     this.error.set(null);
@@ -142,8 +170,17 @@ export class StoreSettingsPageComponent {
       next: (response) => {
         this.store.set(response.data);
         this.welcomeForm.reset({
-          welcomePhrase: response.data.welcomePhrase ?? ''
+          welcomePhrase: response.data.welcomePhrase ?? '',
+          openingTime: this.normalizeTimeForInput(response.data.openingTime),
+          closingTime: this.normalizeTimeForInput(response.data.closingTime),
+          cartonPrice: response.data.cartonPrice,
+          bucketPrice: response.data.bucketPrice,
+          minimumPurchase: response.data.minimumPurchase,
+          businessAddress: response.data.businessAddress ?? '',
+          latitude: response.data.latitude,
+          longitude: response.data.longitude
         });
+        this.selectedBusinessAddress.set(this.buildSelectedBusinessAddress(response.data));
         this.loadStoreResources();
       },
       error: (error) => {
@@ -184,6 +221,7 @@ export class StoreSettingsPageComponent {
 
     this.welcomeForm.markAllAsTouched();
     if (this.welcomeForm.invalid) {
+      shakeInvalidFormControls(this.host.nativeElement);
       return;
     }
 
@@ -191,24 +229,43 @@ export class StoreSettingsPageComponent {
     this.error.set(null);
     this.feedback.set(null);
 
+    const values = this.welcomeForm.getRawValue();
+
     this.storeAdminApi.updateMyStore({
       name: store.name,
       slug: store.slug,
       isActive: store.isActive,
-      welcomePhrase: this.welcomeForm.getRawValue().welcomePhrase.trim() || null
+      welcomePhrase: values.welcomePhrase.trim() || null,
+      openingTime: this.normalizeTimeForApi(values.openingTime),
+      closingTime: this.normalizeTimeForApi(values.closingTime),
+      cartonPrice: values.cartonPrice,
+      bucketPrice: values.bucketPrice,
+      minimumPurchase: values.minimumPurchase,
+      businessAddress: values.businessAddress.trim() || null,
+      latitude: values.latitude,
+      longitude: values.longitude
     }).subscribe({
       next: (response) => {
         this.store.set(response.data);
         this.welcomeForm.reset({
-          welcomePhrase: response.data.welcomePhrase ?? ''
+          welcomePhrase: response.data.welcomePhrase ?? '',
+          openingTime: this.normalizeTimeForInput(response.data.openingTime),
+          closingTime: this.normalizeTimeForInput(response.data.closingTime),
+          cartonPrice: response.data.cartonPrice,
+          bucketPrice: response.data.bucketPrice,
+          minimumPurchase: response.data.minimumPurchase,
+          businessAddress: response.data.businessAddress ?? '',
+          latitude: response.data.latitude,
+          longitude: response.data.longitude
         });
-        const message = 'Frase de bienvenida actualizada.';
+        this.selectedBusinessAddress.set(this.buildSelectedBusinessAddress(response.data));
+        const message = 'Datos de identidad actualizados.';
         this.feedback.set(message);
         this.notifications.success({ summary: message });
         this.submittingWelcome.set(false);
       },
       error: (error) => {
-        const message = getApiErrorMessage(error, 'No fue posible actualizar la frase de bienvenida.');
+        const message = getApiErrorMessage(error, 'No fue posible actualizar la identidad de la tienda.');
         this.error.set(message);
         this.notifications.error({ summary: message });
         this.submittingWelcome.set(false);
@@ -548,6 +605,21 @@ export class StoreSettingsPageComponent {
     this.editingPromotionProductName.set('');
   }
 
+  onBusinessAddressInput(): void {
+    const currentValue = this.welcomeForm.controls.businessAddress.value.trim();
+    const selectedAddress = this.selectedBusinessAddress();
+
+    if (!selectedAddress || currentValue === selectedAddress.formattedAddress) {
+      return;
+    }
+
+    this.selectedBusinessAddress.set(null);
+    this.welcomeForm.patchValue({
+      latitude: null,
+      longitude: null
+    }, { emitEvent: false });
+  }
+
   private openAnimatedModal(
     open: WritableSignal<boolean>,
     active: WritableSignal<boolean>,
@@ -601,6 +673,80 @@ export class StoreSettingsPageComponent {
 
   private selectedPromotionProductName(productId: string): string {
     return this.products().find((product) => product.id === productId)?.name ?? '';
+  }
+
+  private async initializeBusinessAddressAutocomplete(): Promise<void> {
+    const input = this.businessAddressInput?.nativeElement;
+    if (!input) {
+      return;
+    }
+
+    if (this.autocomplete && this.autocompleteInput === input) {
+      return;
+    }
+
+    this.placesLoading.set(true);
+    this.placesError.set(null);
+
+    try {
+      this.destroyAutocompleteListener();
+      this.autocompleteInput = input;
+      this.autocomplete = await this.googlePlaces.createAddressAutocomplete(input);
+      this.autocompleteListener = this.googlePlaces.addPlaceChangedListener(this.autocomplete, () => {
+        this.applySelectedBusinessAddress();
+      });
+      this.placesLoading.set(false);
+    } catch (error) {
+      this.autocomplete = null;
+      this.autocompleteInput = null;
+      this.placesLoading.set(false);
+      this.placesError.set(getApiErrorMessage(error, 'No fue posible cargar Google Places para la direccion del negocio.'));
+    }
+  }
+
+  private applySelectedBusinessAddress(): void {
+    if (!this.autocomplete) {
+      return;
+    }
+
+    const addressDraft = this.googlePlaces.extractAddressDraft(this.autocomplete);
+    if (!addressDraft?.formattedAddress) {
+      return;
+    }
+
+    this.selectedBusinessAddress.set(addressDraft);
+    this.welcomeForm.patchValue({
+      businessAddress: addressDraft.formattedAddress,
+      latitude: addressDraft.latitude,
+      longitude: addressDraft.longitude
+    });
+  }
+
+  private buildSelectedBusinessAddress(store: StoreDto): AddressDraft | null {
+    if (!store.businessAddress) {
+      return null;
+    }
+
+    return {
+      formattedAddress: store.businessAddress,
+      placeId: null,
+      latitude: store.latitude,
+      longitude: store.longitude
+    };
+  }
+
+  private destroyAutocompleteListener(): void {
+    this.autocompleteListener?.remove();
+    this.autocompleteListener = null;
+  }
+
+  private normalizeTimeForInput(value: string | null): string {
+    return value ? value.slice(0, 5) : '';
+  }
+
+  private normalizeTimeForApi(value: string): string | null {
+    const normalized = value.trim();
+    return normalized ? `${normalized}:00` : null;
   }
 
   private syncWelcomeTextareaRows(): void {

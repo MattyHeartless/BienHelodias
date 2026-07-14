@@ -24,6 +24,14 @@ public sealed class LiquorSaaSDbContext(DbContextOptions<LiquorSaaSDbContext> op
             entity.Property(x => x.Name).HasMaxLength(150).IsRequired();
             entity.Property(x => x.Slug).HasMaxLength(80).IsRequired();
             entity.Property(x => x.WelcomePhrase).HasMaxLength(280);
+            entity.Property(x => x.OpeningTime).HasColumnType("time");
+            entity.Property(x => x.ClosingTime).HasColumnType("time");
+            entity.Property(x => x.CartonPrice).HasColumnType("decimal(18,2)");
+            entity.Property(x => x.BucketPrice).HasColumnType("decimal(18,2)");
+            entity.Property(x => x.MinimumPurchase).HasColumnType("decimal(18,2)");
+            entity.Property(x => x.BusinessAddress).HasMaxLength(500);
+            entity.Property(x => x.Latitude).HasColumnType("decimal(9,6)");
+            entity.Property(x => x.Longitude).HasColumnType("decimal(9,6)");
             entity.HasIndex(x => x.Slug).IsUnique();
             entity.HasIndex(x => x.IsActive);
             entity.Property(x => x.SubscriptionStatus).HasConversion<int>();

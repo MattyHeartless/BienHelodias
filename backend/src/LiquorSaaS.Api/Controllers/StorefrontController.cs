@@ -10,6 +10,17 @@ namespace LiquorSaaS.Api.Controllers;
 public sealed class StorefrontController(IStorefrontService storefrontService) : ControllerBase
 {
     [AllowAnonymous]
+    [HttpGet("stores")]
+    public async Task<ActionResult<ApiResponse<IReadOnlyList<StorefrontStoreListItemDto>>>> ListStores(
+        [FromQuery] decimal? latitude,
+        [FromQuery] decimal? longitude,
+        CancellationToken cancellationToken)
+    {
+        var result = await storefrontService.ListStoresAsync(latitude, longitude, cancellationToken);
+        return Ok(ApiResponse<IReadOnlyList<StorefrontStoreListItemDto>>.Ok(result, "Stores retrieved successfully."));
+    }
+
+    [AllowAnonymous]
     [HttpGet("stores/{slug}")]
     public async Task<ActionResult<ApiResponse<StorefrontStoreDto>>> GetStoreBySlug(string slug, CancellationToken cancellationToken)
     {

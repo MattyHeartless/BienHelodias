@@ -1,8 +1,15 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Hyperwave";
+  src: url("/brand/Hyperwave.otf") format("opentype");
+  font-display: swap;
+}
+
 @theme {
   --font-display: "Space Grotesk", sans-serif;
   --font-body: "Manrope", sans-serif;
+  --font-brand: "Hyperwave", sans-serif;
   --color-primary: #d2fd6e;
   --color-primary-container: #87ad26;
   --color-secondary: #e7e959;

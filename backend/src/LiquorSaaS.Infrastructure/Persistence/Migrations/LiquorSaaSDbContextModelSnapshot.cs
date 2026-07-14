@@ -454,16 +454,41 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal?>("BucketPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("BusinessAddress")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<decimal?>("CartonPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<TimeOnly?>("ClosingTime")
+                        .HasColumnType("time");
+
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<decimal?>("Latitude")
+                        .HasColumnType("decimal(9,6)");
+
+                    b.Property<decimal?>("Longitude")
+                        .HasColumnType("decimal(9,6)");
+
+                    b.Property<decimal?>("MinimumPurchase")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
+
+                    b.Property<TimeOnly?>("OpeningTime")
+                        .HasColumnType("time");
 
                     b.Property<string>("Slug")
                         .IsRequired()
@@ -513,6 +538,14 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("LiquorSaaS.Domain.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("LiquorSaaS.Domain.Entities.Promotion", b =>

@@ -1,0 +1,116 @@
+<div class="storefront-discovery">
+  <div class="storefront-discovery__glow storefront-discovery__glow--one"></div>
+  <div class="storefront-discovery__glow storefront-discovery__glow--two"></div>
+
+  <main class="storefront-discovery__shell">
+    <section class="storefront-discovery__hero">
+      <div class="storefront-discovery__hero-media" aria-hidden="true"></div>
+
+      <div class="storefront-discovery__hero-copy">
+        <p class="storefront-discovery__kicker">BIEN HELODIAS</p>
+        <h1 class="storefront-discovery__title">{{ heroTitle() }}</h1>
+        <div class="storefront-discovery__hero-pills">
+          <span class="storefront-discovery__pill storefront-discovery__pill--accent">{{ locationBadge() }}</span>
+          <span class="storefront-discovery__pill">{{ storeCountLabel() }}</span>
+        </div>
+      </div>
+
+      <div class="storefront-discovery__hero-side">
+        <div class="storefront-discovery__hero-panel-top">
+          <div class="storefront-discovery__hero-status">
+            <span class="storefront-discovery__hero-status-dot"></span>
+            <span>{{ statusMessage() }}</span>
+          </div>
+          <button
+            class="storefront-discovery__locate"
+            type="button"
+            (click)="retryWithLocation()"
+            [disabled]="loading() && locationState() === 'requesting'"
+          >
+            <span class="material-symbols-outlined text-base">my_location</span>
+            <span>Ubicarme</span>
+          </button>
+        </div>
+
+        @if (highlightedStore(); as featuredStore) {
+          <button class="storefront-discovery__featured" type="button" (click)="openStore(featuredStore)">
+            <div class="storefront-discovery__featured-copy">
+              <p class="storefront-discovery__featured-label">Entrada sugerida</p>
+              <h2 class="storefront-discovery__featured-name">{{ featuredStore.name }}</h2>
+              <p class="storefront-discovery__featured-address">
+                {{ featuredStore.businessAddress || 'Direccion pendiente' }}
+              </p>
+            </div>
+
+            <div class="storefront-discovery__featured-meta">
+              @if (formatDistance(featuredStore.distanceKm); as distance) {
+                <span class="storefront-discovery__distance storefront-discovery__distance--featured">{{ distance }}</span>
+              }
+              <span class="material-symbols-outlined">arrow_outward</span>
+            </div>
+          </button>
+        } @else {
+          <div class="storefront-discovery__featured storefront-discovery__featured--empty">
+            <p class="storefront-discovery__featured-label">Directorio</p>
+            <p class="storefront-discovery__hero-panel-copy">Las tiendas activas apareceran aqui en cuanto la carga termine.</p>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="storefront-discovery__results">
+      <div class="storefront-discovery__results-head">
+        <h2 class="storefront-discovery__results-title">{{ resultsTitle() }}</h2>
+        <p class="storefront-discovery__results-subtitle">{{ resultsLead() }}</p>
+      </div>
+
+      @if (loading()) {
+        <div class="storefront-discovery__list">
+          @for (item of [1, 2, 3, 4]; track item) {
+            <article class="storefront-discovery__row storefront-discovery__row--skeleton"></article>
+          }
+        </div>
+      } @else if (error()) {
+        <div class="storefront-discovery__empty">
+          <p class="storefront-discovery__empty-title">No pudimos cargar las tiendas.</p>
+          <p class="storefront-discovery__empty-copy">{{ error() }}</p>
+        </div>
+      } @else if (!hasStores()) {
+        <div class="storefront-discovery__empty">
+          <p class="storefront-discovery__empty-title">Aun no hay tiendas disponibles.</p>
+          <p class="storefront-discovery__empty-copy">Cuando haya tiendas activas dadas de alta apareceran aqui.</p>
+        </div>
+      } @else {
+        <div class="storefront-discovery__list">
+          @for (store of stores(); track trackStore($index, store)) {
+            <article class="storefront-discovery__row">
+              <div class="storefront-discovery__row-main">
+                <div class="storefront-discovery__marker" aria-hidden="true">
+                  {{ storeIndexLabel($index) }}
+                </div>
+
+                <div class="storefront-discovery__store-copy">
+                  <div class="storefront-discovery__store-head">
+                    <h3 class="storefront-discovery__store-name">{{ store.name }}</h3>
+                    @if (formatDistance(store.distanceKm); as distance) {
+                      <span class="storefront-discovery__distance">{{ distance }}</span>
+                    }
+                  </div>
+
+                  <p class="storefront-discovery__store-address">
+                    {{ store.businessAddress || 'Direccion no disponible' }}
+                  </p>
+                </div>
+              </div>
+
+              <button class="storefront-discovery__enter" type="button" (click)="openStore(store)">
+                <span>Ir a la tienda</span>
+                <span class="material-symbols-outlined text-base">arrow_outward</span>
+              </button>
+            </article>
+          }
+        </div>
+      }
+    </section>
+  </main>
+</div>

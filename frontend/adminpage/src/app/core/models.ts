@@ -62,9 +62,24 @@ export interface StoreDto {
   name: string;
   slug: string;
   welcomePhrase: string | null;
+  openingTime: string | null;
+  closingTime: string | null;
+  cartonPrice: number | null;
+  bucketPrice: number | null;
+  minimumPurchase: number | null;
+  businessAddress: string | null;
+  latitude: number | null;
+  longitude: number | null;
   isActive: boolean;
   subscriptionStatus: SubscriptionStatus;
   createdAtUtc: string;
+}
+
+export interface AddressDraft {
+  formattedAddress: string;
+  placeId: string | null;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 export interface StoreAdminDto {

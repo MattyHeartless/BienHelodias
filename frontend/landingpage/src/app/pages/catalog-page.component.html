@@ -5,13 +5,8 @@
   <main class="catalog-layout">
     <section class="phone-shell phone-shell--browse">
       <div class="phone-shell__header phone-shell__header--sticky">
-        <div class="flex items-center gap-3">
-          <div class="catalog-brandmark">
-            <img src="/favicon.svg" alt="Bien Helodias" class="catalog-brandmark__image" />
-          </div>
-          <div>
-            <h1 class="font-display text-2xl font-black tracking-[-0.05em] text-primary">{{ tenant()?.name || 'Licoreria' }}</h1>
-          </div>
+        <div>
+          <h1 class="font-display text-2xl font-black tracking-[-0.05em] text-primary">{{ tenant()?.name || 'Licoreria' }}</h1>
         </div>
         <div class="flex items-center gap-2">
           <button class="icon-button icon-button--active" type="button" (click)="openCart()">
@@ -26,18 +21,6 @@
             {{ welcomePhrase() }}
           </h2>
         </section>
-
-        <label class="search-shell">
-          <span class="material-symbols-outlined text-[1.15rem] text-on-surface-variant">search</span>
-          <input
-            #searchInput
-            type="text"
-            class="search-input"
-            [value]="searchQuery()"
-            (input)="updateSearch(searchInput.value)"
-            placeholder="Buscar bebida fresca"
-          />
-        </label>
 
         @if (activeBanner(); as banner) {
           <section
@@ -74,6 +57,18 @@
             }
           </section>
         }
+
+        <label class="search-shell">
+          <span class="material-symbols-outlined text-[1.15rem] text-on-surface-variant">search</span>
+          <input
+            #searchInput
+            type="text"
+            class="search-input"
+            [value]="searchQuery()"
+            (input)="updateSearch(searchInput.value)"
+            placeholder="Buscar bebida fresca"
+          />
+        </label>
 
         <div class="category-tabs">
           @for (category of categories(); track category) {
@@ -183,9 +178,77 @@
 
   </main>
 
+  <button class="store-fab" type="button" (click)="openStoreInfoModal()" aria-label="Ver informacion de la tienda">
+    <span class="store-fab__halo" aria-hidden="true"></span>
+    <span class="store-fab__beam" aria-hidden="true"></span>
+    <span class="material-symbols-outlined store-fab__icon">storefront</span>
+    <span class="store-fab__copy">
+      <span class="store-fab__title">Tienda</span>
+    </span>
+  </button>
+
+  @if (storeInfoModalOpen() && tenant(); as store) {
+    <div class="store-info-overlay" (click)="closeStoreInfoModal()">
+      <section
+        class="store-info-modal t-modal"
+        [class.is-open]="storeInfoModalActive()"
+        [class.is-closing]="storeInfoModalClosing()"
+        (click)="$event.stopPropagation()"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="store-info-title"
+      >
+        <button
+          class="store-info-modal__close"
+          type="button"
+          (click)="closeStoreInfoModal(); $event.stopPropagation()"
+          aria-label="Cerrar informacion de la tienda"
+        >
+          <span class="material-symbols-outlined text-base">close</span>
+        </button>
+
+        <div class="store-info-modal__hero">
+          <p id="store-info-title" class="eyebrow flex items-center gap-2">
+            <span class="material-symbols-outlined text-[0.95rem] leading-none">storefront</span>
+            <span>{{ store.name }}</span>
+          </p>
+          <p class="store-info-modal__description">
+            {{ store.welcomePhrase?.trim() || 'Tu tienda de confianza para pedir bebidas frias sin rodeos.' }}
+          </p>
+        </div>
+
+        <div class="store-info-specs" role="list">
+          @for (item of storeInfoCards(); track item.label) {
+            <article class="store-info-spec" role="listitem">
+              <div class="store-info-spec__meta">
+                <div class="store-info-spec__icon">
+                  <span class="material-symbols-outlined">{{ item.icon }}</span>
+                </div>
+                <p class="store-info-spec__label">{{ item.label }}</p>
+              </div>
+              <p class="store-info-spec__value">{{ item.value }}</p>
+            </article>
+          }
+        </div>
+
+        <p class="store-info-modal__brandmark">BIEN HELODIAS</p>
+      </section>
+    </div>
+  }
+
   @if (promoModalOpen() && promoModalBanner(); as promoBanner) {
-    <div class="promo-modal-overlay" (click)="closePromotionModal()">
-      <section class="promo-modal" (click)="$event.stopPropagation()">
+    <div
+      class="promo-modal-overlay"
+      [class.is-open]="promoModalActive()"
+      [class.is-closing]="promoModalClosing()"
+      (click)="closePromotionModal()"
+    >
+      <section
+        class="promo-modal t-modal"
+        [class.is-open]="promoModalActive()"
+        [class.is-closing]="promoModalClosing()"
+        (click)="$event.stopPropagation()"
+      >
         <button class="promo-modal__close" type="button" (click)="closePromotionModal()">
           <span class="material-symbols-outlined text-base">close</span>
         </button>
@@ -197,11 +260,15 @@
         <p class="promo-modal__description">{{ promoBanner.description }}</p>
 
         @if (promoBanner.promotion; as promotion) {
-          <div class="promo-modal__code-shell">
-            <p class="promo-modal__label">Codigo de promocion</p>
+          <div class="promo-modal__code-block">
+            <div class="promo-modal__code-head">
+              <p class="promo-modal__label">Codigo de promocion</p>
+              <span class="promo-modal__hint">Usalo al finalizar tu pedido</span>
+            </div>
+
             <div class="promo-modal__code-row">
               <span class="promo-modal__code">{{ promotion.code }}</span>
-              <button class="liquid-button promo-modal__copy" type="button" (click)="copyPromotionCode()">
+              <button class="promo-modal__copy" type="button" (click)="copyPromotionCode()">
                 <span class="material-symbols-outlined text-base">{{ promoCodeCopied() ? 'check' : 'content_copy' }}</span>
                 {{ promoCodeCopied() ? 'Copiado' : 'Copiar codigo' }}
               </button>

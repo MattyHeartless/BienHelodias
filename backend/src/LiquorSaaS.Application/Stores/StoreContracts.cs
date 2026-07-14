@@ -3,9 +3,48 @@ using LiquorSaaS.Domain.Enums;
 
 namespace LiquorSaaS.Application.Stores;
 
-public sealed record CreateStoreRequest(string Name, string Slug, SubscriptionStatus SubscriptionStatus, string? WelcomePhrase = null);
-public sealed record UpdateStoreRequest(string Name, string Slug, bool IsActive, string? WelcomePhrase = null);
-public sealed record StoreDto(Guid Id, string Name, string Slug, string? WelcomePhrase, bool IsActive, SubscriptionStatus SubscriptionStatus, DateTime CreatedAtUtc);
+public sealed record CreateStoreRequest(
+    string Name,
+    string Slug,
+    SubscriptionStatus SubscriptionStatus,
+    string? WelcomePhrase = null,
+    TimeOnly? OpeningTime = null,
+    TimeOnly? ClosingTime = null,
+    decimal? CartonPrice = null,
+    decimal? BucketPrice = null,
+    decimal? MinimumPurchase = null,
+    string? BusinessAddress = null,
+    decimal? Latitude = null,
+    decimal? Longitude = null);
+public sealed record UpdateStoreRequest(
+    string Name,
+    string Slug,
+    bool IsActive,
+    string? WelcomePhrase = null,
+    TimeOnly? OpeningTime = null,
+    TimeOnly? ClosingTime = null,
+    decimal? CartonPrice = null,
+    decimal? BucketPrice = null,
+    decimal? MinimumPurchase = null,
+    string? BusinessAddress = null,
+    decimal? Latitude = null,
+    decimal? Longitude = null);
+public sealed record StoreDto(
+    Guid Id,
+    string Name,
+    string Slug,
+    string? WelcomePhrase,
+    TimeOnly? OpeningTime,
+    TimeOnly? ClosingTime,
+    decimal? CartonPrice,
+    decimal? BucketPrice,
+    decimal? MinimumPurchase,
+    string? BusinessAddress,
+    decimal? Latitude,
+    decimal? Longitude,
+    bool IsActive,
+    SubscriptionStatus SubscriptionStatus,
+    DateTime CreatedAtUtc);
 public sealed record UpdateSubscriptionRequest(SubscriptionStatus SubscriptionStatus);
 
 public interface IStoreService

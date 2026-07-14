@@ -42,7 +42,17 @@ export class SuperadminApiService {
     return this.http.post<ApiResponse<StoreDto>>(this.storesUrl, request);
   }
 
-  updateStore(storeId: string, request: { name: string; slug: string; isActive: boolean }): Observable<ApiResponse<StoreDto>> {
+  updateStore(storeId: string, request: {
+    name: string;
+    slug: string;
+    isActive: boolean;
+    welcomePhrase?: string | null;
+    openingTime?: string | null;
+    closingTime?: string | null;
+    cartonPrice?: number | null;
+    bucketPrice?: number | null;
+    minimumPurchase?: number | null;
+  }): Observable<ApiResponse<StoreDto>> {
     return this.http.put<ApiResponse<StoreDto>>(`${this.storesUrl}/${storeId}`, request);
   }
 
