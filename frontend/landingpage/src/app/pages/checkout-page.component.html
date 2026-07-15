@@ -75,11 +75,34 @@
                 </div>
               }
 
+              @if (!storeAvailability().isOpen) {
+                <section class="store-closed-notice" role="status">
+                  <div class="store-closed-notice__icon" aria-hidden="true">
+                    <span class="material-symbols-outlined">lock_clock</span>
+                  </div>
+                  <div>
+                    <p class="store-closed-notice__title">La tienda está cerrada</p>
+                    <p class="store-closed-notice__copy">Tus datos y el pedido estarán listos para confirmar al volver a abrir.</p>
+                  </div>
+                  <div class="store-closed-notice__schedule">
+                    <p class="store-closed-notice__schedule-label">Horario para pedir</p>
+                    <p class="store-closed-notice__schedule-value">{{ storeAvailability().scheduleLabel }}</p>
+                  </div>
+                </section>
+              } @else if (!meetsMinimumPurchase()) {
+                <div class="minimum-purchase-notice" role="status">
+                  <span class="material-symbols-outlined minimum-purchase-notice__icon" aria-hidden="true">shopping_bag</span>
+                  <p class="minimum-purchase-notice__copy">
+                    Agrega <span class="minimum-purchase-notice__amount">{{ amountMissingForMinimum() | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span> más para llegar al mínimo de {{ minimumPurchase() | currency: 'MXN':'symbol-narrow':'1.2-2' }}.
+                  </p>
+                </div>
+              }
+
               <div class="checkout-actions">
                 <a [routerLink]="activeSlug() ? ['/', activeSlug(), 'cart'] : ['/']" class="ghost-button w-full !justify-center py-4">
                   Volver al carrito
                 </a>
-                <button class="liquid-button w-full !justify-center py-4" type="submit" [disabled]="submitting() || cartItems().length === 0">
+                <button class="liquid-button w-full !justify-center py-4" type="submit" [disabled]="submitting() || !canSubmitOrder()">
                   <span class="material-symbols-outlined text-base">bolt</span>
                   {{ submitting() ? 'Creando pedido...' : 'Crear pedido' }}
                 </button>

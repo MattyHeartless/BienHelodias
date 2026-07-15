@@ -10441,19 +10441,19 @@
     ]
   },
   "packageFolders": {
-    "/Users/jaiman/.nuget/packages/": {}
+    "C:\\Users\\Dev\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/tests/LiquorSaaS.IntegrationTests/LiquorSaaS.IntegrationTests.csproj",
+      "projectUniqueName": "C:\\Users\\Dev\\My Web Sites\\BienHelodias\\backend\\tests\\LiquorSaaS.IntegrationTests\\LiquorSaaS.IntegrationTests.csproj",
       "projectName": "LiquorSaaS.IntegrationTests",
-      "projectPath": "/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/tests/LiquorSaaS.IntegrationTests/LiquorSaaS.IntegrationTests.csproj",
-      "packagesPath": "/Users/jaiman/.nuget/packages/",
-      "outputPath": "/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/tests/LiquorSaaS.IntegrationTests/obj/",
+      "projectPath": "C:\\Users\\Dev\\My Web Sites\\BienHelodias\\backend\\tests\\LiquorSaaS.IntegrationTests\\LiquorSaaS.IntegrationTests.csproj",
+      "packagesPath": "C:\\Users\\Dev\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Dev\\My Web Sites\\BienHelodias\\backend\\tests\\LiquorSaaS.IntegrationTests\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/jaiman/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\Dev\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -10465,11 +10465,11 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/LiquorSaaS.Api.csproj": {
-              "projectPath": "/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Api/LiquorSaaS.Api.csproj"
+            "C:\\Users\\Dev\\My Web Sites\\BienHelodias\\backend\\src\\LiquorSaaS.Api\\LiquorSaaS.Api.csproj": {
+              "projectPath": "C:\\Users\\Dev\\My Web Sites\\BienHelodias\\backend\\src\\LiquorSaaS.Api\\LiquorSaaS.Api.csproj"
             },
-            "/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Infrastructure/LiquorSaaS.Infrastructure.csproj": {
-              "projectPath": "/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Infrastructure/LiquorSaaS.Infrastructure.csproj"
+            "C:\\Users\\Dev\\My Web Sites\\BienHelodias\\backend\\src\\LiquorSaaS.Infrastructure\\LiquorSaaS.Infrastructure.csproj": {
+              "projectPath": "C:\\Users\\Dev\\My Web Sites\\BienHelodias\\backend\\src\\LiquorSaaS.Infrastructure\\LiquorSaaS.Infrastructure.csproj"
             }
           }
         }
@@ -10483,8 +10483,7 @@
         "enableAudit": "true",
         "auditLevel": "low",
         "auditMode": "direct"
-      },
-      "SdkAnalysisLevel": "10.0.100"
+      }
     },
     "frameworks": {
       "net8.0": {
@@ -10535,7 +10534,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/10.0.102/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.417/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

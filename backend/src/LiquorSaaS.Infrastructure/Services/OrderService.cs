@@ -21,8 +21,11 @@ public sealed class OrderService(
     ICurrentUserService currentUserService,
     IPromotionService promotionService,
     IPushNotificationService pushNotificationService,
+    TimeProvider timeProvider,
     ILogger<OrderService> logger) : IOrderService
 {
+    private const string StoreTimeZoneId = "America/Mexico_City";
+
     public async Task<OrderDto> CreateAsync(CreateOrderRequest request, CancellationToken cancellationToken)
     {
         var storeId = request.StoreId;
@@ -33,6 +36,8 @@ public sealed class OrderService(
         {
             throw new ConflictException("Store is not active.");
         }
+
+        EnsureStoreIsOpen(store);
 
         if (request.Items.Count == 0)
         {
@@ -64,6 +69,12 @@ public sealed class OrderService(
 
             return OrderItem.Create(product.Id, product.Name, product.Price, itemRequest.Quantity);
         }).ToArray();
+
+        var subtotal = orderItems.Sum(item => item.Subtotal);
+        if (store.MinimumPurchase is { } minimumPurchase && subtotal < minimumPurchase)
+        {
+            throw new ConflictException($"Minimum purchase is {minimumPurchase:0.00}.");
+        }
 
         var promotion = await promotionService.EvaluateAsync(
             storeId,
@@ -174,6 +185,25 @@ public sealed class OrderService(
             .Replace("[", "[[]", StringComparison.Ordinal)
             .Replace("%", "[%]", StringComparison.Ordinal)
             .Replace("_", "[_]", StringComparison.Ordinal);
+    }
+
+    private void EnsureStoreIsOpen(Store store)
+    {
+        if (!store.OpeningTime.HasValue || !store.ClosingTime.HasValue || store.OpeningTime == store.ClosingTime)
+        {
+            return;
+        }
+
+        var timeZone = TimeZoneInfo.FindSystemTimeZoneById(StoreTimeZoneId);
+        var localTime = TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), timeZone).TimeOfDay;
+        var isOpen = store.OpeningTime < store.ClosingTime
+            ? localTime >= store.OpeningTime.Value.ToTimeSpan() && localTime < store.ClosingTime.Value.ToTimeSpan()
+            : localTime >= store.OpeningTime.Value.ToTimeSpan() || localTime < store.ClosingTime.Value.ToTimeSpan();
+
+        if (!isOpen)
+        {
+            throw new ConflictException($"Store is closed. Opening hours: {store.OpeningTime:HH\\:mm} - {store.ClosingTime:HH\\:mm}.");
+        }
     }
 
     public async Task<OrderDto> UpdateStatusAsync(Guid id, UpdateOrderStatusRequest request, CancellationToken cancellationToken)

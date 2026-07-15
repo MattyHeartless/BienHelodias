@@ -8,6 +8,7 @@ import { OrdersApiService } from '../services/orders-api.service';
 import { ProductsApiService } from '../services/products-api.service';
 import { CartSessionService } from '../services/cart-session.service';
 import { StorefrontTenantService } from '../services/storefront-tenant.service';
+import { StoreAvailabilityService } from '../services/store-availability.service';
 
 @Component({
   selector: 'app-cart-page',
@@ -24,6 +25,7 @@ export class CartPageComponent {
   private readonly ordersApi = inject(OrdersApiService);
   private readonly cartSession = inject(CartSessionService);
   private readonly storefrontTenant = inject(StorefrontTenantService);
+  private readonly storeAvailabilityService = inject(StoreAvailabilityService);
 
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
@@ -35,6 +37,7 @@ export class CartPageComponent {
   readonly cart = computed(() => this.cartSession.items());
   readonly cartCount = computed(() => this.cartSession.cartCount());
   readonly appliedPromotion = computed(() => this.cartSession.appliedPromotion());
+  readonly storeAvailability = computed(() => this.storeAvailabilityService.getAvailability(this.storefrontTenant.store()));
 
   readonly promoForm = this.formBuilder.nonNullable.group({
     promoCode: ['']
@@ -55,6 +58,12 @@ export class CartPageComponent {
 
   readonly discountTotal = computed(() => this.appliedPromotion()?.discountTotal ?? 0);
   readonly total = computed(() => this.appliedPromotion()?.total ?? this.subtotal());
+  readonly minimumPurchase = computed(() => this.storefrontTenant.store()?.minimumPurchase ?? null);
+  readonly amountMissingForMinimum = computed(() => Math.max(0, (this.minimumPurchase() ?? 0) - this.subtotal()));
+  readonly meetsMinimumPurchase = computed(() => this.amountMissingForMinimum() === 0);
+  readonly canContinueCheckout = computed(() =>
+    this.cartItems().length > 0 && this.storeAvailability().isOpen && this.meetsMinimumPurchase()
+  );
 
   constructor() {
     this.promoForm.controls.promoCode.valueChanges.subscribe((value) => {
@@ -129,7 +138,7 @@ export class CartPageComponent {
 
   continueCheckout(): void {
     const slug = this.activeSlug();
-    if (!slug || this.cartItems().length === 0) {
+    if (!slug || !this.canContinueCheckout()) {
       return;
     }
 

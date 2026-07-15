@@ -9,6 +9,7 @@ import { OrdersApiService } from '../services/orders-api.service';
 import { ProductsApiService } from '../services/products-api.service';
 import { CartSessionService } from '../services/cart-session.service';
 import { StorefrontTenantService } from '../services/storefront-tenant.service';
+import { StoreAvailabilityService } from '../services/store-availability.service';
 
 @Component({
   selector: 'app-checkout-page',
@@ -26,6 +27,7 @@ export class CheckoutPageComponent implements OnDestroy {
   private readonly googlePlaces = inject(GooglePlacesService);
   private readonly cartSession = inject(CartSessionService);
   private readonly storefrontTenant = inject(StorefrontTenantService);
+  private readonly storeAvailabilityService = inject(StoreAvailabilityService);
   private autocomplete: any | null = null;
   private autocompleteListener: { remove: () => void } | null = null;
   private autocompleteInput: HTMLInputElement | null = null;
@@ -51,6 +53,7 @@ export class CheckoutPageComponent implements OnDestroy {
   readonly storeName = computed(() => this.storefrontTenant.store()?.name ?? 'Licoreria');
   readonly cart = computed(() => this.cartSession.items());
   readonly appliedPromotion = computed(() => this.cartSession.appliedPromotion());
+  readonly storeAvailability = computed(() => this.storeAvailabilityService.getAvailability(this.storefrontTenant.store()));
 
   readonly checkoutForm = this.formBuilder.nonNullable.group({
     customerName: ['', [Validators.required, Validators.minLength(2)]],
@@ -77,6 +80,12 @@ export class CheckoutPageComponent implements OnDestroy {
 
   readonly discountTotal = computed(() => this.appliedPromotion()?.discountTotal ?? 0);
   readonly total = computed(() => this.appliedPromotion()?.total ?? this.subtotal());
+  readonly minimumPurchase = computed(() => this.storefrontTenant.store()?.minimumPurchase ?? null);
+  readonly amountMissingForMinimum = computed(() => Math.max(0, (this.minimumPurchase() ?? 0) - this.subtotal()));
+  readonly meetsMinimumPurchase = computed(() => this.amountMissingForMinimum() === 0);
+  readonly canSubmitOrder = computed(() =>
+    this.cartItems().length > 0 && this.storeAvailability().isOpen && this.meetsMinimumPurchase()
+  );
 
   constructor() {
     this.route.paramMap.subscribe((params) => {
@@ -106,7 +115,17 @@ export class CheckoutPageComponent implements OnDestroy {
     this.checkoutForm.markAllAsTouched();
     const storeId = this.storefrontTenant.storeId();
     const slug = this.activeSlug();
-    if (this.checkoutForm.invalid || this.cartItems().length === 0 || !storeId || !slug) {
+    if (this.checkoutForm.invalid || !storeId || !slug) {
+      return;
+    }
+
+    if (!this.storeAvailability().isOpen) {
+      this.error.set(`La tienda está cerrada. Horario de atención: ${this.storeAvailability().scheduleLabel}.`);
+      return;
+    }
+
+    if (!this.meetsMinimumPurchase()) {
+      this.error.set(`Te faltan ${this.amountMissingForMinimum().toFixed(2)} para alcanzar el pedido mínimo.`);
       return;
     }
 

@@ -7,6 +7,7 @@ import { ProductsApiService } from '../services/products-api.service';
 import { CartSessionService } from '../services/cart-session.service';
 import { StorefrontContentApiService } from '../services/storefront-content-api.service';
 import { StorefrontTenantService } from '../services/storefront-tenant.service';
+import { StoreAvailabilityService } from '../services/store-availability.service';
 import { catchError, forkJoin, of } from 'rxjs';
 
 @Component({
@@ -24,6 +25,7 @@ export class CatalogPageComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly storefrontTenant = inject(StorefrontTenantService);
+  private readonly storeAvailabilityService = inject(StoreAvailabilityService);
   private bannerRotationHandle: ReturnType<typeof window.setInterval> | null = null;
   private bannerPointerId: number | null = null;
   private bannerPointerStartX: number | null = null;
@@ -32,6 +34,7 @@ export class CatalogPageComponent {
   private readonly quickAddFeedbackTimeouts = new Map<string, ReturnType<typeof window.setTimeout>>();
 
   readonly tenant = computed(() => this.storefrontTenant.store());
+  readonly storeAvailability = computed(() => this.storeAvailabilityService.getAvailability(this.tenant()));
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly products = signal<ProductDto[]>([]);
@@ -53,6 +56,8 @@ export class CatalogPageComponent {
   readonly isBannerDragging = signal(false);
   readonly highlightedProductId = signal<string | null>(null);
   readonly detailOpen = signal(false);
+  readonly detailModalActive = signal(false);
+  readonly detailModalClosing = signal(false);
   readonly cart = computed(() => this.cartSession.items());
   readonly cartCount = computed(() => this.cartSession.cartCount());
   readonly quickAddFeedback = signal<Record<string, boolean>>({});
@@ -138,6 +143,11 @@ export class CatalogPageComponent {
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
+    if (this.detailOpen()) {
+      this.closeDetail();
+      return;
+    }
+
     if (this.promoModalOpen()) {
       this.closePromotionModal();
       return;
@@ -185,7 +195,7 @@ export class CatalogPageComponent {
 
   selectCategory(category: string): void {
     this.activeCategory.set(category);
-    this.detailOpen.set(false);
+    this.closeDetail();
   }
 
   updateSearch(query: string): void {
@@ -195,12 +205,16 @@ export class CatalogPageComponent {
   selectProduct(productId: string): void {
     this.highlightedProductId.set(productId);
     this.detailQuantity.set(1);
-    this.detailOpen.set(true);
+    this.openAnimatedModal(this.detailOpen, this.detailModalActive, this.detailModalClosing);
   }
 
   closeDetail(): void {
-    this.detailOpen.set(false);
-    this.detailQuantity.set(1);
+    this.closeAnimatedModal(
+      this.detailOpen,
+      this.detailModalActive,
+      this.detailModalClosing,
+      () => this.detailQuantity.set(1)
+    );
   }
 
   isSelectedProduct(productId: string): boolean {
@@ -208,6 +222,10 @@ export class CatalogPageComponent {
   }
 
   addToCart(product: ProductDto, quantity = 1): void {
+    if (!this.storeAvailability().isOpen) {
+      return;
+    }
+
     this.cartSession.addItem(product.id, quantity, product.stock);
   }
 

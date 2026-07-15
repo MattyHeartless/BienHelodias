@@ -129,11 +129,34 @@
               </div>
             </div>
 
+            @if (!storeAvailability().isOpen) {
+              <section class="store-closed-notice mt-4" role="status">
+                <div class="store-closed-notice__icon" aria-hidden="true">
+                  <span class="material-symbols-outlined">lock_clock</span>
+                </div>
+                <div>
+                  <p class="store-closed-notice__title">La tienda está cerrada</p>
+                  <p class="store-closed-notice__copy">Tu carrito se conserva. Podrás finalizar el pedido al volver a abrir.</p>
+                </div>
+                <div class="store-closed-notice__schedule">
+                  <p class="store-closed-notice__schedule-label">Horario para pedir</p>
+                  <p class="store-closed-notice__schedule-value">{{ storeAvailability().scheduleLabel }}</p>
+                </div>
+              </section>
+            } @else if (!meetsMinimumPurchase()) {
+              <div class="minimum-purchase-notice mt-4" role="status">
+                <span class="material-symbols-outlined minimum-purchase-notice__icon" aria-hidden="true">shopping_bag</span>
+                <p class="minimum-purchase-notice__copy">
+                  Agrega <span class="minimum-purchase-notice__amount">{{ amountMissingForMinimum() | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span> más para llegar al mínimo de {{ minimumPurchase() | currency: 'MXN':'symbol-narrow':'1.2-2' }}.
+                </p>
+              </div>
+            }
+
             <div class="cart-actions">
               <a [routerLink]="activeSlug() ? ['/', activeSlug()] : ['/']" class="ghost-button w-full !justify-center py-4">
                 Seguir viendo bebidas
               </a>
-              <button class="liquid-button w-full !justify-center py-4" type="button" (click)="continueCheckout()" [disabled]="cartItems().length === 0">
+              <button class="liquid-button w-full !justify-center py-4" type="button" (click)="continueCheckout()" [disabled]="!canContinueCheckout()">
                 <span class="material-symbols-outlined text-base">arrow_forward</span>
                 Ya estuvo, vámonos
               </button>

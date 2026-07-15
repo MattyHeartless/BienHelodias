@@ -7,7 +7,10 @@ using LiquorSaaS.Application.Orders;
 using LiquorSaaS.Application.Promotions;
 using LiquorSaaS.Domain.Enums;
 using LiquorSaaS.Infrastructure.Persistence.Seed;
+using LiquorSaaS.Infrastructure.Persistence;
 using LiquorSaaS.IntegrationTests.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 
 namespace LiquorSaaS.IntegrationTests.Orders;
 
@@ -39,6 +42,81 @@ public sealed class OrderIntegrationTests(TestWebApplicationFactory factory) : I
         payload.Data.Status.Should().Be(OrderStatus.Pending);
         payload.Data.DeliveryLatitude.Should().Be(19.432608m);
         payload.Data.DeliveryLongitude.Should().Be(-99.133209m);
+    }
+
+    [Fact]
+    public async Task CreateOrder_ShouldRejectOrderBelowMinimumPurchase()
+    {
+        try
+        {
+            await UpdateSeedStoreAsync(minimumPurchase: 50m);
+            var client = factory.CreateStoreClient();
+
+            var response = await client.PostAsJsonAsync("/api/orders", CreateOrderRequestForGin());
+
+            response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        }
+        finally
+        {
+            await ResetSeedStoreRulesAsync();
+        }
+    }
+
+    [Fact]
+    public async Task CreateOrder_ShouldRejectOrderOutsideOpeningHours()
+    {
+        try
+        {
+            factory.SetUtcNow(new DateTimeOffset(2026, 7, 15, 3, 0, 0, TimeSpan.Zero)); // 21:00 in Guadalajara on the previous day.
+            await UpdateSeedStoreAsync(openingTime: new TimeOnly(9, 0), closingTime: new TimeOnly(18, 0));
+            var client = factory.CreateStoreClient();
+
+            var response = await client.PostAsJsonAsync("/api/orders", CreateOrderRequestForGin());
+
+            response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        }
+        finally
+        {
+            await ResetSeedStoreRulesAsync();
+        }
+    }
+
+    [Fact]
+    public async Task CreateOrder_ShouldAllowOvernightSchedule()
+    {
+        try
+        {
+            factory.SetUtcNow(new DateTimeOffset(2026, 7, 15, 6, 0, 0, TimeSpan.Zero)); // 00:00 in Guadalajara.
+            await UpdateSeedStoreAsync(openingTime: new TimeOnly(18, 0), closingTime: new TimeOnly(2, 0));
+            var client = factory.CreateStoreClient();
+
+            var response = await client.PostAsJsonAsync("/api/orders", CreateOrderRequestForGin());
+
+            response.StatusCode.Should().Be(HttpStatusCode.Created);
+        }
+        finally
+        {
+            await ResetSeedStoreRulesAsync();
+        }
+    }
+
+    [Fact]
+    public async Task CreateOrder_ShouldAllowEqualOpeningAndClosingTimes()
+    {
+        try
+        {
+            factory.SetUtcNow(new DateTimeOffset(2026, 7, 15, 3, 0, 0, TimeSpan.Zero));
+            await UpdateSeedStoreAsync(openingTime: new TimeOnly(9, 0), closingTime: new TimeOnly(9, 0));
+            var client = factory.CreateStoreClient();
+
+            var response = await client.PostAsJsonAsync("/api/orders", CreateOrderRequestForGin());
+
+            response.StatusCode.Should().Be(HttpStatusCode.Created);
+        }
+        finally
+        {
+            await ResetSeedStoreRulesAsync();
+        }
     }
 
     [Fact]
@@ -245,4 +323,37 @@ public sealed class OrderIntegrationTests(TestWebApplicationFactory factory) : I
         var payload = await response.Content.ReadFromJsonAsync<ApiResponse<OrderDto>>();
         return payload!.Data!.Id;
     }
+
+    private async Task UpdateSeedStoreAsync(TimeOnly? openingTime = null, TimeOnly? closingTime = null, decimal? minimumPurchase = null)
+    {
+        using var scope = factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<LiquorSaaSDbContext>();
+        var store = await dbContext.Stores.SingleAsync(store => store.Id == SeedDataIds.StoreId);
+        store.Update(
+            store.Name,
+            store.Slug,
+            store.IsActive,
+            store.WelcomePhrase,
+            openingTime,
+            closingTime,
+            store.CartonPrice,
+            store.BucketPrice,
+            minimumPurchase,
+            store.BusinessAddress,
+            store.Latitude,
+            store.Longitude);
+        await dbContext.SaveChangesAsync();
+    }
+
+    private static CreateOrderRequest CreateOrderRequestForGin() => new(
+        SeedDataIds.StoreId,
+        "Cliente Test",
+        "55555",
+        "Av Principal 123",
+        19.432608m,
+        -99.133209m,
+        null,
+        new[] { new CreateOrderItemRequest(SeedDataIds.ProductGinId, 1) });
+
+    private Task ResetSeedStoreRulesAsync() => UpdateSeedStoreAsync();
 }

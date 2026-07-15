@@ -41,6 +41,7 @@ public static class DependencyInjection
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.Configure<OpenAiInventoryOptions>(configuration.GetSection(OpenAiInventoryOptions.SectionName));
         services.Configure<PushNotificationOptions>(configuration.GetSection(PushNotificationOptions.SectionName));
+        services.AddSingleton(TimeProvider.System);
         services.AddScoped<BcryptPasswordHasher>();
         services.AddScoped<IPasswordHasher>(sp => sp.GetRequiredService<BcryptPasswordHasher>());
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();

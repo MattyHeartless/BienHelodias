@@ -5,7 +5,8 @@
   <main class="catalog-layout">
     <section class="phone-shell phone-shell--browse">
       <div class="phone-shell__header phone-shell__header--sticky">
-        <div>
+        <div class="flex items-center gap-2.5">
+          <span class="material-symbols-outlined text-[1.65rem] text-primary" aria-hidden="true">local_bar</span>
           <h1 class="font-display text-2xl font-black tracking-[-0.05em] text-primary">{{ tenant()?.name || 'Licoreria' }}</h1>
         </div>
         <div class="flex items-center gap-2">
@@ -30,6 +31,22 @@
             {{ welcomePhrase() }}
           </h2>
         </section>
+
+        @if (!storeAvailability().isOpen) {
+          <section class="store-closed-notice" role="status">
+            <div class="store-closed-notice__icon" aria-hidden="true">
+              <span class="material-symbols-outlined">lock_clock</span>
+            </div>
+            <div>
+              <p class="store-closed-notice__title">La tienda está cerrada</p>
+              <p class="store-closed-notice__copy">Podrás agregar bebidas al abrir.</p>
+            </div>
+            <div class="store-closed-notice__schedule">
+              <p class="store-closed-notice__schedule-label">Horario para pedir</p>
+              <p class="store-closed-notice__schedule-value">{{ storeAvailability().scheduleLabel }}</p>
+            </div>
+          </section>
+        }
 
         @if (activeBanner(); as banner) {
           <section
@@ -146,6 +163,8 @@
                       class="quick-add-button quick-add-feedback"
                       [class.quick-add-feedback--burst]="isQuickAddAnimating(product.id)"
                       (click)="addToCartWithFeedback(product)"
+                      [disabled]="!storeAvailability().isOpen"
+                      [attr.aria-label]="storeAvailability().isOpen ? 'Agregar al carrito' : 'Tienda cerrada'"
                     >
                       @if (isQuickAddAnimating(product.id)) {
                         <span class="quick-add-feedback__burst" aria-hidden="true"></span>
@@ -295,86 +314,69 @@
   }
 
   @if (detailOpen() && selectedProduct(); as selected) {
-    <div class="detail-overlay" (click)="closeDetail()">
-      <section class="phone-shell phone-shell--detail" (click)="$event.stopPropagation()">
-        <div class="phone-shell__header phone-shell__header--detail">
-          <p class="text-sm font-semibold">Detalle</p>
-          <button class="icon-button" type="button" (click)="closeDetail()">
-            <span class="material-symbols-outlined text-base">close</span>
-          </button>
+    <div
+      class="detail-modal-overlay"
+      [class.is-open]="detailModalActive()"
+      [class.is-closing]="detailModalClosing()"
+      (click)="closeDetail()"
+    >
+      <section
+        class="detail-modal t-modal"
+        [class.is-open]="detailModalActive()"
+        [class.is-closing]="detailModalClosing()"
+        (click)="$event.stopPropagation()"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="detail-modal-title"
+      >
+        <button class="detail-modal__close" type="button" (click)="closeDetail()" aria-label="Cerrar detalle">
+          <span class="material-symbols-outlined text-base">close</span>
+        </button>
+
+        <div class="detail-modal__media" [style.background]="productTone(1)">
+          @if (selected.imageUrl) {
+            <img [src]="selected.imageUrl" [alt]="selected.name" class="h-full w-full object-contain p-5" />
+          } @else {
+            <div class="flex h-full items-center justify-center">
+              <span class="material-symbols-outlined text-[5rem] text-primary/60">liquor</span>
+            </div>
+          }
         </div>
 
-        <div class="phone-shell__body phone-shell__body--detail">
-          <div class="detail-card">
-            <div class="detail-card__media" [style.background]="productTone(1)">
-              @if (selected.imageUrl) {
-                <img [src]="selected.imageUrl" [alt]="selected.name" class="h-full w-full object-contain p-5" />
-              } @else {
-                <div class="flex h-full items-center justify-center">
-                  <span class="material-symbols-outlined text-[7rem] text-primary/60">liquor</span>
-                </div>
-              }
-            </div>
+        <div class="detail-modal__content">
+          <p class="detail-modal__category">{{ selected.category }}</p>
+          <h3 id="detail-modal-title" class="detail-modal__title">{{ selected.name }}</h3>
 
-            <div class="detail-card__dots">
-              <span class="detail-card__dot detail-card__dot--active"></span>
-              <span class="detail-card__dot"></span>
-            </div>
-          </div>
-
-          <div class="detail-copy">
-            <div class="flex items-start justify-between gap-3">
-              <div>
-                <h3 class="font-display text-4xl font-bold tracking-[-0.05em]">{{ selected.name }}</h3>
-              </div>
-              <!-- Re-enable when product ratings are available.
-              <div class="rating-pill">
-                <span class="material-symbols-outlined text-sm">star</span>
-                4.9
-              </div>
-              -->
-            </div>
-
-            <div class="mt-4 flex items-end justify-between gap-3">
-              <div>
-                <span class="font-display text-4xl font-bold text-primary">
-                  {{ selected.price | currency: 'MXN':'symbol-narrow':'1.2-2' }}
-                </span>
-              </div>
-              <div class="quantity-stepper">
-                <button type="button" class="quantity-stepper__button" (click)="decreaseDetailQuantity()">
-                  <span class="material-symbols-outlined text-base">remove</span>
-                </button>
-                <span class="quantity-stepper__value">{{ detailQuantity() }}</span>
-                <button type="button" class="quantity-stepper__button" (click)="increaseDetailQuantity()">
-                  <span class="material-symbols-outlined text-base">add</span>
-                </button>
-              </div>
-            </div>
-
-            <p class="mt-5 text-sm leading-7 text-on-surface-variant">{{ selected.description }}</p>
-
-            <div class="mt-8 grid grid-cols-2 gap-3">
-              <button type="button" class="ghost-button detail-copy__action" (click)="closeDetail()">
-                <span class="material-symbols-outlined text-base">close</span>
-                Cerrar
+          <div class="detail-modal__purchase-row">
+            <span class="detail-modal__price">{{ selected.price | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span>
+            <div class="quantity-stepper">
+              <button type="button" class="quantity-stepper__button" (click)="decreaseDetailQuantity()" aria-label="Reducir cantidad">
+                <span class="material-symbols-outlined text-base">remove</span>
               </button>
-              <button
-                type="button"
-                class="liquid-button detail-copy__action quick-add-feedback"
-                [class.quick-add-feedback--burst]="isQuickAddAnimating(selected.id)"
-                (click)="addToCartWithFeedback(selected)"
-              >
-                @if (isQuickAddAnimating(selected.id)) {
-                  <span class="quick-add-feedback__burst" aria-hidden="true"></span>
-                  <span class="quick-add-feedback__bubble quick-add-feedback__bubble--left" aria-hidden="true"></span>
-                  <span class="quick-add-feedback__bubble quick-add-feedback__bubble--right" aria-hidden="true"></span>
-                }
-                <span class="material-symbols-outlined text-base">add_shopping_cart</span>
-                Agregar
+              <span class="quantity-stepper__value">{{ detailQuantity() }}</span>
+              <button type="button" class="quantity-stepper__button" (click)="increaseDetailQuantity()" aria-label="Aumentar cantidad">
+                <span class="material-symbols-outlined text-base">add</span>
               </button>
             </div>
           </div>
+
+          <p class="detail-modal__description">{{ selected.description }}</p>
+
+          <button
+            type="button"
+            class="liquid-button detail-modal__add quick-add-feedback"
+            [class.quick-add-feedback--burst]="isQuickAddAnimating(selected.id)"
+            (click)="addToCartWithFeedback(selected)"
+            [disabled]="!storeAvailability().isOpen"
+          >
+            @if (isQuickAddAnimating(selected.id)) {
+              <span class="quick-add-feedback__burst" aria-hidden="true"></span>
+              <span class="quick-add-feedback__bubble quick-add-feedback__bubble--left" aria-hidden="true"></span>
+              <span class="quick-add-feedback__bubble quick-add-feedback__bubble--right" aria-hidden="true"></span>
+            }
+            <span class="material-symbols-outlined text-base">add_shopping_cart</span>
+            Agregar al carrito
+          </button>
         </div>
       </section>
     </div>

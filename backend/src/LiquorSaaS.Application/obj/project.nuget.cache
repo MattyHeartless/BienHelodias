@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "vZxN4txekrk=",
+  "dgSpecHash": "LO0B7JVwRCw=",
   "success": true,
-  "projectFilePath": "/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/src/LiquorSaaS.Application/LiquorSaaS.Application.csproj",
+  "projectFilePath": "C:\\Users\\Dev\\My Web Sites\\BienHelodias\\backend\\src\\LiquorSaaS.Application\\LiquorSaaS.Application.csproj",
   "expectedPackageFiles": [
-    "/Users/jaiman/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/8.0.2/microsoft.extensions.dependencyinjection.abstractions.8.0.2.nupkg.sha512"
+    "C:\\Users\\Dev\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.2\\microsoft.extensions.dependencyinjection.abstractions.8.0.2.nupkg.sha512"
   ],
   "logs": []
 }

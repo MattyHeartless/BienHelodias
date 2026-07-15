@@ -16,6 +16,7 @@ namespace LiquorSaaS.IntegrationTests.Infrastructure;
 public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private readonly SqliteConnection _connection = new("DataSource=:memory:");
+    private readonly FixedTimeProvider _timeProvider = new();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -31,6 +32,9 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>, 
             {
                 options.UseSqlite(sp.GetRequiredService<SqliteConnection>());
             });
+
+            services.RemoveAll<TimeProvider>();
+            services.AddSingleton<TimeProvider>(_timeProvider);
         });
     }
 
@@ -52,6 +56,8 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>, 
         return client;
     }
 
+    public void SetUtcNow(DateTimeOffset utcNow) => _timeProvider.SetUtcNow(utcNow);
+
     public async Task<string> LoginAsync(string email, string password, Guid? storeId = null)
     {
         var client = CreateStoreClient(storeId);
@@ -68,4 +74,13 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>, 
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return client;
     }
+}
+
+public sealed class FixedTimeProvider : TimeProvider
+{
+    private DateTimeOffset _utcNow = new(2026, 7, 15, 18, 0, 0, TimeSpan.Zero);
+
+    public override DateTimeOffset GetUtcNow() => _utcNow;
+
+    public void SetUtcNow(DateTimeOffset utcNow) => _utcNow = utcNow;
 }

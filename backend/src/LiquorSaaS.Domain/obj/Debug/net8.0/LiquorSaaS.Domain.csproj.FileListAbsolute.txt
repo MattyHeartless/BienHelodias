@@ -51,3 +51,6 @@ C:\Users\Dev\My Web Sites\BienHelodias\backend\.verify-build\api\LiquorSaaS.Doma
 C:\Users\Dev\My Web Sites\BienHelodias\backend\.verify-build\integration-tests\LiquorSaaS.Domain.deps.json
 C:\Users\Dev\My Web Sites\BienHelodias\backend\.verify-build\integration-tests\LiquorSaaS.Domain.dll
 C:\Users\Dev\My Web Sites\BienHelodias\backend\.verify-build\integration-tests\LiquorSaaS.Domain.pdb
+C:\Users\Dev\My Web Sites\BienHelodias\backend\artifacts\verification\Debug\net8.0\LiquorSaaS.Domain.deps.json
+C:\Users\Dev\My Web Sites\BienHelodias\backend\artifacts\verification\Debug\net8.0\LiquorSaaS.Domain.dll
+C:\Users\Dev\My Web Sites\BienHelodias\backend\artifacts\verification\Debug\net8.0\LiquorSaaS.Domain.pdb
