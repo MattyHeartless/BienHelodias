@@ -28,6 +28,7 @@ export class CatalogPageComponent {
   private bannerPointerId: number | null = null;
   private bannerPointerStartX: number | null = null;
   private bannerPointerStartY: number | null = null;
+  private storeFinderNavigationHandle: ReturnType<typeof window.setTimeout> | null = null;
   private readonly quickAddFeedbackTimeouts = new Map<string, ReturnType<typeof window.setTimeout>>();
 
   readonly tenant = computed(() => this.storefrontTenant.store());
@@ -45,6 +46,8 @@ export class CatalogPageComponent {
   readonly storeInfoModalOpen = signal(false);
   readonly storeInfoModalActive = signal(false);
   readonly storeInfoModalClosing = signal(false);
+  readonly isStoreFabHidden = signal(false);
+  readonly isStoreFinderLaunching = signal(false);
   readonly activeCategory = signal<string>('all');
   readonly searchQuery = signal('');
   readonly isBannerDragging = signal(false);
@@ -145,6 +148,14 @@ export class CatalogPageComponent {
     }
   }
 
+  @HostListener('window:scroll')
+  onWindowScroll(): void {
+    const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrollProgress = scrollableHeight > 0 ? (window.scrollY / scrollableHeight) * 100 : 0;
+
+    this.isStoreFabHidden.set(scrollProgress >= 5);
+  }
+
   loadCatalog(): void {
     this.loading.set(true);
     this.error.set(null);
@@ -209,6 +220,17 @@ export class CatalogPageComponent {
     void this.router.navigate(['/', slug, 'cart']);
   }
 
+  openStoreFinder(): void {
+    if (this.isStoreFinderLaunching()) {
+      return;
+    }
+
+    this.isStoreFinderLaunching.set(true);
+    this.storeFinderNavigationHandle = window.setTimeout(() => {
+      void this.router.navigate(['/']);
+    }, 250);
+  }
+
   openPromotionModal(banner: BannerDto): void {
     if (!banner.promotion) {
       this.selectCategory('all');
@@ -243,6 +265,9 @@ export class CatalogPageComponent {
 
   ngOnDestroy(): void {
     this.stopBannerRotation();
+    if (this.storeFinderNavigationHandle !== null) {
+      window.clearTimeout(this.storeFinderNavigationHandle);
+    }
     this.quickAddFeedbackTimeouts.forEach((handle) => window.clearTimeout(handle));
     this.quickAddFeedbackTimeouts.clear();
   }

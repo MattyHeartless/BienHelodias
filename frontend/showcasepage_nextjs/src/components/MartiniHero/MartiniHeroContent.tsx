@@ -208,19 +208,61 @@ export function MartiniHeroContent() {
       </section>
 
       <section className="martini-scene martini-scene--platform" aria-label="Plataforma">
-        <div className="platform-copy">
-          <p className="scene-kicker">Todo conectado</p>
-          <h2>Menos vueltas, más señales en vivo</h2>
+        <div className="platform-finder-copy">
+          <p className="scene-kicker platform-eyebrow">Todo conectado</p>
+          <h2 className="platform-headline">
+            <span className="platform-headline-line">Tiendas afiliadas</span>
+            <span className="platform-headline-line">cerca de ti</span>
+          </h2>
+          <p className="platform-support">Explora opciones cercanas en segundos.</p>
+          <a
+            className="platform-search-cta"
+            href="https://bienhelodias.qzz.io/"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Encontrar tiendas cerca en BienHelodias"
+          >
+            <span className="platform-search-cta__lens" aria-hidden="true" />
+            <span>Encontrar tiendas cerca</span>
+            <span className="platform-search-cta__arrow" aria-hidden="true">→</span>
+          </a>
         </div>
-        <div className="platform-visuals">
-          <div className="platform-card platform-drinks">
-            <Image src="/scene/beerbag.png" alt="Bebidas listas para pedir en la plataforma" width={500} height={500} />
+
+        <div className="platform-map-card" aria-label="Mapa de tiendas afiliadas cercanas">
+          <div className="platform-map-grid" aria-hidden="true" />
+          <div className="platform-map-glow" aria-hidden="true" />
+          <div className="platform-proximity-rings" aria-hidden="true">
+            <span className="platform-proximity-ring" />
+            <span className="platform-proximity-ring" />
+            <span className="platform-proximity-ring" />
           </div>
-          <div className="platform-card platform-stonks">
-            <Image src="/scene/business.png" alt="Administración de la licorería en la plataforma" width={500} height={500} />
-          </div>
-          <div className="platform-card platform-pin">
-            <Image src="/scene/route.png" alt="Seguimiento del pedido en camino" width={500} height={500} />
+          <span className="platform-route" aria-hidden="true"><span /></span>
+          <span className="platform-user-marker" aria-hidden="true"><span /></span>
+          <span className="platform-store-marker platform-store-marker--nearest" aria-hidden="true"><span>BH</span></span>
+          <span className="platform-store-marker platform-store-marker--two" aria-hidden="true"><span>BH</span></span>
+          <span className="platform-store-marker platform-store-marker--three" aria-hidden="true"><span>BH</span></span>
+          <span className="platform-store-marker platform-store-marker--four" aria-hidden="true"><span>BH</span></span>
+          <p className="platform-status-pill"><span />3 tiendas encontradas</p>
+          <div className="platform-results" aria-label="Tiendas afiliadas ordenadas por distancia">
+            <div className="platform-results__heading">
+              <span>Más cerca de ti</span>
+              <span>Distancia</span>
+            </div>
+            <article className="platform-result platform-result--nearest">
+              <span className="platform-result__index">01</span>
+              <span className="platform-result__name">La Bodega del Barrio <em>Más cercana</em></span>
+              <strong>450 m</strong>
+            </article>
+            <article className="platform-result">
+              <span className="platform-result__index">02</span>
+              <span className="platform-result__name">Licorería La Esquina</span>
+              <strong>1.2 km</strong>
+            </article>
+            <article className="platform-result">
+              <span className="platform-result__index">03</span>
+              <span className="platform-result__name">Frías San Juan</span>
+              <strong>1.8 km</strong>
+            </article>
           </div>
         </div>
       </section>

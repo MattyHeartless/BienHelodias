@@ -41,6 +41,8 @@ export function MartiniIntroOverlay() {
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
+    const isMobile = window.matchMedia("(max-width: 900px), (pointer: coarse)").matches;
+    let introTl: gsap.core.Timeline | null = null;
     let particleTl: gsap.core.Timeline | null = null;
     let ctx: CanvasRenderingContext2D | null = null;
     let disposed = false;
@@ -60,7 +62,7 @@ export function MartiniIntroOverlay() {
       }
 
       const rect = overlay.getBoundingClientRect();
-      const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, isMobile ? 0.65 : 1.5);
       canvas.width = Math.max(1, Math.round(rect.width * pixelRatio));
       canvas.height = Math.max(1, Math.round(rect.height * pixelRatio));
       canvas.style.width = `${rect.width}px`;
@@ -93,21 +95,22 @@ export function MartiniIntroOverlay() {
       ctx.save();
       ctx.globalCompositeOperation = "screen";
 
-      particles
-        .slice()
-        .sort((first, second) => first.scale - second.scale)
-        .forEach((particle) => {
+      const drawableParticles = isMobile
+        ? particles
+        : particles.slice().sort((first, second) => first.scale - second.scale);
+
+      drawableParticles.forEach((particle) => {
           const size = particle.size * particle.scale;
           if (size <= 0.4) {
             return;
           }
 
           ctx?.save();
-          ctx?.translate(centerX, centerY);
-          ctx?.rotate(particle.rotate);
-          if (ctx) {
-            ctx.shadowColor = "rgba(210, 253, 110, 0.95)";
-            ctx.shadowBlur = 10 + particle.scale * 14;
+            ctx?.translate(centerX, centerY);
+            ctx?.rotate(particle.rotate);
+            if (ctx) {
+              ctx.shadowColor = "rgba(210, 253, 110, 0.95)";
+            ctx.shadowBlur = isMobile ? 6 + particle.scale * 8 : 10 + particle.scale * 14;
             ctx.globalAlpha = Math.min(1, 0.22 + particle.scale);
             ctx.drawImage(particle.image, particle.x, particle.y, size, size);
           }
@@ -115,6 +118,12 @@ export function MartiniIntroOverlay() {
         });
 
       ctx.restore();
+    };
+
+    const stopParticles = () => {
+      particleTl?.kill();
+      particleTl = null;
+      ctx?.clearRect(0, 0, metrics.width, metrics.height);
     };
 
     const runIntro = async () => {
@@ -145,7 +154,7 @@ export function MartiniIntroOverlay() {
           y: 0,
           scale: 0,
           rotate: 0,
-          size: gsap.utils.random(42, 92),
+          size: gsap.utils.random(isMobile ? 34 : 42, isMobile ? 72 : 92),
         }))
       );
 
@@ -181,7 +190,7 @@ export function MartiniIntroOverlay() {
       window.addEventListener("resize", resizeCanvas);
       particleTl.play(0);
 
-      gsap
+      introTl = gsap
         .timeline({
           defaults: { ease: "power3.out" },
           onComplete: () => {
@@ -209,12 +218,24 @@ export function MartiniIntroOverlay() {
           { autoAlpha: 1, yPercent: 0, rotateX: 0, duration: 0.72, stagger: 0.035 },
           "<"
         )
-        .to(title, { letterSpacing: "0.02em", duration: 0.4 }, "-=0.42")
+        .to(
+          title,
+          isMobile
+            ? { scale: 1.02, duration: 0.4 }
+            : { letterSpacing: "0.02em", duration: 0.4 },
+          "-=0.42"
+        )
+        .call(() => {
+          letters.forEach((letter) => {
+            letter.style.willChange = "auto";
+          });
+        })
         .to({}, { duration: 0.8 })
-        .to(particleTl, { timeScale: 1.8, duration: 0.35, ease: "power2.in" }, "-=0.45")
-        .to(title, { autoAlpha: 0, y: -14, duration: 0.35, ease: "power2.in" })
-        .to(glow, { autoAlpha: 0, scale: 1.2, duration: 0.35 }, "<")
-        .to(overlay, { autoAlpha: 0, duration: 0.4 }, "-=0.08");
+        .to(canvas, { autoAlpha: 0, duration: 0.12 }, "-=0.1")
+        .call(stopParticles)
+        .to(title, { autoAlpha: 0, duration: 0.28, ease: "power2.in" })
+        .to(glow, { autoAlpha: 0, scale: 1.2, duration: 0.28 }, "<")
+        .to(overlay, { autoAlpha: 0, duration: 0.32 }, "-=0.06");
     };
 
     void runIntro();
@@ -222,7 +243,8 @@ export function MartiniIntroOverlay() {
     return () => {
       disposed = true;
       window.removeEventListener("resize", resizeCanvas);
-      particleTl?.kill();
+      introTl?.kill();
+      stopParticles();
     };
   }, []);
 

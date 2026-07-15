@@ -319,35 +319,86 @@ export function addCommissionScene(scrollTl: MartiniTimeline) {
 }
 
 export function addPlatformScene(scrollTl: MartiniTimeline) {
-  const { fadeUpFrom, fadeUpTo, fadeDownFrom, fadeLeftFrom } = animationPresets;
-
   scrollTl.addLabel("platformIn");
   scrollTl
-    .fromTo(".platform-copy", fadeUpFrom, { ...fadeUpTo, duration: 0.8 }, "platformIn")
     .fromTo(
-      ".platform-drinks",
-      fadeDownFrom,
-      { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" },
-      "platformIn+=0.2"
+      ".platform-eyebrow",
+      { opacity: 0, y: 18 },
+      { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" },
+      "platformIn"
     )
     .fromTo(
-      ".platform-stonks",
-      fadeUpFrom,
-      { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" },
+      ".platform-headline-line",
+      { opacity: 0, y: 38 },
+      { opacity: 1, y: 0, duration: 0.62, stagger: 0.12, ease: "power3.out" },
+      "platformIn+=0.1"
+    )
+    .fromTo(
+      ".platform-support",
+      { opacity: 0, y: 18 },
+      { opacity: 1, y: 0, duration: 0.42, ease: "power2.out" },
       "platformIn+=0.35"
     )
     .fromTo(
-      ".platform-pin",
-      fadeLeftFrom,
-      { opacity: 1, x: 0, duration: 0.8, ease: "power2.out" },
+      ".platform-search-cta",
+      { opacity: 0, y: 24, scale: 0.97 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.46, ease: "power2.out" },
       "platformIn+=0.5"
+    )
+    .fromTo(
+      ".platform-map-card",
+      { opacity: 0, y: 38, rotateX: 5, transformPerspective: 900 },
+      { opacity: 1, y: 0, rotateX: 0, duration: 0.7, ease: "power3.out" },
+      "platformIn+=0.25"
+    )
+    .fromTo(
+      ".platform-user-marker",
+      { opacity: 0, scale: 0.25 },
+      { opacity: 1, scale: 1, duration: 0.38, ease: "back.out(1.4)" },
+      "platformIn+=0.7"
+    )
+    .fromTo(
+      ".platform-proximity-ring",
+      { opacity: 0 },
+      { opacity: 1, duration: 0.5, stagger: 0.1, ease: "power2.out" },
+      "platformIn+=0.78"
+    )
+    .fromTo(
+      ".platform-store-marker",
+      { opacity: 0 },
+      { opacity: 1, duration: 0.36, stagger: 0.12, ease: "power2.out" },
+      "platformIn+=1.05"
+    )
+    .fromTo(
+      ".platform-route",
+      { opacity: 0, scaleX: 0, transformOrigin: "left center" },
+      { opacity: 1, scaleX: 1, duration: 0.55, ease: "power2.inOut" },
+      "platformIn+=1.28"
+    )
+    .fromTo(
+      ".platform-status-pill",
+      { opacity: 0, y: 10 },
+      { opacity: 1, y: 0, duration: 0.36, ease: "power2.out" },
+      "platformIn+=1.5"
+    )
+    .fromTo(
+      ".platform-results",
+      { opacity: 0, y: 22 },
+      { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" },
+      "platformIn+=1.62"
+    )
+    .fromTo(
+      ".platform-result",
+      { opacity: 0, x: 12 },
+      { opacity: 1, x: 0, duration: 0.34, stagger: 0.1, ease: "power2.out" },
+      "platformIn+=1.74"
     );
 
   addSceneHold(scrollTl, SCENE_HOLD.platform, "platformHold");
 
   scrollTl.addLabel("platformOut");
   scrollTl.to(
-    [".platform-copy", ".platform-drinks", ".platform-stonks", ".platform-pin"],
+    [".platform-finder-copy", ".platform-map-card"],
     {
       opacity: 0,
       y: -40,

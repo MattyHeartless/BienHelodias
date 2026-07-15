@@ -9,8 +9,17 @@
           <h1 class="font-display text-2xl font-black tracking-[-0.05em] text-primary">{{ tenant()?.name || 'Licoreria' }}</h1>
         </div>
         <div class="flex items-center gap-2">
-          <button class="icon-button icon-button--active" type="button" (click)="openCart()">
-            <span class="material-symbols-outlined text-base">shopping_bag</span>
+          <button
+            class="store-finder-button"
+            [class.store-finder-button--launching]="isStoreFinderLaunching()"
+            type="button"
+            (click)="openStoreFinder()"
+            aria-label="Buscar tiendas"
+          >
+            <span class="t-icon-swap" [attr.data-state]="isStoreFinderLaunching() ? 'b' : 'a'" aria-hidden="true">
+              <span class="material-symbols-outlined text-base t-icon" data-icon="a">travel_explore</span>
+              <span class="material-symbols-outlined text-base t-icon" data-icon="b">location_searching</span>
+            </span>
           </button>
         </div>
       </div>
@@ -178,7 +187,13 @@
 
   </main>
 
-  <button class="store-fab" type="button" (click)="openStoreInfoModal()" aria-label="Ver informacion de la tienda">
+  <button
+    class="store-fab"
+    [class.store-fab--hidden]="isStoreFabHidden()"
+    type="button"
+    (click)="openStoreInfoModal()"
+    aria-label="Ver informacion de la tienda"
+  >
     <span class="store-fab__halo" aria-hidden="true"></span>
     <span class="store-fab__beam" aria-hidden="true"></span>
     <span class="material-symbols-outlined store-fab__icon">storefront</span>

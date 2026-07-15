@@ -72,7 +72,7 @@ export function MartiniBeamsBackground({
     const beams = Array.from({ length: activeBeamNumber }, (_, index) =>
       createBeam(index, activeBeamNumber, beamWidth)
     );
-    const frameDuration = isMobile ? 1000 / 18 : 0;
+    const frameDuration = isMobile ? 1000 / 30 : 0;
     let frame: number | null = null;
     let previousRenderTime = 0;
     let isPageVisible = document.visibilityState === "visible";
