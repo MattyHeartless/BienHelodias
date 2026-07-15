@@ -68,10 +68,11 @@ export function MartiniBeamsBackground({
     const isMobile = window.matchMedia("(max-width: 900px), (pointer: coarse)").matches;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const color = hexToRgb(lightColor);
-    const beams = Array.from({ length: beamNumber }, (_, index) =>
-      createBeam(index, beamNumber, beamWidth)
+    const activeBeamNumber = isMobile ? Math.min(beamNumber, 7) : beamNumber;
+    const beams = Array.from({ length: activeBeamNumber }, (_, index) =>
+      createBeam(index, activeBeamNumber, beamWidth)
     );
-    const frameDuration = isMobile ? 1000 / 24 : 0;
+    const frameDuration = isMobile ? 1000 / 18 : 0;
     let frame: number | null = null;
     let previousRenderTime = 0;
     let isPageVisible = document.visibilityState === "visible";
@@ -83,7 +84,7 @@ export function MartiniBeamsBackground({
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
-      pixelRatio = Math.min(window.devicePixelRatio || 1, isMobile ? 0.8 : 1.5);
+      pixelRatio = Math.min(window.devicePixelRatio || 1, isMobile ? 0.65 : 1.5);
       width = Math.max(1, rect.width);
       height = Math.max(1, rect.height);
       canvas.width = Math.round(width * pixelRatio);

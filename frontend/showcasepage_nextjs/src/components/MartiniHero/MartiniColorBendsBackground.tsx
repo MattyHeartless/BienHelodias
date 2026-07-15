@@ -239,7 +239,7 @@ export function MartiniColorBendsBackground({
     });
     rendererRef.current = renderer;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 0.8 : 1.5));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 0.65 : 1.5));
     renderer.setClearColor(0x000000, initialProps.transparent ? 0 : 1);
     renderer.domElement.style.width = "100%";
     renderer.domElement.style.height = "100%";
@@ -260,10 +260,23 @@ export function MartiniColorBendsBackground({
     observer.observe(container);
     resizeObserverRef.current = observer;
 
-    const frameDuration = isMobile ? 1000 / 24 : 0;
+    const frameDuration = isMobile ? 1000 / 18 : 0;
     let previousRenderTime = 0;
+    let isPageVisible = document.visibilityState === "visible";
+    let isInViewport = true;
+    const overlay = container.parentElement?.querySelector<HTMLElement>(".hero-overlay");
+    let isOverlayVisible = overlay
+      ? window.getComputedStyle(overlay).visibility !== "hidden"
+      : false;
+
+    const shouldRender = () => isPageVisible && isInViewport && !isOverlayVisible;
 
     const loop = (time: number) => {
+      frameRef.current = null;
+      if (!shouldRender()) {
+        return;
+      }
+
       frameRef.current = window.requestAnimationFrame(loop);
 
       if (frameDuration && time - previousRenderTime < frameDuration) {
@@ -285,13 +298,51 @@ export function MartiniColorBendsBackground({
 
       renderer.render(scene, camera);
     };
-    frameRef.current = window.requestAnimationFrame(loop);
+
+    const syncRenderLoop = () => {
+      if (!shouldRender()) {
+        if (frameRef.current !== null) {
+          window.cancelAnimationFrame(frameRef.current);
+          frameRef.current = null;
+        }
+        return;
+      }
+
+      if (frameRef.current === null) {
+        previousRenderTime = 0;
+        frameRef.current = window.requestAnimationFrame(loop);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      isPageVisible = document.visibilityState === "visible";
+      syncRenderLoop();
+    };
+
+    const intersectionObserver = new IntersectionObserver(([entry]) => {
+      isInViewport = entry.isIntersecting;
+      syncRenderLoop();
+    });
+    const overlayObserver = overlay
+      ? new MutationObserver(() => {
+          isOverlayVisible = window.getComputedStyle(overlay).visibility !== "hidden";
+          syncRenderLoop();
+        })
+      : null;
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    intersectionObserver.observe(container);
+    overlayObserver?.observe(overlay, { attributes: true, attributeFilter: ["class", "style"] });
+    syncRenderLoop();
 
     return () => {
       if (frameRef.current !== null) {
         window.cancelAnimationFrame(frameRef.current);
       }
       resizeObserverRef.current?.disconnect();
+      intersectionObserver.disconnect();
+      overlayObserver?.disconnect();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       geometry.dispose();
       material.dispose();
       renderer.dispose();

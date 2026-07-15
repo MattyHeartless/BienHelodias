@@ -153,8 +153,12 @@ export function MartiniHeroCanvas({ glassRef }: MartiniHeroCanvasProps) {
     let previousRenderTime = 0;
     let isPageVisible = document.visibilityState === "visible";
     let isInViewport = true;
+    const overlay = mount.parentElement?.querySelector<HTMLElement>(".hero-overlay");
+    let isOverlayVisible = overlay
+      ? window.getComputedStyle(overlay).visibility !== "hidden"
+      : false;
 
-    const shouldRender = () => isPageVisible && isInViewport;
+    const shouldRender = () => isPageVisible && isInViewport && !isOverlayVisible;
 
     const render = (time: number) => {
       frame = null;
@@ -225,9 +229,16 @@ export function MartiniHeroCanvas({ glassRef }: MartiniHeroCanvasProps) {
       isInViewport = entry.isIntersecting;
       syncRenderLoop();
     });
+    const overlayObserver = overlay
+      ? new MutationObserver(() => {
+          isOverlayVisible = window.getComputedStyle(overlay).visibility !== "hidden";
+          syncRenderLoop();
+        })
+      : null;
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
     intersectionObserver.observe(mount);
+    overlayObserver?.observe(overlay, { attributes: true, attributeFilter: ["class", "style"] });
     syncRenderLoop();
 
     return () => {
@@ -237,6 +248,7 @@ export function MartiniHeroCanvas({ glassRef }: MartiniHeroCanvasProps) {
       }
       observer.disconnect();
       intersectionObserver.disconnect();
+      overlayObserver?.disconnect();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       renderer.dispose();
       scene.traverse((object) => {
