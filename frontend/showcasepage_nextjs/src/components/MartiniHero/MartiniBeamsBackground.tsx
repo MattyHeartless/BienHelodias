@@ -65,12 +65,17 @@ export function MartiniBeamsBackground({
       return;
     }
 
+    const isMobile = window.matchMedia("(max-width: 900px), (pointer: coarse)").matches;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const color = hexToRgb(lightColor);
     const beams = Array.from({ length: beamNumber }, (_, index) =>
       createBeam(index, beamNumber, beamWidth)
     );
-    let frame = 0;
+    const frameDuration = isMobile ? 1000 / 24 : 0;
+    let frame: number | null = null;
+    let previousRenderTime = 0;
+    let isPageVisible = document.visibilityState === "visible";
+    let isCanvasVisible = true;
     let width = 0;
     let height = 0;
     let pixelRatio = 1;
@@ -78,7 +83,7 @@ export function MartiniBeamsBackground({
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
-      pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+      pixelRatio = Math.min(window.devicePixelRatio || 1, isMobile ? 0.8 : 1.5);
       width = Math.max(1, rect.width);
       height = Math.max(1, rect.height);
       canvas.width = Math.round(width * pixelRatio);
@@ -123,6 +128,18 @@ export function MartiniBeamsBackground({
     };
 
     const render = (time: number) => {
+      frame = null;
+      if (!isPageVisible || !isCanvasVisible) {
+        return;
+      }
+
+      frame = window.requestAnimationFrame(render);
+
+      if (frameDuration && time - previousRenderTime < frameDuration) {
+        return;
+      }
+
+      previousRenderTime = time;
       elapsed = time;
       ctx.clearRect(0, 0, width, height);
       ctx.fillStyle = "rgba(3, 6, 5, 0.06)";
@@ -135,18 +152,50 @@ export function MartiniBeamsBackground({
       beams.forEach(drawBeam);
       ctx.restore();
 
-      frame = window.requestAnimationFrame(render);
+    };
+
+    const syncRenderLoop = () => {
+      const parent = canvas.parentElement;
+      isCanvasVisible = !parent || window.getComputedStyle(parent).visibility !== "hidden";
+
+      if (!isPageVisible || !isCanvasVisible) {
+        if (frame !== null) {
+          window.cancelAnimationFrame(frame);
+          frame = null;
+        }
+        return;
+      }
+
+      if (frame === null) {
+        previousRenderTime = 0;
+        frame = window.requestAnimationFrame(render);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      isPageVisible = document.visibilityState === "visible";
+      syncRenderLoop();
     };
 
     resize();
-    frame = window.requestAnimationFrame(render);
 
     const observer = new ResizeObserver(resize);
     observer.observe(canvas);
+    const visibilityObserver = new MutationObserver(syncRenderLoop);
+    if (canvas.parentElement) {
+      visibilityObserver.observe(canvas.parentElement, { attributes: true, attributeFilter: ["class", "style"] });
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    syncRenderLoop();
 
     return () => {
-      window.cancelAnimationFrame(frame);
+      if (frame !== null) {
+        window.cancelAnimationFrame(frame);
+      }
       observer.disconnect();
+      visibilityObserver.disconnect();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [beamHeight, beamNumber, beamWidth, lightColor, noiseIntensity, rotation, scale, speed]);
 

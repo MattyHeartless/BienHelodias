@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type MutableRefObject } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import type { Object3D } from "three";
 import { applyGlassState, canvasConfig, glassStates } from "./martiniTimeline.config";
 
 type MartiniHeroCanvasProps = {
-  glass: Object3D;
+  glassRef: MutableRefObject<Object3D>;
 };
 
 function createFallbackGlass() {
@@ -48,7 +48,7 @@ function normalizeModel(model: Object3D) {
   model.position.sub(center);
 }
 
-export function MartiniHeroCanvas({ glass }: MartiniHeroCanvasProps) {
+export function MartiniHeroCanvas({ glassRef }: MartiniHeroCanvasProps) {
   const mountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -92,7 +92,7 @@ export function MartiniHeroCanvas({ glass }: MartiniHeroCanvasProps) {
     rim.position.set(-2.4, 0.8, 2.2);
     scene.add(ambient, key, rim);
 
-    const glassRoot = glass;
+    const glassRoot = glassRef.current;
     glassRoot.clear();
     applyGlassState(glassRoot, glassStates.hidden);
     glassRoot.userData.operationFloatStrength = 0;
@@ -148,9 +148,27 @@ export function MartiniHeroCanvas({ glass }: MartiniHeroCanvasProps) {
 
     const clock = new THREE.Clock();
     const floatSeed = Math.random() * 100;
-    let frame = 0;
-    const render = () => {
+    const frameDuration = isMobile ? 1000 / 24 : 0;
+    let frame: number | null = null;
+    let previousRenderTime = 0;
+    let isPageVisible = document.visibilityState === "visible";
+    let isInViewport = true;
+
+    const shouldRender = () => isPageVisible && isInViewport;
+
+    const render = (time: number) => {
+      frame = null;
+      if (!shouldRender()) {
+        return;
+      }
+
       frame = window.requestAnimationFrame(render);
+
+      if (frameDuration && time - previousRenderTime < frameDuration) {
+        return;
+      }
+
+      previousRenderTime = time;
       const elapsed = clock.getElapsedTime() + floatSeed;
       const strength = THREE.MathUtils.clamp(
         Number(glassRoot.userData.operationFloatStrength ?? 0),
@@ -182,12 +200,44 @@ export function MartiniHeroCanvas({ glass }: MartiniHeroCanvasProps) {
       }
       renderer.render(scene, camera);
     };
-    render();
+
+    const syncRenderLoop = () => {
+      if (!shouldRender()) {
+        if (frame !== null) {
+          window.cancelAnimationFrame(frame);
+          frame = null;
+        }
+        return;
+      }
+
+      if (frame === null) {
+        previousRenderTime = 0;
+        frame = window.requestAnimationFrame(render);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      isPageVisible = document.visibilityState === "visible";
+      syncRenderLoop();
+    };
+
+    const intersectionObserver = new IntersectionObserver(([entry]) => {
+      isInViewport = entry.isIntersecting;
+      syncRenderLoop();
+    });
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    intersectionObserver.observe(mount);
+    syncRenderLoop();
 
     return () => {
       disposed = true;
-      window.cancelAnimationFrame(frame);
+      if (frame !== null) {
+        window.cancelAnimationFrame(frame);
+      }
       observer.disconnect();
+      intersectionObserver.disconnect();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       renderer.dispose();
       scene.traverse((object) => {
         if (object instanceof THREE.Mesh) {
@@ -198,7 +248,7 @@ export function MartiniHeroCanvas({ glass }: MartiniHeroCanvasProps) {
       });
       mount.removeChild(renderer.domElement);
     };
-  }, [glass]);
+  }, [glassRef]);
 
   return <div ref={mountRef} className="martini-canvas" aria-hidden="true" />;
 }

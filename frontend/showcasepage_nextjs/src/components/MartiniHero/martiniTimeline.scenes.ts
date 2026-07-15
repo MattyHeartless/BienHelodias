@@ -272,6 +272,9 @@ export function addCommissionScene(scrollTl: MartiniTimeline) {
       position
     );
 
+    // Once covered, the prior panel no longer needs to be composited. GSAP restores it on reverse.
+    scrollTl.set(panels[index], { autoAlpha: 0 });
+
     if (index === 3) {
       scrollTl.to(
         ".hero-logo",

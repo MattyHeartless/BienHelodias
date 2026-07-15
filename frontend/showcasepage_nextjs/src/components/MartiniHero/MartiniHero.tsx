@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Group } from "three";
 import type { Object3D } from "three";
 import { MartiniColorBendsBackground } from "./MartiniColorBendsBackground";
@@ -11,7 +11,7 @@ import { createMartiniScrollTimeline } from "./martiniTimeline";
 
 export function MartiniHero() {
   const rootRef = useRef<HTMLElement>(null);
-  const [glass] = useState<Object3D>(() => new Group());
+  const glassRef = useRef<Object3D>(new Group());
 
   useEffect(() => {
     const root = rootRef.current;
@@ -19,9 +19,9 @@ export function MartiniHero() {
       return;
     }
 
-    const scrollContext = createMartiniScrollTimeline(root, glass);
+    const scrollContext = createMartiniScrollTimeline(root, glassRef.current);
     return () => scrollContext.revert();
-  }, [glass]);
+  }, []);
 
   return (
     <section ref={rootRef} className="martini-hero">
@@ -43,7 +43,7 @@ export function MartiniHero() {
         intensity={1.5}
         bandWidth={6}
       />
-      <MartiniHeroCanvas glass={glass} />
+      <MartiniHeroCanvas glassRef={glassRef} />
       <MartiniHeroContent />
       <MartiniIntroOverlay />
     </section>
