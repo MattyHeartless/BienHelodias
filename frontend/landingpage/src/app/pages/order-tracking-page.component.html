@@ -7,57 +7,50 @@
             <div class="tracking-brandmark">
               <img src="/favicon.svg" alt="Bien Helodias" class="tracking-brandmark__image" />
             </div>
-            <div>
-              <h1 class="font-display text-2xl font-black tracking-[-0.05em] text-primary">{{ storeName() }}</h1>
-            </div>
+            <h1 class="font-display text-2xl font-black tracking-[-0.05em] text-primary">{{ storeName() }}</h1>
           </a>
-          <a [routerLink]="activeSlug() ? ['/', activeSlug(), 'cart'] : ['/']" class="tracking-icon-button">
-            <span class="material-symbols-outlined text-base">shopping_bag</span>
+          <a [routerLink]="['/']" class="tracking-icon-button" aria-label="Buscar tiendas">
+            <span class="material-symbols-outlined text-base">travel_explore</span>
           </a>
         </div>
 
         <div class="tracking-shell__body">
-          <section class="tracking-card tracking-card--hero">
-            <div class="tracking-hero">
+          <section class="tracking-hero-panel" aria-live="polite">
+            <div class="tracking-hero-panel__top">
+              <div class="tracking-status-mark" [class.tracking-status-mark--changed]="statusJustChanged()">
+                <span class="material-symbols-outlined">local_shipping</span>
+              </div>
               <div>
                 <p class="eyebrow">Rastreo en vivo</p>
-                <h1 class="tracking-hero__title">Tu pedido ya va agarrando camino.</h1>
-                <p class="tracking-hero__copy">
-                  Aquí te mostramos el avance más reciente para que sepas si ya lo están armando o si ya va en ruta.
-                </p>
-              </div>
-
-              <div class="tracking-status-pill" [class.tracking-status-pill--changed]="statusJustChanged()">
-                <span class="tracking-status-pill__dot"></span>
-                {{ statusLabel() }}
+                <h2 class="tracking-hero__title">{{ statusLabel() }}</h2>
+                <p class="tracking-hero__copy">Tu pedido se actualiza automáticamente mientras avanzamos.</p>
               </div>
             </div>
 
-            <div class="tracking-grid">
-              <div class="tracking-chip">
-                <p class="eyebrow">Pedido</p>
-                <p class="tracking-chip__value tracking-chip__value--break">{{ currentOrder.id }}</p>
-              </div>
-              <div class="tracking-chip">
-                <p class="eyebrow">Última actualización</p>
-                <p class="tracking-chip__value">{{ currentOrder.updatedAtUtc | date: 'dd MMM, HH:mm' }}</p>
-              </div>
-              <div class="tracking-chip">
-                <p class="eyebrow">Creado</p>
-                <p class="tracking-chip__value">{{ currentOrder.createdAtUtc | date: 'dd MMM, HH:mm' }}</p>
-              </div>
+            <div class="tracking-status-line" [class.tracking-status-line--changed]="statusJustChanged()" role="status">
+              <span class="tracking-status-line__signal" aria-hidden="true"></span>
+              <span>Pedido {{ orderReference() }}</span>
             </div>
+
+            <dl class="tracking-meta">
+              <div>
+                <dt>Actualizado</dt>
+                <dd>{{ currentOrder.updatedAtUtc | date: 'dd MMM, HH:mm' }}</dd>
+              </div>
+              <div>
+                <dt>Creado</dt>
+                <dd>{{ currentOrder.createdAtUtc | date: 'dd MMM, HH:mm' }}</dd>
+              </div>
+            </dl>
           </section>
 
-          <section class="tracking-card">
+          <section class="tracking-progress" aria-labelledby="tracking-progress-title">
             <div class="tracking-section-head">
               <div>
-                <p class="eyebrow">Progreso</p>
-                <h2 class="tracking-section-title">Así va el jale</h2>
+                <p class="eyebrow">Progreso del pedido</p>
+                <h2 id="tracking-progress-title" class="tracking-section-title">Así va tu entrega</h2>
               </div>
-              <div class="tracking-section-badge">
-                Paso {{ currentStepIndex() >= 0 ? currentStepIndex() + 1 : 0 }} / {{ steps.length }}
-              </div>
+              <span class="tracking-section-badge">{{ currentStepIndex() >= 0 ? currentStepIndex() + 1 : 0 }} de {{ steps.length }}</span>
             </div>
 
             <div class="tracking-steps">
@@ -69,26 +62,19 @@
                   [class.tracking-step--changed]="step.status === currentOrder.status && statusJustChanged()"
                   [class.tracking-step--en-route]="step.status === currentOrder.status && isOnTheWay()"
                 >
-                  <div
-                    class="tracking-step__index"
-                    [ngClass]="
-                      isCompleted(step.status)
-                        ? 'tracking-step__index--done'
-                        : 'tracking-step__index--pending'
-                    "
-                  >
-                    {{ $index + 1 }}
+                  <div class="tracking-step__index">
+                    @if (step.status === currentOrder.status) {
+                      <span class="material-symbols-outlined text-base">local_shipping</span>
+                    } @else if (isCompleted(step.status)) {
+                      <span class="material-symbols-outlined text-base">check</span>
+                    } @else {
+                      {{ $index + 1 }}
+                    }
                   </div>
                   <div class="tracking-step__copy">
                     <span class="tracking-step__label">{{ step.label }}</span>
                     <span class="tracking-step__meta">
-                      {{
-                        step.status === currentOrder.status
-                          ? 'Estado actual'
-                          : isCompleted(step.status)
-                            ? 'Completado'
-                            : 'Pendiente'
-                      }}
+                      {{ step.status === currentOrder.status ? 'Estado actual' : isCompleted(step.status) ? 'Completado' : 'Pendiente' }}
                     </span>
                   </div>
                 </div>
@@ -96,36 +82,39 @@
             </div>
           </section>
 
-          <section class="tracking-card">
+          <section class="tracking-information" aria-labelledby="tracking-delivery-title">
             <div class="tracking-section-head">
               <div>
                 <p class="eyebrow">Entrega</p>
-                <h2 class="tracking-section-title">{{ currentOrder.customerName }}</h2>
+                <h2 id="tracking-delivery-title" class="tracking-section-title">{{ currentOrder.customerName }}</h2>
               </div>
             </div>
 
-            <div class="tracking-detail-grid">
+            <dl class="tracking-detail-grid">
               <div class="tracking-detail-row">
-                <span class="tracking-detail-label">Teléfono</span>
-                <span class="tracking-detail-value">{{ currentOrder.customerPhone }}</span>
+                <dt>Teléfono</dt>
+                <dd>{{ currentOrder.customerPhone }}</dd>
               </div>
               <div class="tracking-detail-row">
-                <span class="tracking-detail-label">Dirección</span>
-                <span class="tracking-detail-value">{{ currentOrder.deliveryAddress }}</span>
+                <dt>Dirección</dt>
+                <dd>{{ currentOrder.deliveryAddress }}</dd>
               </div>
-              <div class="tracking-detail-row">
-                <span class="tracking-detail-label">Notas</span>
-                <span class="tracking-detail-value">{{ currentOrder.notes || 'Sin notas adicionales.' }}</span>
-              </div>
-            </div>
+              @if (currentOrder.notes) {
+                <div class="tracking-detail-row">
+                  <dt>Notas</dt>
+                  <dd>{{ currentOrder.notes }}</dd>
+                </div>
+              }
+            </dl>
           </section>
 
-          <section class="tracking-card">
+          <section class="tracking-summary" aria-labelledby="tracking-summary-title">
             <div class="tracking-section-head">
               <div>
                 <p class="eyebrow">Resumen</p>
-                <h2 class="tracking-section-title">Lo que va en tu pedido</h2>
+                <h2 id="tracking-summary-title" class="tracking-section-title">Tu pedido</h2>
               </div>
+              <span class="tracking-summary__count">{{ currentOrder.items.length }} artículos</span>
             </div>
 
             <div class="tracking-items">
@@ -133,16 +122,18 @@
                 <div class="tracking-item">
                   <div class="tracking-item__content">
                     <div class="tracking-item__icon">
-                      <span class="material-symbols-outlined text-[1.2rem] text-primary/80">local_bar</span>
+                      @if (productImages()[item.productId]; as imageUrl) {
+                        <img [src]="imageUrl" [alt]="item.productNameSnapshot" class="tracking-item__image" />
+                      } @else {
+                        <span class="material-symbols-outlined text-[1.2rem] text-primary/80" aria-hidden="true">local_bar</span>
+                      }
                     </div>
                     <div>
-                    <p class="tracking-item__name">{{ item.productNameSnapshot }}</p>
-                    <p class="tracking-item__meta">{{ item.quantity }} piezas</p>
+                      <p class="tracking-item__name">{{ item.productNameSnapshot }}</p>
+                      <p class="tracking-item__meta">{{ item.quantity }} piezas</p>
                     </div>
                   </div>
-                  <p class="tracking-item__price">
-                    {{ item.subtotal | currency: 'MXN':'symbol-narrow':'1.2-2' }}
-                  </p>
+                  <p class="tracking-item__price">{{ item.subtotal | currency: 'MXN':'symbol-narrow':'1.2-2' }}</p>
                 </div>
               }
             </div>
@@ -150,17 +141,10 @@
             @if (currentOrder.appliedPromotionCode || currentOrder.discountTotal > 0) {
               <div class="tracking-promo">
                 <div class="tracking-promo__content">
-                  <div class="tracking-promo__icon">
-                    <span class="material-symbols-outlined text-[1.1rem] text-primary">local_offer</span>
-                  </div>
-                  <div>
-                    <p class="tracking-promo__eyebrow">Promoción aplicada</p>
-                    <p class="tracking-promo__code">{{ currentOrder.appliedPromotionCode || 'Descuento aplicado' }}</p>
-                  </div>
+                  <span class="material-symbols-outlined text-[1.1rem] text-primary">local_offer</span>
+                  <span>Promoción {{ currentOrder.appliedPromotionCode || 'aplicada' }}</span>
                 </div>
-                <p class="tracking-promo__discount">
-                  -{{ currentOrder.discountTotal | currency: 'MXN':'symbol-narrow':'1.2-2' }}
-                </p>
+                <span class="tracking-promo__discount">-{{ currentOrder.discountTotal | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span>
               </div>
             }
 
@@ -178,15 +162,8 @@
             </div>
 
             <div class="tracking-total">
-              <div class="tracking-total__row">
-                <div class="tracking-total__content">
-                  <div class="tracking-total__icon">
-                    <span class="material-symbols-outlined text-[1.25rem] text-primary">receipt_long</span>
-                  </div>
-                  <span class="tracking-total__label">Total final</span>
-                </div>
-                <span class="tracking-total__value">{{ currentOrder.total | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span>
-              </div>
+              <span class="tracking-total__label">Total final</span>
+              <span class="tracking-total__value">{{ currentOrder.total | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span>
             </div>
           </section>
         </div>
@@ -213,9 +190,7 @@
     <div class="max-w-xl rounded-[2rem] bg-surface-container-low p-8 text-center shadow-[0_35px_100px_rgba(0,0,0,0.35)]">
       <p class="eyebrow">Seguimiento</p>
       <h1 class="mt-4 font-display text-4xl font-bold tracking-[-0.05em]">Consultando tu pedido...</h1>
-      <p class="mt-4 leading-8 text-on-surface-variant">
-        Estamos jalando el estado mas reciente para que veas en que va.
-      </p>
+      <p class="mt-4 leading-8 text-on-surface-variant">Estamos consultando el estado más reciente de tu pedido.</p>
     </div>
   </div>
 } @else {
@@ -223,9 +198,7 @@
     <div class="max-w-xl rounded-[2rem] bg-surface-container-low p-8 text-center shadow-[0_35px_100px_rgba(0,0,0,0.35)]">
       <p class="eyebrow">Seguimiento</p>
       <h1 class="mt-4 font-display text-4xl font-bold tracking-[-0.05em]">No hay un pedido disponible.</h1>
-      <p class="mt-4 leading-8 text-on-surface-variant">
-        {{ error() || 'Genera un pedido desde el catalogo para ver su snapshot de seguimiento.' }}
-      </p>
+      <p class="mt-4 leading-8 text-on-surface-variant">{{ error() || 'Genera un pedido desde el catálogo para ver su seguimiento.' }}</p>
       <a [routerLink]="activeSlug() ? ['/', activeSlug()] : ['/']" class="liquid-button mt-8">
         <span class="material-symbols-outlined text-base">storefront</span>
         Volver al inicio

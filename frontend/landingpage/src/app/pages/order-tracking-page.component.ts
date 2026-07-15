@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { OrderDto, OrderStatus } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
 import { OrdersApiService } from '../services/orders-api.service';
+import { ProductsApiService } from '../services/products-api.service';
 import { StorefrontTenantService } from '../services/storefront-tenant.service';
 
 @Component({
@@ -17,6 +18,7 @@ export class OrderTrackingPageComponent implements OnDestroy {
   private static readonly POLL_INTERVAL_MS = 15000;
   private readonly route = inject(ActivatedRoute);
   private readonly ordersApi = inject(OrdersApiService);
+  private readonly productsApi = inject(ProductsApiService);
   private readonly storefrontTenant = inject(StorefrontTenantService);
   private pollHandle: ReturnType<typeof window.setInterval> | null = null;
   private statusChangeHandle: ReturnType<typeof window.setTimeout> | null = null;
@@ -25,7 +27,12 @@ export class OrderTrackingPageComponent implements OnDestroy {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly statusJustChanged = signal(false);
+  readonly productImages = signal<Record<string, string>>({});
   readonly storeName = computed(() => this.storefrontTenant.store()?.name ?? 'Licoreria');
+  readonly orderReference = computed(() => {
+    const orderId = this.order()?.id ?? '';
+    return orderId ? `#${orderId.slice(-5)}` : '';
+  });
   readonly activeSlug = signal<string | null>(null);
   readonly activeOrderId = signal<string | null>(null);
   readonly steps = [
@@ -81,6 +88,7 @@ export class OrderTrackingPageComponent implements OnDestroy {
     this.storefrontTenant.loadStore(slug).subscribe({
       next: () => {
         this.fetchTracking();
+        this.loadProductImages();
         this.startPolling();
       },
       error: () => {
@@ -122,6 +130,20 @@ export class OrderTrackingPageComponent implements OnDestroy {
       error: (error) => {
         this.error.set(getApiErrorMessage(error, 'No fue posible consultar el estado actual del pedido.'));
         this.loading.set(false);
+      }
+    });
+  }
+
+  private loadProductImages(): void {
+    this.productsApi.getCatalog().subscribe({
+      next: (response) => {
+        const images = response.data.items.reduce<Record<string, string>>((result, product) => {
+          if (product.imageUrl) {
+            result[product.id] = product.imageUrl;
+          }
+          return result;
+        }, {});
+        this.productImages.set(images);
       }
     });
   }

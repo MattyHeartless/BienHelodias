@@ -1,5 +1,5 @@
 import { CommonModule, CurrencyPipe } from '@angular/common';
-import { Component, ElementRef, OnDestroy, ViewChild, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DeliveryAddressDraft, ProductDto } from '../core/models';
@@ -31,6 +31,9 @@ export class CheckoutPageComponent implements OnDestroy {
   private autocomplete: any | null = null;
   private autocompleteListener: { remove: () => void } | null = null;
   private autocompleteInput: HTMLInputElement | null = null;
+  private confirmationCloseHandle: ReturnType<typeof window.setTimeout> | null = null;
+  private confirmationOpenFrame: number | null = null;
+  private readonly validationShakeTimers = new Map<string, ReturnType<typeof window.setTimeout>>();
 
   @ViewChild('deliveryAddressInput')
   set deliveryAddressInputRef(value: ElementRef<HTMLInputElement> | undefined) {
@@ -47,6 +50,9 @@ export class CheckoutPageComponent implements OnDestroy {
   readonly error = signal<string | null>(null);
   readonly placesLoading = signal(false);
   readonly placesError = signal<string | null>(null);
+  readonly confirmationModalOpen = signal(false);
+  readonly confirmationModalActive = signal(false);
+  readonly confirmationModalClosing = signal(false);
   readonly selectedAddress = signal<DeliveryAddressDraft | null>(null);
   readonly products = signal<ProductDto[]>([]);
   readonly activeSlug = signal<string | null>(null);
@@ -109,6 +115,76 @@ export class CheckoutPageComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.destroyAutocompleteListener();
+    this.clearConfirmationCloseHandle();
+    this.cancelConfirmationOpenFrame();
+    this.validationShakeTimers.forEach((timer) => window.clearTimeout(timer));
+    this.validationShakeTimers.clear();
+  }
+
+  @HostListener('document:keydown.escape')
+  handleEscape(): void {
+    if (this.confirmationModalOpen()) {
+      this.closeConfirmationModal();
+    }
+  }
+
+  requestOrderConfirmation(): void {
+    this.checkoutForm.markAllAsTouched();
+    const storeId = this.storefrontTenant.storeId();
+    const slug = this.activeSlug();
+    if (this.checkoutForm.invalid || !storeId || !slug) {
+      if (this.checkoutForm.invalid) {
+        this.shakeInvalidFields();
+      }
+      return;
+    }
+
+    if (!this.storeAvailability().isOpen) {
+      this.error.set(`La tienda está cerrada. Horario de atención: ${this.storeAvailability().scheduleLabel}.`);
+      return;
+    }
+
+    if (!this.meetsMinimumPurchase()) {
+      this.error.set(`Te faltan ${this.amountMissingForMinimum().toFixed(2)} para alcanzar el pedido mínimo.`);
+      return;
+    }
+
+    this.clearConfirmationCloseHandle();
+    this.cancelConfirmationOpenFrame();
+    this.confirmationModalClosing.set(false);
+    this.confirmationModalActive.set(false);
+    this.confirmationModalOpen.set(true);
+    this.confirmationOpenFrame = window.requestAnimationFrame(() => {
+      this.confirmationModalActive.set(true);
+      this.confirmationOpenFrame = null;
+    });
+  }
+
+  closeConfirmationModal(): void {
+    if (!this.confirmationModalOpen()) {
+      return;
+    }
+
+    this.confirmationModalActive.set(false);
+    this.confirmationModalClosing.set(true);
+    this.cancelConfirmationOpenFrame();
+    this.clearConfirmationCloseHandle();
+    const closeDuration = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--modal-close-dur')) || 150;
+    this.confirmationCloseHandle = window.setTimeout(() => {
+      this.confirmationModalOpen.set(false);
+      this.confirmationModalClosing.set(false);
+      this.confirmationCloseHandle = null;
+    }, closeDuration);
+  }
+
+  confirmOrder(): void {
+    this.closeConfirmationModal();
+    this.submitOrder();
+  }
+
+  isFieldInvalid(fieldName: 'customerName' | 'customerPhone' | 'deliveryAddress'): boolean {
+    const control = this.checkoutForm.controls[fieldName];
+    return control.touched && control.invalid;
   }
 
   submitOrder(): void {
@@ -279,6 +355,49 @@ export class CheckoutPageComponent implements OnDestroy {
   private destroyAutocompleteListener(): void {
     this.autocompleteListener?.remove();
     this.autocompleteListener = null;
+  }
+
+  private clearConfirmationCloseHandle(): void {
+    if (this.confirmationCloseHandle !== null) {
+      window.clearTimeout(this.confirmationCloseHandle);
+      this.confirmationCloseHandle = null;
+    }
+  }
+
+  private cancelConfirmationOpenFrame(): void {
+    if (this.confirmationOpenFrame !== null) {
+      window.cancelAnimationFrame(this.confirmationOpenFrame);
+      this.confirmationOpenFrame = null;
+    }
+  }
+
+  private shakeInvalidFields(): void {
+    const invalidFieldNames = (['customerName', 'customerPhone', 'deliveryAddress'] as const)
+      .filter((fieldName) => this.checkoutForm.controls[fieldName].invalid);
+    const computedStyles = getComputedStyle(document.documentElement);
+    const shakeDuration = (Number.parseFloat(computedStyles.getPropertyValue('--shake-dur-a')) || 80) * 2
+      + (Number.parseFloat(computedStyles.getPropertyValue('--shake-dur-b')) || 60) * 2;
+
+    invalidFieldNames.forEach((fieldName) => {
+      const input = document.querySelector<HTMLElement>(`[data-checkout-field="${fieldName}"] .t-input`);
+      if (!input) {
+        return;
+      }
+
+      input.classList.remove('is-shaking');
+      void input.offsetWidth;
+      input.classList.add('is-shaking');
+
+      const existingTimer = this.validationShakeTimers.get(fieldName);
+      if (existingTimer) {
+        window.clearTimeout(existingTimer);
+      }
+
+      this.validationShakeTimers.set(fieldName, window.setTimeout(() => {
+        input.classList.remove('is-shaking');
+        this.validationShakeTimers.delete(fieldName);
+      }, shakeDuration + 20));
+    });
   }
 
   private getLastOrderStorageKey(slug: string): string {

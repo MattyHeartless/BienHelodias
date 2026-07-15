@@ -6,178 +6,150 @@
           <div class="cart-brandmark">
             <img src="/favicon.svg" alt="Bien Helodias" class="cart-brandmark__image" />
           </div>
-          <div>
-            <h1 class="font-display text-2xl font-black tracking-[-0.05em] text-primary">{{ storeName() }}</h1>
-          </div>
+          <h1 class="font-display text-2xl font-black tracking-[-0.05em] text-primary">{{ storeName() }}</h1>
         </a>
       </div>
 
       <div class="cart-shell__body">
         @if (loading()) {
-          <div class="cart-card h-48 animate-pulse"></div>
-          <div class="cart-card h-64 animate-pulse"></div>
+          <div class="cart-skeleton cart-skeleton--hero animate-pulse"></div>
+          <div class="cart-skeleton cart-skeleton--list animate-pulse"></div>
         } @else if (error()) {
-          <div class="cart-card">
+          <div class="cart-state-panel">
             <p class="eyebrow">Carrito</p>
             <h2 class="mt-4 font-display text-3xl font-bold tracking-[-0.05em]">No pudimos cargar la tienda.</h2>
             <p class="mt-4 text-sm leading-7 text-on-surface-variant">{{ error() }}</p>
           </div>
         } @else {
-          <section class="cart-card">
-            <div class="flex items-start justify-between gap-4">
+          <section class="cart-hero">
+            <div class="cart-hero__top">
+              <div class="cart-status-mark">
+                <span class="material-symbols-outlined">shopping_bag</span>
+              </div>
               <div>
                 <p class="eyebrow">Carrito</p>
-                <h2 class="mt-3 font-display text-4xl font-black tracking-[-0.06em]">Tu pedido</h2>
-                <p class="mt-3 text-sm leading-7 text-on-surface-variant">
-                  Checa tus bebidas, ajusta cuántas van y mete tu código antes de cerrar el pedido.
-                </p>
+                <h2 class="cart-hero__title">Tu pedido</h2>
+                <p class="cart-hero__copy">Échale un ojo a tus frías antes de mandártelas.</p>
               </div>
-              <div class="summary-pill">{{ cartCount() }} items</div>
+            </div>
+            <div class="cart-status-line">
+              <span>{{ cartCount() }} {{ cartCount() === 1 ? 'artículo' : 'artículos' }}</span>
+              <span>{{ subtotal() | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span>
             </div>
           </section>
 
-          <section class="cart-card">
-            <div class="cart-list">
+          @if (cartItems().length > 0) {
+            <section class="cart-list" aria-label="Artículos en tu carrito">
               @for (entry of cartItems(); track entry.product.id) {
                 <article class="cart-item">
                   <div class="cart-item__content">
                     <div class="cart-item__thumb">
-                      <span class="material-symbols-outlined text-[1.6rem] text-primary/70">local_bar</span>
+                      @if (entry.product.imageUrl) {
+                        <img [src]="entry.product.imageUrl" [alt]="entry.product.name" class="cart-item__image" />
+                      } @else {
+                        <span class="material-symbols-outlined text-[1.6rem] text-primary/70" aria-hidden="true">local_bar</span>
+                      }
                     </div>
                     <div class="cart-item__copy">
                       <p class="cart-item__name">{{ entry.product.name }}</p>
-                      <p class="cart-item__meta">
-                        {{ entry.product.price | currency: 'MXN':'symbol-narrow':'1.2-2' }} c/u
-                      </p>
+                      <p class="cart-item__meta">{{ entry.product.price | currency: 'MXN':'symbol-narrow':'1.2-2' }} c/u</p>
                       <div class="cart-item__summary-row">
                         <div class="quantity-stepper cart-item__stepper">
-                          <button type="button" class="quantity-stepper__button" (click)="decreaseQuantity(entry.product.id)">
+                          <button type="button" class="quantity-stepper__button" (click)="decreaseQuantity(entry.product.id)" aria-label="Reducir cantidad">
                             <span class="material-symbols-outlined text-base">remove</span>
                           </button>
                           <span class="quantity-stepper__value">{{ entry.quantity }}</span>
-                          <button type="button" class="quantity-stepper__button" (click)="increaseQuantity(entry.product)">
+                          <button type="button" class="quantity-stepper__button" (click)="increaseQuantity(entry.product)" aria-label="Aumentar cantidad">
                             <span class="material-symbols-outlined text-base">add</span>
                           </button>
                         </div>
-                        <p class="cart-item__price">
-                          {{ entry.product.price * entry.quantity | currency: 'MXN':'symbol-narrow':'1.2-2' }}
-                        </p>
+                        <p class="cart-item__price">{{ entry.product.price * entry.quantity | currency: 'MXN':'symbol-narrow':'1.2-2' }}</p>
                       </div>
                     </div>
                   </div>
-
                   <button type="button" class="cart-item__remove" (click)="removeItem(entry.product.id)" aria-label="Quitar producto">
                     <span class="material-symbols-outlined text-base">close</span>
                   </button>
                 </article>
               }
+            </section>
 
-              @if (cartItems().length === 0) {
-                <div class="empty-state">
-                  <div class="empty-state__icon">
-                    <span class="material-symbols-outlined text-[2rem] text-primary">shopping_bag</span>
-                  </div>
-                  <p class="font-display text-2xl font-bold tracking-[-0.04em]">Tu carrito anda bien tumbado.</p>
-                  <p class="mt-2 text-sm leading-7 text-on-surface-variant">Caele al catálogo, compa, y ármate unas frías para que agarre sabor el pedido.</p>
-                </div>
-              }
-            </div>
-          </section>
-
-          <section class="cart-card">
-            <form class="cart-promo" [formGroup]="promoForm">
-              <div>
-                <label class="eyebrow">Código promocional</label>
-                <input
-                  class="mt-2 w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 uppercase text-white outline-none transition focus:border-primary"
-                  formControlName="promoCode"
-                  placeholder="Ej. HOTSALE20"
-                />
-              </div>
-              <button class="ghost-button !justify-center" type="button" (click)="applyPromotionCode()" [disabled]="applyingPromotion() || !promoForm.get('promoCode')?.value?.trim()">
-                {{ applyingPromotion() ? 'Validando...' : 'Aplicar código' }}
-              </button>
-            </form>
-
-            @if (appliedPromotion(); as promotion) {
-              <div class="promo-result">
-                <p class="promo-result__title">{{ promotion.name }}</p>
-                <p class="promo-result__summary">{{ promotion.summary }}</p>
-              </div>
-            }
-
-            @if (promoError()) {
-              <div class="rounded-[1.25rem] border border-error/30 bg-error/10 px-4 py-3 text-sm text-white">
-                {{ promoError() }}
-              </div>
-            }
-
-            <div class="cart-summary mt-5">
-              <div class="cart-summary__line">
-                <span>Subtotal</span>
-                <span>{{ subtotal() | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span>
-              </div>
-              @if (discountTotal() > 0) {
-                <div class="cart-summary__line cart-summary__line--discount">
-                  <span>Descuento</span>
-                  <span>-{{ discountTotal() | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span>
-                </div>
-              }
-              <div class="cart-summary__line cart-summary__line--total">
-                <span>Total</span>
-                <span>{{ total() | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span>
-              </div>
-            </div>
-
-            @if (!storeAvailability().isOpen) {
-              <section class="store-closed-notice mt-4" role="status">
-                <div class="store-closed-notice__icon" aria-hidden="true">
-                  <span class="material-symbols-outlined">lock_clock</span>
-                </div>
+            <section class="cart-checkout-panel">
+              <form class="cart-promo" [formGroup]="promoForm">
                 <div>
-                  <p class="store-closed-notice__title">La tienda está cerrada</p>
-                  <p class="store-closed-notice__copy">Tu carrito se conserva. Podrás finalizar el pedido al volver a abrir.</p>
+                  <label class="eyebrow">Código promocional</label>
+                  <input class="cart-promo__input" formControlName="promoCode" placeholder="Ej. HOTSALE20" />
                 </div>
-                <div class="store-closed-notice__schedule">
-                  <p class="store-closed-notice__schedule-label">Horario para pedir</p>
-                  <p class="store-closed-notice__schedule-value">{{ storeAvailability().scheduleLabel }}</p>
-                </div>
-              </section>
-            } @else if (!meetsMinimumPurchase()) {
-              <div class="minimum-purchase-notice mt-4" role="status">
-                <span class="material-symbols-outlined minimum-purchase-notice__icon" aria-hidden="true">shopping_bag</span>
-                <p class="minimum-purchase-notice__copy">
-                  Agrega <span class="minimum-purchase-notice__amount">{{ amountMissingForMinimum() | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span> más para llegar al mínimo de {{ minimumPurchase() | currency: 'MXN':'symbol-narrow':'1.2-2' }}.
-                </p>
-              </div>
-            }
+                <button class="ghost-button !justify-center" type="button" (click)="applyPromotionCode()" [disabled]="applyingPromotion() || !promoForm.get('promoCode')?.value?.trim()">
+                  {{ applyingPromotion() ? 'Validando...' : 'Aplicar código' }}
+                </button>
+              </form>
 
-            <div class="cart-actions">
-              <a [routerLink]="activeSlug() ? ['/', activeSlug()] : ['/']" class="ghost-button w-full !justify-center py-4">
-                Seguir viendo bebidas
-              </a>
-              <button class="liquid-button w-full !justify-center py-4" type="button" (click)="continueCheckout()" [disabled]="!canContinueCheckout()">
-                <span class="material-symbols-outlined text-base">arrow_forward</span>
-                Ya estuvo, vámonos
-              </button>
-            </div>
-          </section>
+              @if (appliedPromotion(); as promotion) {
+                <div class="promo-result">
+                  <p class="promo-result__title">{{ promotion.name }}</p>
+                  <p class="promo-result__summary">{{ promotion.summary }}</p>
+                </div>
+              }
+
+              @if (promoError()) {
+                <div class="cart-promo-error">{{ promoError() }}</div>
+              }
+
+              <div class="cart-summary">
+                <div class="cart-summary__line"><span>Subtotal</span><span>{{ subtotal() | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span></div>
+                @if (discountTotal() > 0) {
+                  <div class="cart-summary__line cart-summary__line--discount"><span>Descuento</span><span>-{{ discountTotal() | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span></div>
+                }
+              </div>
+
+              <div class="cart-total">
+                <span class="cart-total__label">Total final</span>
+                <span class="cart-total__value">{{ total() | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span>
+              </div>
+
+              @if (!storeAvailability().isOpen) {
+                <section class="store-closed-notice mt-4" role="status">
+                  <div class="store-closed-notice__icon" aria-hidden="true"><span class="material-symbols-outlined">lock_clock</span></div>
+                  <div>
+                    <p class="store-closed-notice__title">La tienda está cerrada</p>
+                    <p class="store-closed-notice__copy">Tu carrito se conserva. Podrás finalizar el pedido al volver a abrir.</p>
+                  </div>
+                  <div class="store-closed-notice__schedule">
+                    <p class="store-closed-notice__schedule-label">Horario para pedir</p>
+                    <p class="store-closed-notice__schedule-value">{{ storeAvailability().scheduleLabel }}</p>
+                  </div>
+                </section>
+              } @else if (!meetsMinimumPurchase()) {
+                <div class="minimum-purchase-notice mt-4" role="status">
+                  <span class="material-symbols-outlined minimum-purchase-notice__icon" aria-hidden="true">shopping_bag</span>
+                  <p class="minimum-purchase-notice__copy">Agrega <span class="minimum-purchase-notice__amount">{{ amountMissingForMinimum() | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span> más para llegar al mínimo de {{ minimumPurchase() | currency: 'MXN':'symbol-narrow':'1.2-2' }}.</p>
+                </div>
+              }
+
+              <div class="cart-actions">
+                <button class="liquid-button w-full !justify-center py-4" type="button" (click)="continueCheckout()" [disabled]="!canContinueCheckout()">
+                  <span class="material-symbols-outlined text-base">arrow_forward</span>
+                  Continuar
+                </button>
+                <a [routerLink]="activeSlug() ? ['/', activeSlug()] : ['/']" class="cart-continue-link">Seguir viendo bebidas</a>
+              </div>
+            </section>
+          } @else {
+            <section class="empty-state">
+              <div class="empty-state__icon"><span class="material-symbols-outlined text-[2rem] text-primary">shopping_bag</span></div>
+              <p class="font-display text-2xl font-bold tracking-[-0.04em]">Tu carrito está vacío.</p>
+              <p class="mt-2 text-sm leading-7 text-on-surface-variant">Explora el catálogo para preparar tu pedido.</p>
+              <a [routerLink]="activeSlug() ? ['/', activeSlug()] : ['/']" class="liquid-button mt-6">Ver bebidas</a>
+            </section>
+          }
         }
       </div>
 
       <div class="cart-bottom-nav">
-        <a [routerLink]="activeSlug() ? ['/', activeSlug()] : ['/']" class="cart-bottom-nav__item">
-          <span class="material-symbols-outlined">local_bar</span>
-          Bebidas
-        </a>
-        <button class="cart-bottom-nav__item" type="button" (click)="trackLastOrder()">
-          <span class="material-symbols-outlined">local_shipping</span>
-          Rastreo
-        </button>
-        <button class="cart-bottom-nav__item cart-bottom-nav__item--active" type="button">
-          <span class="material-symbols-outlined">shopping_bag</span>
-          Carrito
-        </button>
+        <a [routerLink]="activeSlug() ? ['/', activeSlug()] : ['/']" class="cart-bottom-nav__item"><span class="material-symbols-outlined">local_bar</span>Bebidas</a>
+        <button class="cart-bottom-nav__item" type="button" (click)="trackLastOrder()"><span class="material-symbols-outlined">local_shipping</span>Rastreo</button>
+        <button class="cart-bottom-nav__item cart-bottom-nav__item--active" type="button"><span class="material-symbols-outlined">shopping_bag</span>Carrito</button>
       </div>
     </section>
   </main>
