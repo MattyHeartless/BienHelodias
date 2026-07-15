@@ -332,7 +332,9 @@ export function MartiniColorBendsBackground({
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
     intersectionObserver.observe(container);
-    overlayObserver?.observe(overlay, { attributes: true, attributeFilter: ["class", "style"] });
+    if (overlay && overlayObserver) {
+      overlayObserver.observe(overlay, { attributes: true, attributeFilter: ["class", "style"] });
+    }
     syncRenderLoop();
 
     return () => {
