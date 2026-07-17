@@ -52,12 +52,11 @@
             (pointerup)="handleBannerPointerUp($event)"
             (pointercancel)="handleBannerPointerUp($event)"
           >
-            <div class="promo-strip__shape" aria-hidden="true">
+            <div class="promo-strip__art" aria-hidden="true">
               @if (banner.promotion) {
-                <span class="promo-strip__shape-icon material-symbols-outlined">local_bar</span>
+                <img class="promo-strip__art-image promo-strip__art-image--promotion" src="images/banners/promo-generic-beer.webp" alt="" />
               } @else {
-                <span class="promo-strip__shape-icon promo-strip__shape-icon--bottle material-symbols-outlined">liquor</span>
-                <span class="promo-strip__shape-icon promo-strip__shape-icon--can material-symbols-outlined">sports_bar</span>
+                <img class="promo-strip__art-image promo-strip__art-image--informational" src="images/banners/info-generic-bottles.webp" alt="" />
               }
             </div>
 

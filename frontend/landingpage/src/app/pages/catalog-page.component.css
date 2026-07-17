@@ -179,33 +179,25 @@
 .promo-strip--draggable { cursor: grab; touch-action: pan-y; user-select: none; }
 .promo-strip--dragging { cursor: grabbing; }
 
-.promo-strip__shape {
+.promo-strip__art {
   position: absolute;
-  right: -1.1rem;
-  top: -1.35rem;
-  bottom: 0.35rem;
-  display: grid;
-  place-items: center;
-  width: 54%;
-  color: rgb(228 228 228 / 0.3);
+  right: -0.7rem;
+  top: 0;
+  bottom: 0;
+  width: 53%;
   pointer-events: none;
 }
 
-.promo-strip__shape-icon {
-  font-size: 16.5rem;
-  font-variation-settings: 'FILL' 0, 'wght' 190, 'GRAD' 0, 'opsz' 48;
-  line-height: 1;
-  text-shadow: 0 0 2.75rem rgb(255 255 255 / 0.08);
+.promo-strip__art-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: right bottom;
+  filter: drop-shadow(-1rem 1.15rem 1.5rem rgb(0 0 0 / 0.28));
 }
 
-.promo-strip:not(.promo-strip--with-promotion) .promo-strip__shape {
-  right: -0.35rem;
-  top: -0.15rem;
-  color: rgb(220 220 220 / 0.18);
-}
-
-.promo-strip__shape-icon--bottle { transform: translateX(-1.2rem) rotate(-8deg); }
-.promo-strip__shape-icon--can { position: absolute; transform: translate(2.65rem, 1.25rem) rotate(10deg); opacity: 0.68; }
+.promo-strip__art-image--promotion { transform: translateX(0.5rem) scale(1.12); transform-origin: right bottom; }
+.promo-strip__art-image--informational { transform: translateX(0.25rem) scale(1.04); transform-origin: right bottom; }
 
 .promo-strip__copy,
 .promo-strip__offer { position: relative; z-index: 1; max-width: 64%; }
