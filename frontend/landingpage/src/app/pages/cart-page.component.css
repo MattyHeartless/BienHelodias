@@ -14,7 +14,7 @@
 .cart-skeleton { border-radius: 1.5rem; background: rgb(255 255 255 / 0.05); }
 .cart-skeleton--hero { min-height: 9rem; }
 .cart-skeleton--list { min-height: 16rem; }
-.cart-state-panel, .empty-state { padding: 1.15rem; border: 1px solid rgb(255 255 255 / 0.09); border-radius: 1.45rem; background: rgb(255 255 255 / 0.045); }
+.cart-state-panel { padding: 1.15rem; border: 1px solid rgb(255 255 255 / 0.09); border-radius: 1.45rem; background: rgb(255 255 255 / 0.045); }
 .cart-checkout-panel { padding: 0; }
 
 .cart-hero { padding: 0.55rem 0 0; }
@@ -99,8 +99,12 @@
 .cart-continue-link { color: rgb(255 255 255 / 0.58); font-size: 0.82rem; font-weight: 700; text-align: center; text-decoration: none; }
 .cart-continue-link:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 0.25rem; border-radius: 0.3rem; }
 
-.empty-state { text-align: center; }
-.empty-state__icon { width: 4rem; height: 4rem; margin-bottom: 0.9rem; border-radius: 999px; background: rgb(210 253 110 / 0.08); border: 1px solid rgb(210 253 110 / 0.12); }
+.empty-state { display: grid; align-content: center; justify-items: center; gap: 1.25rem; min-height: calc(100dvh - 18.25rem); margin-top: -0.3rem; padding: 1rem 0; text-align: center; }
+.empty-state__icon { color: var(--color-primary); font-size: 3.5rem; font-variation-settings: 'wght' 250; }
+.empty-state__content { display: grid; justify-items: center; gap: 0.55rem; max-width: 17rem; }
+.empty-state__title { margin: 0; color: #fff; font-family: var(--font-display, inherit); font-size: clamp(1.85rem, 8.5vw, 2.2rem); font-weight: 800; letter-spacing: -0.06em; line-height: 1.02; }
+.empty-state__copy { margin: 0; color: rgb(255 255 255 / 0.62); font-size: 0.92rem; line-height: 1.55; }
+.empty-state__action { margin-top: 0.65rem; }
 
 .cart-bottom-nav { bottom: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; padding: 0.7rem 1rem 1rem; border-top: 1px solid rgb(255 255 255 / 0.08); background: linear-gradient(180deg, rgb(14 14 14 / 0.82), rgb(14 14 14 / 0.98)); }
 .cart-bottom-nav__item { display: grid; justify-items: center; gap: 0.25rem; border: 0; background: transparent; color: rgb(255 255 255 / 0.48); font-size: 0.78rem; font-weight: 600; text-decoration: none; }
