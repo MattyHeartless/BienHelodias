@@ -120,11 +120,21 @@
         </nav>
 
         @if (loading()) {
-          <div class="product-grid">
-            @for (item of [1, 2, 3, 4]; track item) {
-              <div class="product-tile product-tile--skeleton animate-pulse"></div>
-            }
-          </div>
+          @if (loadingSkeletonVisible()) {
+            <section class="product-grid product-grid--skeleton" aria-busy="true" aria-label="Cargando catálogo">
+              @for (item of [1, 2, 3]; track item) {
+                <article class="product-tile product-tile--skeleton" aria-hidden="true">
+                  <span class="product-skeleton product-skeleton__media"></span>
+                  <div class="product-skeleton__content">
+                    <span class="product-skeleton product-skeleton__line product-skeleton__line--title"></span>
+                    <span class="product-skeleton product-skeleton__line product-skeleton__line--price"></span>
+                    <span class="product-skeleton product-skeleton__line product-skeleton__line--description"></span>
+                  </div>
+                  <span class="product-skeleton product-skeleton__action"></span>
+                </article>
+              }
+            </section>
+          }
         } @else {
           <section class="catalog-products-section" aria-label="Productos">
           <div id="catalog-products" class="product-grid">

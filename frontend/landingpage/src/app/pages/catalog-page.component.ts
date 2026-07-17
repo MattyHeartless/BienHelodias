@@ -19,6 +19,7 @@ import { catchError, forkJoin, of } from 'rxjs';
 })
 export class CatalogPageComponent {
   private static readonly BANNER_SWIPE_THRESHOLD = 45;
+  private static readonly SKELETON_DELAY_MS = 240;
   private readonly productsApi = inject(ProductsApiService);
   private readonly storefrontContentApi = inject(StorefrontContentApiService);
   private readonly cartSession = inject(CartSessionService);
@@ -32,11 +33,13 @@ export class CatalogPageComponent {
   private bannerPointerStartY: number | null = null;
   private storeFinderNavigationHandle: ReturnType<typeof window.setTimeout> | null = null;
   private categoryScrollHandle: ReturnType<typeof window.setTimeout> | null = null;
+  private loadingSkeletonHandle: ReturnType<typeof window.setTimeout> | null = null;
   private readonly quickAddFeedbackTimeouts = new Map<string, ReturnType<typeof window.setTimeout>>();
 
   readonly tenant = computed(() => this.storefrontTenant.store());
   readonly storeAvailability = computed(() => this.storeAvailabilityService.getAvailability(this.tenant()));
   readonly loading = signal(true);
+  readonly loadingSkeletonVisible = signal(false);
   readonly error = signal<string | null>(null);
   readonly products = signal<ProductDto[]>([]);
   readonly storeCategories = signal<StorefrontCategoryDto[]>([]);
@@ -143,7 +146,7 @@ export class CatalogPageComponent {
       const slug = params.get('slug');
       if (!slug) {
         this.storefrontTenant.clear();
-        this.loading.set(false);
+        this.finishLoading();
         this.error.set('No se encontro el slug de la tienda.');
         return;
       }
@@ -179,7 +182,7 @@ export class CatalogPageComponent {
   }
 
   loadCatalog(): void {
-    this.loading.set(true);
+    this.beginLoading();
     this.error.set(null);
 
     forkJoin({
@@ -197,11 +200,11 @@ export class CatalogPageComponent {
         this.startBannerRotation();
         this.detailQuantity.set(1);
         this.detailOpen.set(false);
-        this.loading.set(false);
+        this.finishLoading();
       },
       error: (error) => {
         this.error.set(getApiErrorMessage(error, 'No fue posible cargar el catalogo.'));
-        this.loading.set(false);
+        this.finishLoading();
       }
     });
   }
@@ -302,6 +305,9 @@ export class CatalogPageComponent {
     }
     if (this.categoryScrollHandle !== null) {
       window.clearTimeout(this.categoryScrollHandle);
+    }
+    if (this.loadingSkeletonHandle !== null) {
+      window.clearTimeout(this.loadingSkeletonHandle);
     }
     this.quickAddFeedbackTimeouts.forEach((handle) => window.clearTimeout(handle));
     this.quickAddFeedbackTimeouts.clear();
@@ -518,8 +524,33 @@ export class CatalogPageComponent {
     });
   }
 
-  private resolveStorefront(slug: string): void {
+  private beginLoading(): void {
+    if (this.loadingSkeletonHandle !== null) {
+      window.clearTimeout(this.loadingSkeletonHandle);
+    }
+
     this.loading.set(true);
+    this.loadingSkeletonVisible.set(false);
+    this.loadingSkeletonHandle = window.setTimeout(() => {
+      if (this.loading()) {
+        this.loadingSkeletonVisible.set(true);
+      }
+      this.loadingSkeletonHandle = null;
+    }, CatalogPageComponent.SKELETON_DELAY_MS);
+  }
+
+  private finishLoading(): void {
+    if (this.loadingSkeletonHandle !== null) {
+      window.clearTimeout(this.loadingSkeletonHandle);
+      this.loadingSkeletonHandle = null;
+    }
+
+    this.loadingSkeletonVisible.set(false);
+    this.loading.set(false);
+  }
+
+  private resolveStorefront(slug: string): void {
+    this.beginLoading();
     this.error.set(null);
 
     this.storefrontTenant.loadStore(slug).subscribe({
@@ -531,7 +562,7 @@ export class CatalogPageComponent {
         this.products.set([]);
         this.banners.set([]);
         this.highlightedProductId.set(null);
-        this.loading.set(false);
+        this.finishLoading();
         this.error.set(this.storefrontTenant.error() ?? 'No fue posible cargar la tienda solicitada.');
       }
     });
