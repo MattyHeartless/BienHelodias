@@ -32,8 +32,9 @@ RUN dotnet publish "LiquorSaaS.Api.csproj" -c Release -o /app/publish /p:UseAppH
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS final
 WORKDIR /app
 
-# Install globalization support - required for token validation, dates, and localization
-RUN apk add --no-cache icu-libs
+# Install globalization and IANA time-zone data required by dates, localization,
+# and TimeZoneInfo.FindSystemTimeZoneById("America/Mexico_City").
+RUN apk add --no-cache icu-libs tzdata
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
 EXPOSE 8080
