@@ -26,12 +26,6 @@
       </div>
 
       <div class="phone-shell__body">
-        <section class="intro-block">
-          <h2 class="font-display text-4xl font-black tracking-[-0.06em] text-white">
-            {{ welcomePhrase() }}
-          </h2>
-        </section>
-
         @if (!storeAvailability().isOpen) {
           <section class="store-closed-notice" role="status">
             <div class="store-closed-notice__icon" aria-hidden="true">
@@ -51,38 +45,42 @@
         @if (activeBanner(); as banner) {
           <section
             class="promo-strip promo-strip--draggable"
+            [class.promo-strip--with-promotion]="!!banner.promotion"
             [class.promo-strip--dragging]="isBannerDragging()"
             (pointerdown)="handleBannerPointerDown($event)"
             (pointermove)="handleBannerPointerMove($event)"
             (pointerup)="handleBannerPointerUp($event)"
             (pointercancel)="handleBannerPointerUp($event)"
           >
-            <div class="promo-strip__copy">
-              <p class="eyebrow">{{ banner.header }}</p>
-              <h3 class="mt-2 font-display text-3xl font-bold tracking-[-0.05em]">
-                {{ banner.title }}
-              </h3>
-              <p class="mt-1 text-sm text-white/72">{{ banner.description }}</p>
-            </div>
-
-            <div class="promo-strip__offer">
-              <span class="promo-strip__badge">{{ banner.wildcard || 'Promo activa' }}</span>
+            <div class="promo-strip__shape" aria-hidden="true">
               @if (banner.promotion) {
-                <button class="ghost-button promo-strip__button" type="button" (click)="openPromotionModal(banner)">Ver promo</button>
+                <span class="promo-strip__shape-icon material-symbols-outlined">local_bar</span>
+              } @else {
+                <span class="promo-strip__shape-icon promo-strip__shape-icon--bottle material-symbols-outlined">liquor</span>
+                <span class="promo-strip__shape-icon promo-strip__shape-icon--can material-symbols-outlined">sports_bar</span>
               }
             </div>
 
-            @if (banners().length > 1) {
-              <div class="flex items-center justify-center gap-2">
-                  @for (item of banners(); track item.bannerId; let index = $index) {
-                    <span
-                      class="h-[0.55rem] w-[0.55rem] cursor-pointer rounded-full border-0 bg-white/25 transition duration-200"
-                      [class.!bg-primary]="index === activeBannerIndex()"
-                      [class.scale-110]="index === activeBannerIndex()"
-                    ></span>
-                  }
-              </div>
-            }
+            <div class="promo-strip__copy">
+              <p class="promo-strip__label">{{ banner.header }}</p>
+              <h3 class="promo-strip__title">{{ banner.title }}</h3>
+              <p class="promo-strip__description">{{ banner.description }}</p>
+            </div>
+
+            <div class="promo-strip__offer">
+              @if (banner.promotion) {
+                <button class="promo-strip__button" type="button" (click)="openPromotionModal(banner)">
+                  <span class="material-symbols-outlined" aria-hidden="true">local_offer</span>
+                  Ver promo
+                </button>
+              }
+            </div>
+
+            <div class="promo-strip__pagination" aria-hidden="true">
+              @for (item of banners(); track item.bannerId; let index = $index) {
+                <span [class.promo-strip__dot--active]="index === activeBannerIndex()" class="promo-strip__dot"></span>
+              }
+            </div>
           </section>
         }
 
@@ -129,6 +127,7 @@
             }
           </div>
         } @else {
+          <section class="catalog-products-section" aria-label="Productos">
           <div id="catalog-products" class="product-grid">
             @for (product of filteredProducts(); track product.id; let index = $index) {
               <article
@@ -167,7 +166,10 @@
                     </span>
                   </div>
 
-                  <div class="product-tile__footer" (click)="$event.stopPropagation()">
+                  <p class="product-tile__description">{{ product.description }}</p>
+                </div>
+
+                <div class="product-tile__footer" (click)="$event.stopPropagation()">
                     <span class="product-tile__cart-status">
                       {{ cart()[product.id] > 0 ? cart()[product.id] + ' en carrito' : 'Agregar rápido' }}
                     </span>
@@ -187,10 +189,10 @@
                       <span class="material-symbols-outlined text-base">add_shopping_cart</span>
                     </button>
                   </div>
-                </div>
               </article>
             }
           </div>
+          </section>
 
           @if (filteredProducts().length === 0) {
             <div class="empty-state">
