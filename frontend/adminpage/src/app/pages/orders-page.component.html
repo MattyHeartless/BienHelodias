@@ -154,11 +154,29 @@
                   <div>
                     <p class="font-semibold text-white">{{ item.productNameSnapshot }}</p>
                     <p class="mt-2 text-sm text-on-surface-variant">{{ item.quantity }} x {{ item.unitPrice | currency: 'MXN':'symbol-narrow':'1.2-2' }}</p>
+                    @if (item.emptyContainersToExchange > 0) {
+                      <p class="mt-1 text-xs text-on-surface-variant">Recoger {{ item.emptyContainersToExchange }} envase{{ item.emptyContainersToExchange === 1 ? '' : 's' }} vacío{{ item.emptyContainersToExchange === 1 ? '' : 's' }}.</p>
+                    }
                   </div>
                   <p class="font-semibold text-white">{{ item.subtotal | currency: 'MXN':'symbol-narrow':'1.2-2' }}</p>
                 </div>
               }
             </div>
+
+            @if (order.deposits.length) {
+              <div class="mt-5 space-y-3 border-t border-white/8 pt-5">
+                <p class="text-xs uppercase tracking-[0.24em] text-on-surface-variant">Importes a cobrar</p>
+                @for (deposit of order.deposits; track deposit.id) {
+                  <div class="flex items-start justify-between gap-4">
+                    <div>
+                      <p class="font-semibold text-white">{{ deposit.quantity }} × {{ deposit.type === 2 ? 'Importe de cubeta' : 'Importe de cartón' }}</p>
+                      <p class="mt-1 text-sm text-on-surface-variant">{{ deposit.productNameSnapshot }} · {{ deposit.unitPrice | currency: 'MXN':'symbol-narrow':'1.2-2' }} c/u</p>
+                    </div>
+                    <p class="font-semibold text-primary">{{ deposit.total | currency: 'MXN':'symbol-narrow':'1.2-2' }}</p>
+                  </div>
+                }
+              </div>
+            }
 
             @if (order.appliedPromotionCode || order.discountTotal > 0) {
               <div class="order-promo mt-5">
@@ -178,6 +196,12 @@
                 <span>Subtotal</span>
                 <span>{{ order.subtotal | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span>
               </div>
+              @if (order.depositTotal > 0) {
+                <div class="order-totals__line">
+                  <span>Importe de envases</span>
+                  <span>{{ order.depositTotal | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span>
+                </div>
+              }
               @if (order.discountTotal > 0) {
                 <div class="order-totals__line order-totals__line--discount">
                   <span>Descuento</span>

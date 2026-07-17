@@ -3,12 +3,14 @@ import { PromotionValidationDto } from '../core/models';
 
 interface CartSessionState {
   items: Record<string, number>;
+  emptyContainersToExchange: Record<string, number>;
   promoCode: string;
   appliedPromotion: PromotionValidationDto | null;
 }
 
 const EMPTY_STATE: CartSessionState = {
   items: {},
+  emptyContainersToExchange: {},
   promoCode: '',
   appliedPromotion: null
 };
@@ -20,6 +22,7 @@ export class CartSessionService {
 
   readonly items = computed(() => this.state().items);
   readonly promoCode = computed(() => this.state().promoCode);
+  readonly emptyContainersToExchange = computed(() => this.state().emptyContainersToExchange);
   readonly appliedPromotion = computed(() => this.state().appliedPromotion);
   readonly cartCount = computed(() =>
     Object.values(this.state().items).reduce((total, quantity) => total + quantity, 0)
@@ -39,8 +42,10 @@ export class CartSessionService {
     const current = this.state();
     const nextQuantity = (current.items[productId] ?? 0) + quantity;
     const cappedQuantity = typeof stockLimit === 'number' ? Math.min(stockLimit, nextQuantity) : nextQuantity;
+    const nextItems = { ...current.items, [productId]: Math.max(0, cappedQuantity) };
     this.updateState({
-      items: { ...current.items, [productId]: Math.max(0, cappedQuantity) },
+      items: nextItems,
+      emptyContainersToExchange: this.clampExchanges(current.emptyContainersToExchange, nextItems),
       promoCode: current.promoCode,
       appliedPromotion: current.appliedPromotion
     }, true);
@@ -57,6 +62,7 @@ export class CartSessionService {
 
     this.updateState({
       items: nextItems,
+      emptyContainersToExchange: this.clampExchanges(current.emptyContainersToExchange, nextItems),
       promoCode: current.promoCode,
       appliedPromotion: current.appliedPromotion
     }, true);
@@ -66,6 +72,26 @@ export class CartSessionService {
     this.setQuantity(productId, 0);
   }
 
+  setEmptyContainersToExchange(productId: string, quantity: number): void {
+    const current = this.state();
+    const orderedQuantity = current.items[productId] ?? 0;
+    const nextExchanges = { ...current.emptyContainersToExchange };
+    const normalizedQuantity = Math.min(orderedQuantity, Math.max(0, Math.floor(quantity)));
+
+    if (normalizedQuantity === 0) {
+      delete nextExchanges[productId];
+    } else {
+      nextExchanges[productId] = normalizedQuantity;
+    }
+
+    this.updateState({
+      items: current.items,
+      emptyContainersToExchange: nextExchanges,
+      promoCode: current.promoCode,
+      appliedPromotion: current.appliedPromotion
+    });
+  }
+
   setPromoCode(code: string): void {
     const current = this.state();
     const normalizedCode = code.trim().toUpperCase();
@@ -73,6 +99,7 @@ export class CartSessionService {
 
     this.updateState({
       items: current.items,
+      emptyContainersToExchange: current.emptyContainersToExchange,
       promoCode: normalizedCode,
       appliedPromotion
     });
@@ -82,6 +109,7 @@ export class CartSessionService {
     const current = this.state();
     this.updateState({
       items: current.items,
+      emptyContainersToExchange: current.emptyContainersToExchange,
       promoCode: promotion.code,
       appliedPromotion: promotion
     });
@@ -91,6 +119,7 @@ export class CartSessionService {
     const current = this.state();
     this.updateState({
       items: current.items,
+      emptyContainersToExchange: current.emptyContainersToExchange,
       promoCode: resetCode ? '' : current.promoCode,
       appliedPromotion: null
     });
@@ -104,6 +133,7 @@ export class CartSessionService {
     const finalState = invalidatePromotion
       ? {
           items: nextState.items,
+          emptyContainersToExchange: nextState.emptyContainersToExchange,
           promoCode: nextState.promoCode,
           appliedPromotion: null
         }
@@ -132,6 +162,7 @@ export class CartSessionService {
       const parsed = JSON.parse(rawState) as Partial<CartSessionState>;
       return {
         items: parsed.items ?? {},
+        emptyContainersToExchange: this.clampExchanges(parsed.emptyContainersToExchange ?? {}, parsed.items ?? {}),
         promoCode: parsed.promoCode ?? '',
         appliedPromotion: parsed.appliedPromotion ?? null
       };
@@ -142,5 +173,16 @@ export class CartSessionService {
 
   private getStorageKey(slug: string): string {
     return `bien-helodias-cart:${slug}`;
+  }
+
+  private clampExchanges(exchanges: Record<string, number>, items: Record<string, number>): Record<string, number> {
+    return Object.entries(exchanges).reduce<Record<string, number>>((result, [productId, quantity]) => {
+      const orderedQuantity = items[productId] ?? 0;
+      const normalizedQuantity = Math.min(orderedQuantity, Math.max(0, Math.floor(Number(quantity) || 0)));
+      if (normalizedQuantity > 0) {
+        result[productId] = normalizedQuantity;
+      }
+      return result;
+    }, {});
   }
 }

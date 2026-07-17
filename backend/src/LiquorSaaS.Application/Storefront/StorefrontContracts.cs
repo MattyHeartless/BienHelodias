@@ -25,9 +25,12 @@ public sealed record StorefrontStoreListItemDto(
     decimal? Longitude,
     decimal? DistanceKm);
 
+public sealed record StorefrontCategoryDto(Guid Id, string Name);
+
 public sealed record StorefrontContentDto(
     string? WelcomePhrase,
-    IReadOnlyList<BannerDto> Banners);
+    IReadOnlyList<BannerDto> Banners,
+    IReadOnlyList<StorefrontCategoryDto> Categories);
 
 public interface IStorefrontService
 {

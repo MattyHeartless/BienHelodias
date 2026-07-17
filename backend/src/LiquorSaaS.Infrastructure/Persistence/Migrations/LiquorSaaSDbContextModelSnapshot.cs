@@ -262,6 +262,9 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("DeliveryUserId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal>("DepositTotal")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<decimal>("DiscountTotal")
                         .HasColumnType("decimal(18,2)");
 
@@ -297,6 +300,50 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
                     b.ToTable("Orders", (string)null);
                 });
 
+            modelBuilder.Entity("LiquorSaaS.Domain.Entities.OrderDeposit", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ProductNameSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("nvarchar(160)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("OrderDeposits", (string)null);
+                });
+
             modelBuilder.Entity("LiquorSaaS.Domain.Entities.OrderItem", b =>
                 {
                     b.Property<Guid>("Id")
@@ -305,6 +352,9 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("EmptyContainersToExchange")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
@@ -352,6 +402,9 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("DepositType")
+                        .HasColumnType("int");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(1000)
@@ -375,6 +428,9 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
                     b.Property<int>("Stock")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("StoreCategoryId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("StoreId")
                         .HasColumnType("uniqueidentifier");
 
@@ -382,6 +438,8 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("StoreCategoryId");
 
                     b.HasIndex("StoreId");
 
@@ -515,6 +573,42 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
                     b.ToTable("Stores", (string)null);
                 });
 
+            modelBuilder.Entity("LiquorSaaS.Domain.Entities.StoreCategory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("StoreId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StoreId");
+
+                    b.HasIndex("StoreId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("StoreCategories", (string)null);
+                });
+
             modelBuilder.Entity("LiquorSaaS.Domain.Entities.Banner", b =>
                 {
                     b.HasOne("LiquorSaaS.Domain.Entities.Promotion", "Promotion")
@@ -529,6 +623,15 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Promotion");
+                });
+
+            modelBuilder.Entity("LiquorSaaS.Domain.Entities.OrderDeposit", b =>
+                {
+                    b.HasOne("LiquorSaaS.Domain.Entities.Order", null)
+                        .WithMany("Deposits")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("LiquorSaaS.Domain.Entities.OrderItem", b =>
@@ -548,6 +651,14 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("LiquorSaaS.Domain.Entities.Product", b =>
+                {
+                    b.HasOne("LiquorSaaS.Domain.Entities.StoreCategory", null)
+                        .WithMany()
+                        .HasForeignKey("StoreCategoryId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
             modelBuilder.Entity("LiquorSaaS.Domain.Entities.Promotion", b =>
                 {
                     b.HasOne("LiquorSaaS.Domain.Entities.Store", null)
@@ -564,8 +675,19 @@ namespace LiquorSaaS.Infrastructure.Persistence.Migrations
                     b.Navigation("TargetProduct");
                 });
 
+            modelBuilder.Entity("LiquorSaaS.Domain.Entities.StoreCategory", b =>
+                {
+                    b.HasOne("LiquorSaaS.Domain.Entities.Store", null)
+                        .WithMany()
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("LiquorSaaS.Domain.Entities.Order", b =>
                 {
+                    b.Navigation("Deposits");
+
                     b.Navigation("Items");
                 });
 

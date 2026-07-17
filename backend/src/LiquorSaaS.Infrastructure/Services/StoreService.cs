@@ -38,6 +38,7 @@ public sealed class StoreService(
             request.Latitude,
             request.Longitude);
         await dbContext.Stores.AddAsync(store, cancellationToken);
+        await dbContext.StoreCategories.AddRangeAsync(StoreCategoryDefaults.CreateForStore(store.Id), cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return store.ToDto();

@@ -9,8 +9,10 @@ public sealed class LiquorSaaSDbContext(DbContextOptions<LiquorSaaSDbContext> op
     public DbSet<Banner> Banners => Set<Banner>();
     public DbSet<Promotion> Promotions => Set<Promotion>();
     public DbSet<Product> Products => Set<Product>();
+    public DbSet<StoreCategory> StoreCategories => Set<StoreCategory>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+    public DbSet<OrderDeposit> OrderDeposits => Set<OrderDeposit>();
     public DbSet<DeliveryUser> DeliveryUsers => Set<DeliveryUser>();
     public DbSet<CourierPushSubscription> CourierPushSubscriptions => Set<CourierPushSubscription>();
     public DbSet<AppUser> Users => Set<AppUser>();
@@ -92,8 +94,21 @@ public sealed class LiquorSaaSDbContext(DbContextOptions<LiquorSaaSDbContext> op
             entity.Property(x => x.Category).HasMaxLength(120).IsRequired();
             entity.Property(x => x.ImageUrl).HasMaxLength(500);
             entity.Property(x => x.Price).HasColumnType("decimal(18,2)");
+            entity.Property(x => x.DepositType).HasConversion<int>();
+            entity.HasIndex(x => x.StoreCategoryId);
             entity.HasIndex(x => x.StoreId);
             entity.HasIndex(x => new { x.StoreId, x.IsActive });
+            entity.HasOne<StoreCategory>().WithMany().HasForeignKey(x => x.StoreCategoryId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<StoreCategory>(entity =>
+        {
+            entity.ToTable("StoreCategories");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Name).HasMaxLength(120).IsRequired();
+            entity.HasIndex(x => x.StoreId);
+            entity.HasIndex(x => new { x.StoreId, x.Name }).IsUnique();
+            entity.HasOne<Store>().WithMany().HasForeignKey(x => x.StoreId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Order>(entity =>
@@ -108,6 +123,7 @@ public sealed class LiquorSaaSDbContext(DbContextOptions<LiquorSaaSDbContext> op
             entity.Property(x => x.Notes).HasMaxLength(1000);
             entity.Property(x => x.Subtotal).HasColumnType("decimal(18,2)");
             entity.Property(x => x.DiscountTotal).HasColumnType("decimal(18,2)");
+            entity.Property(x => x.DepositTotal).HasColumnType("decimal(18,2)");
             entity.Property(x => x.AppliedPromotionCode).HasMaxLength(80);
             entity.Property(x => x.Total).HasColumnType("decimal(18,2)");
             entity.Property(x => x.Status).HasConversion<int>();
@@ -116,6 +132,7 @@ public sealed class LiquorSaaSDbContext(DbContextOptions<LiquorSaaSDbContext> op
             entity.HasIndex(x => x.DeliveryUserId);
             entity.HasIndex(x => x.AppliedPromotionId);
             entity.HasMany(x => x.Items).WithOne().HasForeignKey(x => x.OrderId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(x => x.Deposits).WithOne().HasForeignKey(x => x.OrderId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<OrderItem>(entity =>
@@ -125,12 +142,25 @@ public sealed class LiquorSaaSDbContext(DbContextOptions<LiquorSaaSDbContext> op
             entity.Property(x => x.ProductNameSnapshot).HasMaxLength(160).IsRequired();
             entity.Property(x => x.UnitPrice).HasColumnType("decimal(18,2)");
             entity.Property(x => x.Subtotal).HasColumnType("decimal(18,2)");
+            entity.Property(x => x.EmptyContainersToExchange).IsRequired();
             entity.HasIndex(x => x.OrderId);
             entity.HasIndex(x => x.ProductId);
             entity.HasOne(x => x.Product)
                 .WithMany()
                 .HasForeignKey(x => x.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<OrderDeposit>(entity =>
+        {
+            entity.ToTable("OrderDeposits");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.ProductNameSnapshot).HasMaxLength(160).IsRequired();
+            entity.Property(x => x.Type).HasConversion<int>();
+            entity.Property(x => x.UnitPrice).HasColumnType("decimal(18,2)");
+            entity.Property(x => x.Total).HasColumnType("decimal(18,2)");
+            entity.HasIndex(x => x.OrderId);
+            entity.HasIndex(x => x.ProductId);
         });
 
         modelBuilder.Entity<DeliveryUser>(entity =>

@@ -14,6 +14,8 @@ import {
   OrderDto,
   PagedResult,
   ProductDto,
+  StoreCategoryDto,
+  ContainerDepositType,
   StoreDto
 } from '../core/models';
 import { AdminSessionService } from '../core/admin-session.service';
@@ -28,6 +30,7 @@ export class StoreAdminApiService {
   private readonly adminBaseUrl = `${this.apiUrl}/admin`;
   private readonly authUrl = `${this.apiUrl}/auth`;
   private readonly productsUrl = `${this.apiUrl}/products`;
+  private readonly storeCategoriesUrl = `${this.apiUrl}/store-categories`;
   private readonly ordersUrl = `${this.apiUrl}/orders`;
   private readonly storesUrl = `${this.apiUrl}/stores`;
   private readonly bannersUrl = `${this.apiUrl}/banners`;
@@ -81,13 +84,23 @@ export class StoreAdminApiService {
     return this.http.get<ApiResponse<ProductDto>>(`${this.productsUrl}/${productId}`);
   }
 
+  getStoreCategories(): Observable<ApiResponse<StoreCategoryDto[]>> {
+    return this.http.get<ApiResponse<StoreCategoryDto[]>>(this.storeCategoriesUrl);
+  }
+
+  createStoreCategory(name: string): Observable<ApiResponse<StoreCategoryDto>> {
+    return this.http.post<ApiResponse<StoreCategoryDto>>(this.storeCategoriesUrl, { name });
+  }
+
   createProduct(request: {
     name: string;
     description: string;
     price: number;
     stock: number;
     category: string;
+    storeCategoryId: string;
     imageUrl: string | null;
+    depositType: ContainerDepositType;
   }): Observable<ApiResponse<ProductDto>> {
     return this.http.post<ApiResponse<ProductDto>>(this.productsUrl, request);
   }
@@ -100,8 +113,10 @@ export class StoreAdminApiService {
       price: number;
       stock: number;
       category: string;
+      storeCategoryId: string;
       imageUrl: string | null;
       isActive: boolean;
+      depositType: ContainerDepositType;
     }
   ): Observable<ApiResponse<ProductDto>> {
     return this.http.put<ApiResponse<ProductDto>>(`${this.productsUrl}/${productId}`, request);

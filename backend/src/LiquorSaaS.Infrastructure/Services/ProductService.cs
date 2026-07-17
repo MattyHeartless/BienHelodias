@@ -22,15 +22,19 @@ public sealed class ProductService(
         var storeId = tenantProvider.GetRequiredStoreId();
 
         await EnsureStoreExistsAsync(storeId, cancellationToken);
+        await EnsureDepositPriceConfiguredAsync(storeId, request.DepositType, cancellationToken);
 
+        var category = await GetCategoryAsync(storeId, request.StoreCategoryId, request.Category, cancellationToken);
         var entity = Product.Create(
             storeId,
             request.Name,
             request.Description,
             request.Price,
             request.Stock,
-            request.Category,
-            request.ImageUrl);
+            category.Name,
+            request.ImageUrl,
+            request.DepositType);
+        entity.AssignStoreCategory(category);
 
         await dbContext.Products.AddAsync(entity, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -45,7 +49,10 @@ public sealed class ProductService(
         var entity = await dbContext.Products.SingleOrDefaultAsync(x => x.Id == id && x.StoreId == storeId, cancellationToken)
             ?? throw new NotFoundException("Product not found.");
 
-        entity.Update(request.Name, request.Description, request.Price, request.Stock, request.Category, request.ImageUrl, request.IsActive);
+        await EnsureDepositPriceConfiguredAsync(storeId, request.DepositType, cancellationToken);
+        var category = await GetCategoryAsync(storeId, request.StoreCategoryId, request.Category, cancellationToken);
+        entity.Update(request.Name, request.Description, request.Price, request.Stock, category.Name, request.ImageUrl, request.IsActive, request.DepositType);
+        entity.AssignStoreCategory(category);
         await dbContext.SaveChangesAsync(cancellationToken);
         return entity.ToDto();
     }
@@ -126,11 +133,44 @@ public sealed class ProductService(
         }
     }
 
+    private async Task<StoreCategory> GetCategoryAsync(Guid storeId, Guid? categoryId, string categoryName, CancellationToken cancellationToken)
+    {
+        if (categoryId.HasValue)
+        {
+            return await dbContext.StoreCategories.SingleOrDefaultAsync(x => x.Id == categoryId.Value && x.StoreId == storeId && x.IsActive, cancellationToken)
+                ?? throw new AppValidationException("Select an active category from this store.");
+        }
+
+        var normalizedName = categoryName?.Trim() ?? string.Empty;
+        var nameKey = normalizedName.ToUpperInvariant();
+        var existing = await dbContext.StoreCategories.SingleOrDefaultAsync(x => x.StoreId == storeId && x.Name.ToUpper() == nameKey, cancellationToken);
+        if (existing is not null) return existing;
+        var category = StoreCategory.Create(storeId, normalizedName);
+        await dbContext.StoreCategories.AddAsync(category, cancellationToken);
+        return category;
+    }
+
     private void EnsureStoreAdminOrSuperAdmin()
     {
         if (currentUserService.Role is not (UserRole.StoreAdmin or UserRole.SuperAdmin))
         {
             throw new ForbiddenException("Store admin or super admin role is required.");
+        }
+    }
+
+    private async Task EnsureDepositPriceConfiguredAsync(Guid storeId, ContainerDepositType depositType, CancellationToken cancellationToken)
+    {
+        if (depositType == ContainerDepositType.None)
+        {
+            return;
+        }
+
+        var store = await dbContext.Stores.AsNoTracking().SingleAsync(x => x.Id == storeId, cancellationToken);
+        var price = depositType == ContainerDepositType.Bucket ? store.BucketPrice : store.CartonPrice;
+
+        if (!price.HasValue)
+        {
+            throw new AppValidationException($"Configure the {depositType} deposit price before assigning it to a product.");
         }
     }
 }

@@ -35,6 +35,12 @@ export enum DeliveryAvailability {
   Busy = 2
 }
 
+export enum ContainerDepositType {
+  None = 0,
+  Carton = 1,
+  Bucket = 2
+}
+
 export interface AuthTokenDto {
   accessToken: string;
   expiresAtUtc: string;
@@ -53,6 +59,17 @@ export interface OrderItemDto {
   unitPrice: number;
   quantity: number;
   subtotal: number;
+  emptyContainersToExchange: number;
+}
+
+export interface OrderDepositDto {
+  id: string;
+  productId: string;
+  productNameSnapshot: string;
+  type: ContainerDepositType;
+  quantity: number;
+  unitPrice: number;
+  total: number;
 }
 
 export interface OrderDto {
@@ -66,10 +83,14 @@ export interface OrderDto {
   notes: string | null;
   status: OrderStatus;
   deliveryUserId: string | null;
+  subtotal: number;
+  discountTotal: number;
+  depositTotal: number;
   total: number;
   createdAtUtc: string;
   updatedAtUtc: string;
   items: OrderItemDto[];
+  deposits: OrderDepositDto[];
 }
 
 export interface DeliveryUserDto {

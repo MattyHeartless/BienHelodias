@@ -34,7 +34,7 @@
             </div>
             <div class="cart-status-line">
               <span>{{ cartCount() }} {{ cartCount() === 1 ? 'artículo' : 'artículos' }}</span>
-              <span>{{ subtotal() | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span>
+              <span>{{ total() | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span>
             </div>
           </section>
 
@@ -67,6 +67,40 @@
                       </div>
                     </div>
                   </div>
+                  @if (requiresDeposit(entry.product)) {
+                    <section
+                      class="container-exchange"
+                      [class.container-exchange--complete]="getDepositQuantity(entry.product, entry.quantity, entry.emptyContainersToExchange) === 0"
+                      [attr.aria-label]="'Selección de importe para ' + getDepositLabel(entry.product, true)"
+                    >
+                      <div class="container-exchange__control">
+                        @if (entry.quantity === 1) {
+                          <p>{{ getEmptyContainerQuestion(entry.product) }}</p>
+                          <div class="container-exchange__choices" role="group" [attr.aria-label]="getEmptyContainerQuestion(entry.product)">
+                            <button type="button" [class.is-selected]="entry.emptyContainersToExchange === 1" (click)="setEmptyContainers(entry.product.id, 1)">Sí</button>
+                            <button type="button" [class.is-selected]="entry.emptyContainersToExchange === 0" (click)="setEmptyContainers(entry.product.id, 0)">No</button>
+                          </div>
+                        } @else {
+                          <p>{{ getEmptyContainerQuantityQuestion(entry.product) }}</p>
+                          <div class="container-exchange__stepper">
+                            <button type="button" (click)="decreaseEmptyContainers(entry.product.id, entry.emptyContainersToExchange)" [disabled]="entry.emptyContainersToExchange === 0" aria-label="Reducir envases vacíos"><span class="material-symbols-outlined" aria-hidden="true">remove</span></button>
+                            <strong>{{ entry.emptyContainersToExchange }}</strong>
+                            <button type="button" (click)="increaseEmptyContainers(entry.product, entry.quantity, entry.emptyContainersToExchange)" [disabled]="entry.emptyContainersToExchange >= entry.quantity" aria-label="Aumentar envases vacíos"><span class="material-symbols-outlined" aria-hidden="true">add</span></button>
+                          </div>
+                        }
+                      </div>
+
+                      <div class="container-exchange__outcome">
+                        @if (getDepositQuantity(entry.product, entry.quantity, entry.emptyContainersToExchange) > 0) {
+                          <span>Importe</span>
+                          <strong>{{ getDepositTotal(entry.product, entry.quantity, entry.emptyContainersToExchange) | currency: 'MXN':'symbol-narrow':'1.2-2' }}</strong>
+                        } @else {
+                          <span>Intercambio completo</span>
+                          <strong>Sin importe</strong>
+                        }
+                      </div>
+                    </section>
+                  }
                   <button type="button" class="cart-item__remove" (click)="removeItem(entry.product.id)" aria-label="Quitar producto">
                     <span class="material-symbols-outlined text-base">close</span>
                   </button>
@@ -74,16 +108,38 @@
               }
             </section>
 
-            <section class="cart-checkout-panel">
-              <form class="cart-promo" [formGroup]="promoForm">
-                <div>
-                  <label class="eyebrow">Código promocional</label>
-                  <input class="cart-promo__input" formControlName="promoCode" placeholder="Ej. HOTSALE20" />
+            <section class="cart-promo-card" [class.cart-promo-card--open]="promoExpanded()">
+              <button
+                type="button"
+                class="cart-promo-card__trigger"
+                (click)="togglePromotionPanel()"
+                [attr.aria-expanded]="promoExpanded()"
+                aria-controls="promo-code-panel"
+              >
+                <span class="cart-promo-card__trigger-copy">
+                  <span class="material-symbols-outlined" aria-hidden="true">local_offer</span>
+                  Tengo un código
+                </span>
+                <span class="material-symbols-outlined cart-promo-card__chevron" aria-hidden="true">expand_more</span>
+              </button>
+
+              @if (promoExpanded()) {
+                <div id="promo-code-panel" class="cart-promo-card__body">
+                  <form class="cart-promo" [formGroup]="promoForm">
+                    <label class="cart-promo__label" for="promo-code">Código promocional</label>
+                    <div class="cart-promo__row">
+                      <input id="promo-code" class="cart-promo__input" formControlName="promoCode" placeholder="Ej. HOTSALE20" />
+                      <button class="cart-promo__apply" type="button" (click)="applyPromotionCode()" [disabled]="applyingPromotion() || !promoForm.get('promoCode')?.value?.trim()">
+                        {{ applyingPromotion() ? 'Validando...' : 'Aplicar' }}
+                      </button>
+                    </div>
+                  </form>
+
+                  @if (promoError()) {
+                    <div class="cart-promo-error">{{ promoError() }}</div>
+                  }
                 </div>
-                <button class="ghost-button !justify-center" type="button" (click)="applyPromotionCode()" [disabled]="applyingPromotion() || !promoForm.get('promoCode')?.value?.trim()">
-                  {{ applyingPromotion() ? 'Validando...' : 'Aplicar código' }}
-                </button>
-              </form>
+              }
 
               @if (appliedPromotion(); as promotion) {
                 <div class="promo-result">
@@ -91,13 +147,22 @@
                   <p class="promo-result__summary">{{ promotion.summary }}</p>
                 </div>
               }
+            </section>
 
-              @if (promoError()) {
-                <div class="cart-promo-error">{{ promoError() }}</div>
-              }
+            <section class="cart-checkout-panel">
+              <div class="cart-checkout-panel__heading">
+                <span class="cart-checkout-panel__icon material-symbols-outlined" aria-hidden="true">receipt_long</span>
+                <div>
+                  <p class="cart-checkout-panel__eyebrow">Resumen de pago</p>
+                  <p class="cart-checkout-panel__copy">{{ cartCount() }} {{ cartCount() === 1 ? 'artículo' : 'artículos' }} en tu pedido</p>
+                </div>
+              </div>
 
               <div class="cart-summary">
                 <div class="cart-summary__line"><span>Subtotal</span><span>{{ subtotal() | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span></div>
+                @if (depositTotal() > 0) {
+                  <div class="cart-summary__line"><span>Importe de envases</span><span>{{ depositTotal() | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span></div>
+                }
                 @if (discountTotal() > 0) {
                   <div class="cart-summary__line cart-summary__line--discount"><span>Descuento</span><span>-{{ discountTotal() | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span></div>
                 }

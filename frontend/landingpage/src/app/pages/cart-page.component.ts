@@ -2,7 +2,7 @@ import { CommonModule, CurrencyPipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ProductDto, PromotionValidationDto } from '../core/models';
+import { ContainerDepositType, ProductDto, PromotionValidationDto } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
 import { OrdersApiService } from '../services/orders-api.service';
 import { ProductsApiService } from '../services/products-api.service';
@@ -18,6 +18,7 @@ import { StoreAvailabilityService } from '../services/store-availability.service
   styleUrl: './cart-page.component.css'
 })
 export class CartPageComponent {
+  readonly containerDepositType = ContainerDepositType;
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly formBuilder = inject(FormBuilder);
@@ -31,10 +32,12 @@ export class CartPageComponent {
   readonly error = signal<string | null>(null);
   readonly promoError = signal<string | null>(null);
   readonly applyingPromotion = signal(false);
+  readonly promoExpanded = signal(false);
   readonly products = signal<ProductDto[]>([]);
   readonly activeSlug = signal<string | null>(null);
   readonly storeName = computed(() => this.storefrontTenant.store()?.name ?? 'Licoreria');
   readonly cart = computed(() => this.cartSession.items());
+  readonly emptyContainersToExchange = computed(() => this.cartSession.emptyContainersToExchange());
   readonly cartCount = computed(() => this.cartSession.cartCount());
   readonly appliedPromotion = computed(() => this.cartSession.appliedPromotion());
   readonly storeAvailability = computed(() => this.storeAvailabilityService.getAvailability(this.storefrontTenant.store()));
@@ -48,7 +51,8 @@ export class CartPageComponent {
       .filter((product) => (this.cart()[product.id] ?? 0) > 0)
       .map((product) => ({
         product,
-        quantity: this.cart()[product.id]
+        quantity: this.cart()[product.id],
+        emptyContainersToExchange: this.emptyContainersToExchange()[product.id] ?? 0
       }))
   );
 
@@ -56,10 +60,14 @@ export class CartPageComponent {
     this.cartItems().reduce((total, entry) => total + entry.product.price * entry.quantity, 0)
   );
 
+  readonly depositTotal = computed(() =>
+    this.cartItems().reduce((total, entry) => total + this.getDepositTotal(entry.product, entry.quantity, entry.emptyContainersToExchange), 0)
+  );
+
   readonly discountTotal = computed(() => this.appliedPromotion()?.discountTotal ?? 0);
-  readonly total = computed(() => this.appliedPromotion()?.total ?? this.subtotal());
+  readonly total = computed(() => (this.appliedPromotion()?.total ?? this.subtotal()) + this.depositTotal());
   readonly minimumPurchase = computed(() => this.storefrontTenant.store()?.minimumPurchase ?? null);
-  readonly amountMissingForMinimum = computed(() => Math.max(0, (this.minimumPurchase() ?? 0) - this.subtotal()));
+  readonly amountMissingForMinimum = computed(() => Math.max(0, (this.minimumPurchase() ?? 0) - (this.subtotal() + this.depositTotal())));
   readonly meetsMinimumPurchase = computed(() => this.amountMissingForMinimum() === 0);
   readonly canContinueCheckout = computed(() =>
     this.cartItems().length > 0 && this.storeAvailability().isOpen && this.meetsMinimumPurchase()
@@ -102,6 +110,60 @@ export class CartPageComponent {
 
   removeItem(productId: string): void {
     this.cartSession.removeItem(productId);
+  }
+
+  togglePromotionPanel(): void {
+    this.promoExpanded.update((expanded) => !expanded);
+  }
+
+  increaseEmptyContainers(product: ProductDto, quantity: number, emptyContainersToExchange: number): void {
+    this.cartSession.setEmptyContainersToExchange(product.id, Math.min(quantity, emptyContainersToExchange + 1));
+  }
+
+  decreaseEmptyContainers(productId: string, emptyContainersToExchange: number): void {
+    this.cartSession.setEmptyContainersToExchange(productId, emptyContainersToExchange - 1);
+  }
+
+  setEmptyContainers(productId: string, quantity: number): void {
+    this.cartSession.setEmptyContainersToExchange(productId, quantity);
+  }
+
+  requiresDeposit(product: ProductDto): boolean {
+    return product.depositType !== ContainerDepositType.None;
+  }
+
+  getDepositLabel(product: ProductDto, plural = false): string {
+    const label = product.depositType === ContainerDepositType.Bucket ? 'cubeta' : 'cartón';
+    return plural ? (label === 'cartón' ? 'cartones' : 'cubetas') : label;
+  }
+
+  getDepositQuantityLabel(product: ProductDto, quantity: number): string {
+    return quantity === 1 ? this.getDepositLabel(product) : this.getDepositLabel(product, true);
+  }
+
+  getEmptyContainerQuestion(product: ProductDto): string {
+    return product.depositType === ContainerDepositType.Bucket
+      ? '¿Tienes la cubeta vacía?'
+      : '¿Tienes el cartón vacío?';
+  }
+
+  getEmptyContainerQuantityQuestion(product: ProductDto): string {
+    return product.depositType === ContainerDepositType.Bucket
+      ? '¿Cuántas cubetas vacías tienes?'
+      : '¿Cuántos cartones vacíos tienes?';
+  }
+
+  getDepositUnitPrice(product: ProductDto): number {
+    const store = this.storefrontTenant.store();
+    return product.depositType === ContainerDepositType.Bucket ? store?.bucketPrice ?? 0 : store?.cartonPrice ?? 0;
+  }
+
+  getDepositQuantity(product: ProductDto, quantity: number, emptyContainersToExchange: number): number {
+    return this.requiresDeposit(product) ? Math.max(0, quantity - emptyContainersToExchange) : 0;
+  }
+
+  getDepositTotal(product: ProductDto, quantity: number, emptyContainersToExchange: number): number {
+    return this.getDepositQuantity(product, quantity, emptyContainersToExchange) * this.getDepositUnitPrice(product);
   }
 
   applyPromotionCode(): void {

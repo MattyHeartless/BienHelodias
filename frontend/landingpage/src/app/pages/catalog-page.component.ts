@@ -1,7 +1,7 @@
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { Component, HostListener, OnDestroy, WritableSignal, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BannerDto, ProductDto } from '../core/models';
+import { BannerDto, ProductDto, StorefrontCategoryDto } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
 import { ProductsApiService } from '../services/products-api.service';
 import { CartSessionService } from '../services/cart-session.service';
@@ -38,6 +38,7 @@ export class CatalogPageComponent {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly products = signal<ProductDto[]>([]);
+  readonly storeCategories = signal<StorefrontCategoryDto[]>([]);
   readonly welcomePhrase = signal('No te compliques, aqui te lo mandamos.');
   readonly banners = signal<BannerDto[]>([]);
   readonly activeBannerIndex = signal(0);
@@ -64,15 +65,24 @@ export class CatalogPageComponent {
   readonly detailQuantity = signal(1);
 
   readonly categories = computed(() => {
-    const names = new Set(this.products().map((product) => product.category).filter(Boolean));
-    return ['all', ...Array.from(names)];
+    const productCategoryIds = new Set(this.products().map((product) => product.storeCategoryId).filter(Boolean));
+    const configuredCategories = this.storeCategories().filter((category) => productCategoryIds.has(category.id));
+
+    if (configuredCategories.length > 0) {
+      return configuredCategories;
+    }
+
+    return Array.from(new Set(this.products().map((product) => product.category).filter(Boolean)))
+      .map((name) => ({ id: name, name }));
   });
 
   readonly filteredProducts = computed(() => {
     const query = this.searchQuery().trim().toLowerCase();
 
     return this.products().filter((product) => {
-      const matchesCategory = this.activeCategory() === 'all' || product.category === this.activeCategory();
+      const matchesCategory = this.activeCategory() === 'all'
+        || product.storeCategoryId === this.activeCategory()
+        || (!product.storeCategoryId && product.category === this.activeCategory());
       const matchesQuery =
         !query ||
         product.name.toLowerCase().includes(query) ||
@@ -180,6 +190,7 @@ export class CatalogPageComponent {
         this.highlightedProductId.set(activeProducts[0]?.id ?? null);
         this.welcomePhrase.set(response.storefront?.data.welcomePhrase?.trim() || 'No te compliques, aqui te lo mandamos.');
         this.banners.set(response.storefront?.data.banners ?? []);
+        this.storeCategories.set(response.storefront?.data.categories ?? []);
         this.activeBannerIndex.set(0);
         this.startBannerRotation();
         this.detailQuantity.set(1);
@@ -193,8 +204,8 @@ export class CatalogPageComponent {
     });
   }
 
-  selectCategory(category: string): void {
-    this.activeCategory.set(category);
+  selectCategory(categoryId: string): void {
+    this.activeCategory.set(categoryId);
     this.closeDetail();
   }
 
@@ -296,8 +307,15 @@ export class CatalogPageComponent {
   }
 
   addToCartWithFeedback(product: ProductDto): void {
-    const quantity = this.selectedProduct()?.id === product.id ? this.detailQuantity() : 1;
+    const isDetailPurchase = this.detailOpen() && this.selectedProduct()?.id === product.id;
+    const quantity = isDetailPurchase ? this.detailQuantity() : 1;
     this.addToCart(product, quantity);
+
+    if (isDetailPurchase) {
+      this.closeDetail();
+      return;
+    }
+
     this.triggerQuickAddFeedback(product.id);
   }
 

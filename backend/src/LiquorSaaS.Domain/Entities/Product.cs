@@ -1,4 +1,5 @@
 using LiquorSaaS.Domain.Common;
+using LiquorSaaS.Domain.Enums;
 using LiquorSaaS.Domain.Exceptions;
 
 namespace LiquorSaaS.Domain.Entities;
@@ -17,6 +18,8 @@ public sealed class Product : AuditableEntity
     public string? ImageUrl { get; private set; }
     public bool IsActive { get; private set; } = true;
     public string Category { get; private set; } = string.Empty;
+    public Guid? StoreCategoryId { get; private set; }
+    public ContainerDepositType DepositType { get; private set; }
 
     public static Product Create(
         Guid storeId,
@@ -25,7 +28,8 @@ public sealed class Product : AuditableEntity
         decimal price,
         int stock,
         string category,
-        string? imageUrl)
+        string? imageUrl,
+        ContainerDepositType depositType = ContainerDepositType.None)
     {
         Validate(name, price, stock, category);
 
@@ -38,6 +42,7 @@ public sealed class Product : AuditableEntity
             Stock = stock,
             Category = category.Trim(),
             ImageUrl = string.IsNullOrWhiteSpace(imageUrl) ? null : imageUrl.Trim(),
+            DepositType = NormalizeDepositType(depositType),
             IsActive = true
         };
     }
@@ -49,7 +54,8 @@ public sealed class Product : AuditableEntity
         int stock,
         string category,
         string? imageUrl,
-        bool isActive)
+        bool isActive,
+        ContainerDepositType depositType = ContainerDepositType.None)
     {
         Validate(name, price, stock, category);
 
@@ -60,12 +66,21 @@ public sealed class Product : AuditableEntity
         Category = category.Trim();
         ImageUrl = string.IsNullOrWhiteSpace(imageUrl) ? null : imageUrl.Trim();
         IsActive = isActive;
+        DepositType = NormalizeDepositType(depositType);
         Touch();
     }
 
     public void SetActiveStatus(bool isActive)
     {
         IsActive = isActive;
+        Touch();
+    }
+
+    public void AssignStoreCategory(StoreCategory category)
+    {
+        if (category.StoreId != StoreId) throw new DomainRuleException("Product category must belong to the same store.");
+        StoreCategoryId = category.Id;
+        Category = category.Name;
         Touch();
     }
 
@@ -90,5 +105,15 @@ public sealed class Product : AuditableEntity
         {
             throw new DomainRuleException("Product category is required.");
         }
+    }
+
+    private static ContainerDepositType NormalizeDepositType(ContainerDepositType depositType)
+    {
+        if (!Enum.IsDefined(depositType))
+        {
+            throw new DomainRuleException("Product deposit type is invalid.");
+        }
+
+        return depositType;
     }
 }

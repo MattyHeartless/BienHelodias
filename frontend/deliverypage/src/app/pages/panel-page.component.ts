@@ -653,6 +653,10 @@ export class PanelPageComponent implements OnDestroy {
     return order.items.reduce((total, item) => total + item.quantity, 0);
   }
 
+  hasContainerInstructions(order: OrderDto): boolean {
+    return order.deposits.length > 0 || order.items.some((item) => item.emptyContainersToExchange > 0);
+  }
+
   getOrderStatusLabel(status: OrderStatus): string {
     switch (status) {
       case OrderStatus.Pending:

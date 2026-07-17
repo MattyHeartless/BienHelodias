@@ -2,7 +2,7 @@ import { CommonModule, CurrencyPipe } from '@angular/common';
 import { Component, ElementRef, HostListener, OnDestroy, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { DeliveryAddressDraft, ProductDto } from '../core/models';
+import { ContainerDepositType, DeliveryAddressDraft, ProductDto } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
 import { GooglePlacesService } from '../services/google-places.service';
 import { OrdersApiService } from '../services/orders-api.service';
@@ -19,6 +19,7 @@ import { StoreAvailabilityService } from '../services/store-availability.service
   styleUrl: './checkout-page.component.css'
 })
 export class CheckoutPageComponent implements OnDestroy {
+  readonly containerDepositType = ContainerDepositType;
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly formBuilder = inject(FormBuilder);
@@ -58,12 +59,13 @@ export class CheckoutPageComponent implements OnDestroy {
   readonly activeSlug = signal<string | null>(null);
   readonly storeName = computed(() => this.storefrontTenant.store()?.name ?? 'Licoreria');
   readonly cart = computed(() => this.cartSession.items());
+  readonly emptyContainersToExchange = computed(() => this.cartSession.emptyContainersToExchange());
   readonly appliedPromotion = computed(() => this.cartSession.appliedPromotion());
   readonly storeAvailability = computed(() => this.storeAvailabilityService.getAvailability(this.storefrontTenant.store()));
 
   readonly checkoutForm = this.formBuilder.nonNullable.group({
     customerName: ['', [Validators.required, Validators.minLength(2)]],
-    customerPhone: ['', [Validators.required, Validators.minLength(8)]],
+    customerPhone: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
     deliveryAddress: ['', [Validators.required, Validators.minLength(10)]],
     notes: [''],
     deliveryPlaceId: [''],
@@ -76,7 +78,8 @@ export class CheckoutPageComponent implements OnDestroy {
       .filter((product) => (this.cart()[product.id] ?? 0) > 0)
       .map((product) => ({
         product,
-        quantity: this.cart()[product.id]
+        quantity: this.cart()[product.id],
+        emptyContainersToExchange: this.emptyContainersToExchange()[product.id] ?? 0
       }))
   );
 
@@ -84,10 +87,14 @@ export class CheckoutPageComponent implements OnDestroy {
     this.cartItems().reduce((total, entry) => total + entry.product.price * entry.quantity, 0)
   );
 
+  readonly depositTotal = computed(() =>
+    this.cartItems().reduce((total, entry) => total + this.getDepositTotal(entry.product, entry.quantity, entry.emptyContainersToExchange), 0)
+  );
+
   readonly discountTotal = computed(() => this.appliedPromotion()?.discountTotal ?? 0);
-  readonly total = computed(() => this.appliedPromotion()?.total ?? this.subtotal());
+  readonly total = computed(() => (this.appliedPromotion()?.total ?? this.subtotal()) + this.depositTotal());
   readonly minimumPurchase = computed(() => this.storefrontTenant.store()?.minimumPurchase ?? null);
-  readonly amountMissingForMinimum = computed(() => Math.max(0, (this.minimumPurchase() ?? 0) - this.subtotal()));
+  readonly amountMissingForMinimum = computed(() => Math.max(0, (this.minimumPurchase() ?? 0) - (this.subtotal() + this.depositTotal())));
   readonly meetsMinimumPurchase = computed(() => this.amountMissingForMinimum() === 0);
   readonly canSubmitOrder = computed(() =>
     this.cartItems().length > 0 && this.storeAvailability().isOpen && this.meetsMinimumPurchase()
@@ -220,7 +227,8 @@ export class CheckoutPageComponent implements OnDestroy {
       promoCode: this.appliedPromotion()?.code ?? null,
       items: this.cartItems().map((entry) => ({
         productId: entry.product.id,
-        quantity: entry.quantity
+        quantity: entry.quantity,
+        emptyContainersToExchange: entry.emptyContainersToExchange
       }))
     }).subscribe({
       next: (response) => {
@@ -247,6 +255,35 @@ export class CheckoutPageComponent implements OnDestroy {
     }
 
     this.clearSelectedAddress();
+  }
+
+  normalizeCustomerPhone(rawPhone: string): void {
+    const phone = rawPhone.replace(/\D/g, '').slice(0, 10);
+    if (phone !== rawPhone) {
+      this.checkoutForm.controls.customerPhone.setValue(phone);
+    }
+  }
+
+  requiresDeposit(product: ProductDto): boolean {
+    return product.depositType !== ContainerDepositType.None;
+  }
+
+  getDepositLabel(product: ProductDto, plural = false): string {
+    const label = product.depositType === ContainerDepositType.Bucket ? 'cubeta' : 'cartón';
+    return plural ? (label === 'cartón' ? 'cartones' : 'cubetas') : label;
+  }
+
+  getDepositUnitPrice(product: ProductDto): number {
+    const store = this.storefrontTenant.store();
+    return product.depositType === ContainerDepositType.Bucket ? store?.bucketPrice ?? 0 : store?.cartonPrice ?? 0;
+  }
+
+  getDepositQuantity(product: ProductDto, quantity: number, emptyContainersToExchange: number): number {
+    return this.requiresDeposit(product) ? Math.max(0, quantity - emptyContainersToExchange) : 0;
+  }
+
+  getDepositTotal(product: ProductDto, quantity: number, emptyContainersToExchange: number): number {
+    return this.getDepositQuantity(product, quantity, emptyContainersToExchange) * this.getDepositUnitPrice(product);
   }
 
   trackLastOrder(): void {

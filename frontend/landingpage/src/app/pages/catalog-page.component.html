@@ -99,14 +99,22 @@
         </label>
 
         <div class="category-tabs">
-          @for (category of categories(); track category) {
+          <button
+            type="button"
+            class="category-tab"
+            [class.category-tab--active]="activeCategory() === 'all'"
+            (click)="selectCategory('all')"
+          >
+            New Fresh
+          </button>
+          @for (category of categories(); track category.id) {
             <button
               type="button"
               class="category-tab"
-              [class.category-tab--active]="activeCategory() === category"
-              (click)="selectCategory(category)"
+              [class.category-tab--active]="activeCategory() === category.id"
+              (click)="selectCategory(category.id)"
             >
-              {{ category === 'all' ? 'New Fresh' : category }}
+              {{ category.name }}
             </button>
           }
         </div>

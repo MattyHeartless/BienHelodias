@@ -84,7 +84,14 @@ public sealed class StorefrontService(
             .OrderByDescending(x => x.Created)
             .ToListAsync(cancellationToken);
 
-        return new StorefrontContentDto(store.WelcomePhrase, banners.Select(x => x.ToDto()).ToArray());
+        var categories = await dbContext.StoreCategories.AsNoTracking()
+            .Where(x => x.StoreId == storeId && x.IsActive)
+            .OrderBy(x => x.SortOrder)
+            .ThenBy(x => x.Name)
+            .Select(x => new StorefrontCategoryDto(x.Id, x.Name))
+            .ToListAsync(cancellationToken);
+
+        return new StorefrontContentDto(store.WelcomePhrase, banners.Select(x => x.ToDto()).ToArray(), categories);
     }
 
     private static decimal CalculateDistanceKm(decimal originLatitude, decimal originLongitude, decimal targetLatitude, decimal targetLongitude)

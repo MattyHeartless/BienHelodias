@@ -64,8 +64,10 @@ internal static class DtoMappings
             entity.Price,
             entity.Stock,
             entity.Category,
+            entity.StoreCategoryId,
             entity.ImageUrl,
             entity.IsActive,
+            entity.DepositType,
             entity.CreatedAtUtc,
             entity.UpdatedAtUtc);
 
@@ -86,6 +88,7 @@ internal static class DtoMappings
             entity.DeliveryUserId,
             entity.Subtotal,
             entity.DiscountTotal,
+            entity.DepositTotal,
             entity.AppliedPromotionId,
             entity.AppliedPromotionCode,
             entity.Total,
@@ -98,7 +101,16 @@ internal static class DtoMappings
                 item.Product?.ImageUrl,
                 item.UnitPrice,
                 item.Quantity,
-                item.Subtotal)).ToArray(),
+                item.Subtotal,
+                item.EmptyContainersToExchange)).ToArray(),
+            entity.Deposits.Select(deposit => new OrderDepositDto(
+                deposit.Id,
+                deposit.ProductId,
+                deposit.ProductNameSnapshot,
+                deposit.Type,
+                deposit.Quantity,
+                deposit.UnitPrice,
+                deposit.Total)).ToArray(),
             deliveryAssignee is null
                 ? null
                 : new OrderDeliveryAssigneeDto(

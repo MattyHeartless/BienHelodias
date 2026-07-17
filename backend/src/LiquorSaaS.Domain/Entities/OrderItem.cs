@@ -15,9 +15,10 @@ public sealed class OrderItem : AuditableEntity
     public decimal UnitPrice { get; private set; }
     public int Quantity { get; private set; }
     public decimal Subtotal { get; private set; }
+    public int EmptyContainersToExchange { get; private set; }
     public Product? Product { get; private set; }
 
-    public static OrderItem Create(Guid productId, string productNameSnapshot, decimal unitPrice, int quantity)
+    public static OrderItem Create(Guid productId, string productNameSnapshot, decimal unitPrice, int quantity, int emptyContainersToExchange = 0)
     {
         if (string.IsNullOrWhiteSpace(productNameSnapshot))
         {
@@ -29,13 +30,19 @@ public sealed class OrderItem : AuditableEntity
             throw new DomainRuleException("Unit price and quantity must be greater than zero.");
         }
 
+        if (emptyContainersToExchange < 0 || emptyContainersToExchange > quantity)
+        {
+            throw new DomainRuleException("Empty containers to exchange must be between zero and the requested quantity.");
+        }
+
         return new OrderItem
         {
             ProductId = productId,
             ProductNameSnapshot = productNameSnapshot.Trim(),
             UnitPrice = unitPrice,
             Quantity = quantity,
-            Subtotal = unitPrice * quantity
+            Subtotal = unitPrice * quantity,
+            EmptyContainersToExchange = emptyContainersToExchange
         };
     }
 

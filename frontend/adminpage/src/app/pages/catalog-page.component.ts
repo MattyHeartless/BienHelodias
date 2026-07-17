@@ -6,7 +6,9 @@ import {
   InventoryAiAnalysisDto,
   InventoryAiCommitRequest,
   InventoryAiDetectedItemDto,
-  ProductDto
+  ProductDto,
+  StoreCategoryDto,
+  ContainerDepositType
 } from '../core/models';
 import { getApiErrorMessage } from '../core/api-error.util';
 import { shakeInvalidFormControls } from '../core/form-error-shake.util';
@@ -51,6 +53,7 @@ interface InventoryAiReviewItem {
   styleUrl: './catalog-page.component.css'
 })
 export class CatalogPageComponent {
+  readonly containerDepositType = ContainerDepositType;
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly storeAdminApi = inject(StoreAdminApiService);
   private readonly formBuilder = inject(FormBuilder);
@@ -69,6 +72,7 @@ export class CatalogPageComponent {
   readonly error = signal<string | null>(null);
   readonly feedback = signal<string | null>(null);
   readonly products = signal<ProductDto[]>([]);
+  readonly storeCategories = signal<StoreCategoryDto[]>([]);
   readonly imageLoadErrors = signal<Record<string, boolean>>({});
   readonly searchTerm = signal('');
   readonly selectedCategory = signal('all');
@@ -76,6 +80,10 @@ export class CatalogPageComponent {
   readonly modalOpen = signal(false);
   readonly productModalActive = signal(false);
   readonly productModalClosing = signal(false);
+  readonly categoriesModalOpen = signal(false);
+  readonly categorySubmitting = signal(false);
+  readonly categoryPickerOpen = signal(false);
+  readonly categoryQuery = signal('');
 
   readonly inventoryAiModalOpen = signal(false);
   readonly inventoryAiModalActive = signal(false);
@@ -93,9 +101,10 @@ export class CatalogPageComponent {
     description: ['', [Validators.required, Validators.minLength(6)]],
     price: [0, [Validators.required, Validators.min(1)]],
     stock: [0, [Validators.required, Validators.min(0)]],
-    category: ['', [Validators.required]],
+    storeCategoryId: ['', [Validators.required]],
     imageUrl: [''],
-    isActive: [true, [Validators.required]]
+    isActive: [true, [Validators.required]],
+    depositType: [ContainerDepositType.None, [Validators.required]]
   });
 
   readonly inventorySummary = computed(() => ({
@@ -105,10 +114,12 @@ export class CatalogPageComponent {
   }));
 
   readonly isEditing = computed(() => this.editingProductId() !== null);
-  readonly categories = computed(() =>
-    [...new Set(this.products().map((product) => product.category.trim()).filter(Boolean))]
-      .sort((left, right) => left.localeCompare(right, 'es', { sensitivity: 'base' }))
-  );
+  readonly categories = computed(() => this.storeCategories().filter((category) => category.isActive));
+  readonly matchingCategories = computed(() => {
+    const query = this.categoryQuery().trim().toLocaleLowerCase();
+    return this.categories().filter((category) => !query || category.name.toLocaleLowerCase().includes(query));
+  });
+  readonly categoryForm = this.formBuilder.nonNullable.group({ name: ['', [Validators.required, Validators.maxLength(120)]] });
   readonly linkableProducts = computed(() =>
     [...this.products()].sort((left, right) => left.name.localeCompare(right.name, 'es', { sensitivity: 'base' }))
   );
@@ -171,6 +182,7 @@ export class CatalogPageComponent {
 
   constructor() {
     this.loadProducts();
+    this.loadCategories();
   }
 
   ngOnDestroy(): void {
@@ -197,6 +209,13 @@ export class CatalogPageComponent {
     });
   }
 
+  loadCategories(): void {
+    this.storeAdminApi.getStoreCategories().subscribe({
+      next: (response) => this.storeCategories.set(response.data),
+      error: (error) => this.notifications.error({ summary: getApiErrorMessage(error, 'No fue posible cargar las categorías.') })
+    });
+  }
+
   saveProduct(): void {
     this.productForm.markAllAsTouched();
     if (this.productForm.invalid) {
@@ -213,14 +232,22 @@ export class CatalogPageComponent {
     this.feedback.set(null);
 
     const values = this.productForm.getRawValue();
+    const category = this.storeCategories().find((item) => item.id === values.storeCategoryId);
+    if (!category) {
+      this.productForm.controls.storeCategoryId.setErrors({ required: true });
+      this.submitting.set(false);
+      return;
+    }
     const request = {
       name: values.name,
       description: values.description,
       price: values.price,
       stock: values.stock,
-      category: values.category,
+      category: category.name,
+      storeCategoryId: category.id,
       imageUrl: values.imageUrl || null,
-      isActive: values.isActive
+      isActive: values.isActive,
+      depositType: values.depositType
     };
 
     const operation = this.isEditing()
@@ -252,10 +279,12 @@ export class CatalogPageComponent {
       description: product.description,
       price: product.price,
       stock: product.stock,
-      category: product.category,
+      storeCategoryId: product.storeCategoryId ?? '',
       imageUrl: product.imageUrl ?? '',
-      isActive: product.isActive
+      isActive: product.isActive,
+      depositType: product.depositType
     });
+    this.categoryQuery.set(product.category);
     this.openAnimatedModal(this.modalOpen, this.productModalActive, this.productModalClosing);
   }
 
@@ -297,6 +326,20 @@ export class CatalogPageComponent {
     });
   }
 
+  setDepositType(type: ContainerDepositType, enabled: boolean): void {
+    const currentType = this.productForm.controls.depositType.value;
+    this.productForm.controls.depositType.setValue(enabled ? type : currentType === type ? ContainerDepositType.None : currentType);
+    this.productForm.controls.depositType.markAsDirty();
+  }
+
+  hasDepositType(type: ContainerDepositType): boolean {
+    return this.productForm.controls.depositType.value === type;
+  }
+
+  depositTypeLabel(type: ContainerDepositType): string {
+    return type === ContainerDepositType.Bucket ? 'Importe de cubeta' : type === ContainerDepositType.Carton ? 'Importe de cartón' : 'Sin importe';
+  }
+
   resetForm(): void {
     this.closeAnimatedModal(this.modalOpen, this.productModalActive, this.productModalClosing, () => {
       this.editingProductId.set(null);
@@ -305,10 +348,12 @@ export class CatalogPageComponent {
         description: '',
         price: 0,
         stock: 0,
-        category: '',
+        storeCategoryId: '',
         imageUrl: '',
-        isActive: true
+        isActive: true,
+        depositType: ContainerDepositType.None
       });
+      this.categoryQuery.set('');
     });
   }
 
@@ -319,16 +364,57 @@ export class CatalogPageComponent {
       description: '',
       price: 0,
       stock: 0,
-      category: '',
+      storeCategoryId: '',
       imageUrl: '',
-      isActive: true
+      isActive: true,
+      depositType: ContainerDepositType.None
     });
+    this.categoryQuery.set('');
     this.openAnimatedModal(this.modalOpen, this.productModalActive, this.productModalClosing);
   }
 
   openInventoryAiModal(): void {
     this.openAnimatedModal(this.inventoryAiModalOpen, this.inventoryAiModalActive, this.inventoryAiModalClosing);
     this.inventoryAiError.set(null);
+  }
+
+  openCategoriesModal(): void {
+    this.categoryForm.reset({ name: '' });
+    this.categoriesModalOpen.set(true);
+  }
+
+  updateCategoryQuery(value: string): void {
+    this.categoryQuery.set(value);
+    this.productForm.controls.storeCategoryId.setValue('');
+    this.categoryPickerOpen.set(true);
+  }
+
+  selectProductCategory(category: StoreCategoryDto): void {
+    this.productForm.controls.storeCategoryId.setValue(category.id);
+    this.productForm.controls.storeCategoryId.markAsDirty();
+    this.categoryQuery.set(category.name);
+    this.categoryPickerOpen.set(false);
+  }
+
+  closeCategoriesModal(): void {
+    this.categoriesModalOpen.set(false);
+  }
+
+  createCategory(): void {
+    if (this.categoryForm.invalid || this.categorySubmitting()) return;
+    this.categorySubmitting.set(true);
+    this.storeAdminApi.createStoreCategory(this.categoryForm.controls.name.value).subscribe({
+      next: (response) => {
+        this.storeCategories.update((categories) => [...categories, response.data].sort((left, right) => left.sortOrder - right.sortOrder || left.name.localeCompare(right.name, 'es')));
+        this.categoryForm.reset({ name: '' });
+        this.categorySubmitting.set(false);
+        this.notifications.success({ summary: `Categoría creada: ${response.data.name}` });
+      },
+      error: (error) => {
+        this.categorySubmitting.set(false);
+        this.notifications.error({ summary: getApiErrorMessage(error, 'No fue posible crear la categoría.') });
+      }
+    });
   }
 
   closeInventoryAiModal(): void {

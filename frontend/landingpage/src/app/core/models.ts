@@ -27,6 +27,12 @@ export enum PromotionType {
   BuyXGetY = 1
 }
 
+export enum ContainerDepositType {
+  None = 0,
+  Carton = 1,
+  Bucket = 2
+}
+
 export interface ProductDto {
   id: string;
   storeId: string;
@@ -35,8 +41,10 @@ export interface ProductDto {
   price: number;
   stock: number;
   category: string;
+  storeCategoryId: string | null;
   imageUrl: string | null;
   isActive: boolean;
+  depositType: ContainerDepositType;
   createdAtUtc: string;
   updatedAtUtc: string;
 }
@@ -112,6 +120,12 @@ export interface PromotionSummaryDto {
 export interface StorefrontContentDto {
   welcomePhrase: string | null;
   banners: BannerDto[];
+  categories: StorefrontCategoryDto[];
+}
+
+export interface StorefrontCategoryDto {
+  id: string;
+  name: string;
 }
 
 export interface OrderItemDto {
@@ -121,6 +135,17 @@ export interface OrderItemDto {
   unitPrice: number;
   quantity: number;
   subtotal: number;
+  emptyContainersToExchange: number;
+}
+
+export interface OrderDepositDto {
+  id: string;
+  productId: string;
+  productNameSnapshot: string;
+  type: ContainerDepositType;
+  quantity: number;
+  unitPrice: number;
+  total: number;
 }
 
 export interface OrderDto {
@@ -136,12 +161,14 @@ export interface OrderDto {
   deliveryUserId: string | null;
   subtotal: number;
   discountTotal: number;
+  depositTotal: number;
   appliedPromotionId: string | null;
   appliedPromotionCode: string | null;
   total: number;
   createdAtUtc: string;
   updatedAtUtc: string;
   items: OrderItemDto[];
+  deposits: OrderDepositDto[];
 }
 
 export interface DeliveryAddressDraft {
@@ -163,6 +190,7 @@ export interface CreateOrderRequest {
   items: Array<{
     productId: string;
     quantity: number;
+    emptyContainersToExchange: number;
   }>;
 }
 

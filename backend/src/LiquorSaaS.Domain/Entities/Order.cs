@@ -7,6 +7,7 @@ namespace LiquorSaaS.Domain.Entities;
 public sealed class Order : AuditableEntity
 {
     private readonly List<OrderItem> _items = [];
+    private readonly List<OrderDeposit> _deposits = [];
 
     private Order()
     {
@@ -23,10 +24,12 @@ public sealed class Order : AuditableEntity
     public Guid? DeliveryUserId { get; private set; }
     public decimal Subtotal { get; private set; }
     public decimal DiscountTotal { get; private set; }
+    public decimal DepositTotal { get; private set; }
     public Guid? AppliedPromotionId { get; private set; }
     public string? AppliedPromotionCode { get; private set; }
     public decimal Total { get; private set; }
     public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
+    public IReadOnlyCollection<OrderDeposit> Deposits => _deposits.AsReadOnly();
 
     public static Order Create(
         Guid storeId,
@@ -37,6 +40,7 @@ public sealed class Order : AuditableEntity
         decimal? deliveryLongitude,
         string? notes,
         IEnumerable<OrderItem> items,
+        IEnumerable<OrderDeposit>? deposits = null,
         decimal discountTotal = 0m,
         string? appliedPromotionCode = null,
         Guid? appliedPromotionId = null)
@@ -95,6 +99,12 @@ public sealed class Order : AuditableEntity
             order._items.Add(item);
         }
 
+        foreach (var deposit in deposits ?? [])
+        {
+            deposit.AttachToOrder(order.Id);
+            order._deposits.Add(deposit);
+        }
+
         order.RecalculatePricing(discountTotal, appliedPromotionCode, appliedPromotionId);
         return order;
     }
@@ -147,10 +157,11 @@ public sealed class Order : AuditableEntity
     public void RecalculatePricing(decimal discountTotal, string? appliedPromotionCode, Guid? appliedPromotionId)
     {
         Subtotal = _items.Sum(item => item.Subtotal);
+        DepositTotal = _deposits.Sum(deposit => deposit.Total);
         DiscountTotal = decimal.Clamp(discountTotal, 0m, Subtotal);
         AppliedPromotionCode = string.IsNullOrWhiteSpace(appliedPromotionCode) ? null : appliedPromotionCode.Trim().ToUpperInvariant();
         AppliedPromotionId = AppliedPromotionCode is null ? null : appliedPromotionId;
-        Total = Subtotal - DiscountTotal;
+        Total = Subtotal + DepositTotal - DiscountTotal;
         Touch();
     }
 

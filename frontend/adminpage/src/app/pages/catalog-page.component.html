@@ -4,12 +4,16 @@
     <h2 class="mt-3 font-display text-3xl font-bold tracking-[-0.05em]">Administra tus productos e inventario</h2>
   </div>
   <div class="catalog-header-actions">
-    <button class="ghost-button catalog-header-action" type="button" (click)="openInventoryAiModal()">
-      <span class="material-symbols-outlined text-base">photo_camera</span>
+    <button class="ghost-button catalog-header-action max-md:!gap-1 max-md:!px-2 max-md:!text-[0.7rem]" type="button" (click)="openCategoriesModal()">
+      <span class="material-symbols-outlined text-base max-md:!text-[0.9rem]">category</span>
+      Categorías
+    </button>
+    <button class="ghost-button catalog-header-action max-md:!gap-1 max-md:!px-2 max-md:!text-[0.7rem]" type="button" (click)="openInventoryAiModal()">
+      <span class="material-symbols-outlined text-base max-md:!text-[0.9rem]">photo_camera</span>
       Inventario IA
     </button>
-    <button class="liquid-button catalog-header-action cursor-pointer" type="button" (click)="openCreateModal()">
-      <span class="material-symbols-outlined text-base">add</span>
+    <button class="liquid-button catalog-header-action cursor-pointer max-md:!gap-1 max-md:!px-2 max-md:!text-[0.7rem]" type="button" (click)="openCreateModal()">
+      <span class="material-symbols-outlined text-base max-md:!text-[0.9rem]">add</span>
       Nuevo producto
     </button>
   </div>
@@ -57,8 +61,8 @@
           (change)="updateSelectedCategory($any($event.target).value)"
         >
           <option value="all">Todas</option>
-          @for (category of categories(); track category) {
-            <option [value]="category">{{ category }}</option>
+          @for (category of categories(); track category.id) {
+            <option [value]="category.name">{{ category.name }}</option>
           }
         </select>
       </label>
@@ -104,7 +108,10 @@
               <div class="mt-5 flex items-center justify-between gap-4">
                 <div>
                   <p class="font-display text-3xl font-bold text-primary">{{ product.price | currency: 'MXN':'symbol-narrow':'1.2-2' }}</p>
-                  <p class="mt-1 text-xs uppercase tracking-[0.24em] text-on-surface-variant">Stock {{ product.stock }}</p>
+                <p class="mt-1 text-xs uppercase tracking-[0.24em] text-on-surface-variant">Stock {{ product.stock }}</p>
+                  @if (product.depositType !== containerDepositType.None) {
+                    <p class="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">{{ depositTypeLabel(product.depositType) }}</p>
+                  }
                 </div>
                 <p class="text-right text-xs uppercase tracking-[0.22em] text-on-surface-variant">
                   Actualizado
@@ -144,6 +151,36 @@
     </div>
   </article>
 </section>
+
+@if (categoriesModalOpen()) {
+  <div class="modal-backdrop" (click)="closeCategoriesModal()">
+    <section class="modal-panel w-full max-w-[38rem]" role="dialog" aria-modal="true" aria-labelledby="categories-modal-title" (click)="$event.stopPropagation()">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <p class="eyebrow">Catálogo</p>
+          <h3 id="categories-modal-title" class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">Categorías</h3>
+          <p class="mt-2 text-sm leading-6 text-on-surface-variant">Estas opciones sólo pertenecen a tu tienda.</p>
+        </div>
+        <button class="ghost-button" type="button" (click)="closeCategoriesModal()"><span class="material-symbols-outlined text-base">close</span>Cerrar</button>
+      </div>
+      <form class="mt-6 grid gap-2" [formGroup]="categoryForm" (ngSubmit)="createCategory()">
+        <label class="field-label" for="new-category-name">Nueva categoría</label>
+        <div class="grid grid-cols-[minmax(0,1fr)_auto] gap-3">
+          <input id="new-category-name" class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary" formControlName="name" placeholder="Ej. Cervezas artesanales" />
+          <button class="liquid-button !justify-center" type="submit" [disabled]="categorySubmitting() || categoryForm.invalid"><span class="material-symbols-outlined text-base">add</span>Agregar</button>
+        </div>
+      </form>
+      <div class="mt-5 grid max-h-72 overflow-y-auto border-t border-white/10" aria-label="Categorías existentes">
+        @for (category of storeCategories(); track category.id) {
+          <div class="flex items-center gap-3 border-b border-white/8 py-3 text-sm font-bold text-white/85" [class.opacity-40]="!category.isActive">
+            <span class="material-symbols-outlined text-[1.05rem] text-primary" aria-hidden="true">category</span><span>{{ category.name }}</span>
+            @if (!category.isActive) { <small class="ml-auto text-[0.68rem] font-bold uppercase text-white/45">Inactiva</small> }
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+}
 
 @if (modalOpen()) {
   <div class="modal-backdrop" (click)="resetForm()">
@@ -188,13 +225,21 @@
 
         <div class="field-block">
           <label class="field-label" for="product-category">Categoría</label>
-          <input
-            id="product-category"
-            class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-white outline-none focus:border-primary"
-            formControlName="category"
-            placeholder="Ej. Tequila, Whisky, Vodka, Ron"
-          />
-          <p class="field-help">Usa la familia comercial del producto para organizar mejor el catálogo.</p>
+          <div class="relative">
+            <input id="product-category" class="w-full rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 pr-11 text-white outline-none focus:border-primary" [value]="categoryQuery()" (input)="updateCategoryQuery($any($event.target).value)" (focus)="categoryPickerOpen.set(true)" placeholder="Busca una categoría" autocomplete="off" />
+            <span class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-primary material-symbols-outlined" aria-hidden="true">search</span>
+            <input type="hidden" formControlName="storeCategoryId" />
+            @if (categoryPickerOpen()) {
+              <div class="absolute z-20 mt-2 grid max-h-52 w-full overflow-y-auto rounded-[1rem] border border-white/10 bg-surface-container-high p-1 shadow-2xl">
+                @for (category of matchingCategories(); track category.id) {
+                  <button class="rounded-[0.75rem] px-3 py-2.5 text-left text-sm font-semibold text-white transition hover:bg-white/8 hover:text-primary" type="button" (click)="selectProductCategory(category)">{{ category.name }}</button>
+                } @empty {
+                  <p class="px-3 py-2.5 text-sm text-on-surface-variant">No hay coincidencias. Agrégala desde Categorías.</p>
+                }
+              </div>
+            }
+          </div>
+          <p class="field-help">Escribe para encontrar una categoría y selecciona la opción correcta.</p>
         </div>
 
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -237,6 +282,31 @@
             placeholder="https://tusitio.com/imagenes/producto.jpg"
           />
           <p class="field-help">Pega el enlace directo de la imagen que quieres mostrar en la tarjeta del producto.</p>
+        </div>
+
+        <div class="field-block">
+          <p class="field-label">Importe por envase</p>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <label class="flex items-center gap-3 rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-sm text-white">
+              <input
+                class="h-4 w-4 accent-primary"
+                type="checkbox"
+                [checked]="hasDepositType(containerDepositType.Carton)"
+                (change)="setDepositType(containerDepositType.Carton, $any($event.target).checked)"
+              />
+              Requiere importe de cartón
+            </label>
+            <label class="flex items-center gap-3 rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-sm text-white">
+              <input
+                class="h-4 w-4 accent-primary"
+                type="checkbox"
+                [checked]="hasDepositType(containerDepositType.Bucket)"
+                (change)="setDepositType(containerDepositType.Bucket, $any($event.target).checked)"
+              />
+              Requiere importe de cubeta
+            </label>
+          </div>
+          <p class="field-help">Selecciona solo un tipo. El cliente podrá intercambiar envases vacíos o se cobrará el importe configurado en la tienda.</p>
         </div>
 
         <label class="flex items-center gap-3 rounded-[1.25rem] border border-white/10 bg-surface-container-high px-4 py-3 text-sm text-white">

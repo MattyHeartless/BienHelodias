@@ -24,6 +24,39 @@ public sealed class OrderDomainTests
     }
 
     [Fact]
+    public void CreateOrder_ShouldAddDepositsWithoutDiscountingThem()
+    {
+        var productId = Guid.NewGuid();
+        var items = new[]
+        {
+            OrderItem.Create(productId, "Agua 20 L", 50.00m, 3, emptyContainersToExchange: 1)
+        };
+        var deposits = new[]
+        {
+            OrderDeposit.Create(productId, "Agua 20 L", ContainerDepositType.Bucket, 2, 40.00m)
+        };
+
+        var order = Order.Create(
+            Guid.NewGuid(),
+            "Cliente",
+            "5555",
+            "Calle 123",
+            null,
+            null,
+            null,
+            items,
+            deposits,
+            discountTotal: 15.00m);
+
+        order.Subtotal.Should().Be(150.00m);
+        order.DepositTotal.Should().Be(80.00m);
+        order.DiscountTotal.Should().Be(15.00m);
+        order.Total.Should().Be(215.00m);
+        order.Deposits.Should().ContainSingle();
+        order.Items.Single().EmptyContainersToExchange.Should().Be(1);
+    }
+
+    [Fact]
     public void UpdateStatus_ShouldAllowOnlyValidTransitions()
     {
         Order.CanTransition(OrderStatus.Pending, OrderStatus.Accepted).Should().BeTrue();

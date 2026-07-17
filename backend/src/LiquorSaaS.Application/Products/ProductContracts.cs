@@ -1,4 +1,5 @@
 using LiquorSaaS.Application.Common;
+using LiquorSaaS.Domain.Enums;
 
 namespace LiquorSaaS.Application.Products;
 
@@ -8,7 +9,9 @@ public sealed record CreateProductRequest(
     decimal Price,
     int Stock,
     string Category,
-    string? ImageUrl);
+    string? ImageUrl,
+    ContainerDepositType DepositType = ContainerDepositType.None,
+    Guid? StoreCategoryId = null);
 
 public sealed record UpdateProductRequest(
     string Name,
@@ -17,7 +20,9 @@ public sealed record UpdateProductRequest(
     int Stock,
     string Category,
     string? ImageUrl,
-    bool IsActive);
+    bool IsActive,
+    ContainerDepositType DepositType = ContainerDepositType.None,
+    Guid? StoreCategoryId = null);
 
 public sealed record UpdateProductStatusRequest(bool IsActive);
 
@@ -29,8 +34,10 @@ public sealed record ProductDto(
     decimal Price,
     int Stock,
     string Category,
+    Guid? StoreCategoryId,
     string? ImageUrl,
     bool IsActive,
+    ContainerDepositType DepositType,
     DateTime CreatedAtUtc,
     DateTime UpdatedAtUtc);
 

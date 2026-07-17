@@ -3,7 +3,7 @@ using LiquorSaaS.Domain.Enums;
 
 namespace LiquorSaaS.Application.Orders;
 
-public sealed record CreateOrderItemRequest(Guid ProductId, int Quantity);
+public sealed record CreateOrderItemRequest(Guid ProductId, int Quantity, int EmptyContainersToExchange = 0);
 
 public sealed record CreateOrderRequest(
     Guid StoreId,
@@ -18,7 +18,9 @@ public sealed record CreateOrderRequest(
 
 public sealed record UpdateOrderStatusRequest(OrderStatus Status);
 
-public sealed record OrderItemDto(Guid Id, Guid ProductId, string ProductNameSnapshot, string? ImageUrl, decimal UnitPrice, int Quantity, decimal Subtotal);
+public sealed record OrderItemDto(Guid Id, Guid ProductId, string ProductNameSnapshot, string? ImageUrl, decimal UnitPrice, int Quantity, decimal Subtotal, int EmptyContainersToExchange);
+
+public sealed record OrderDepositDto(Guid Id, Guid ProductId, string ProductNameSnapshot, ContainerDepositType Type, int Quantity, decimal UnitPrice, decimal Total);
 
 public sealed record OrderDeliveryAssigneeDto(
     Guid Id,
@@ -41,12 +43,14 @@ public sealed record OrderDto(
     Guid? DeliveryUserId,
     decimal Subtotal,
     decimal DiscountTotal,
+    decimal DepositTotal,
     Guid? AppliedPromotionId,
     string? AppliedPromotionCode,
     decimal Total,
     DateTime CreatedAtUtc,
     DateTime UpdatedAtUtc,
     IReadOnlyCollection<OrderItemDto> Items,
+    IReadOnlyCollection<OrderDepositDto> Deposits,
     OrderDeliveryAssigneeDto? DeliveryAssignee = null);
 
 public interface IOrderService

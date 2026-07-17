@@ -48,7 +48,7 @@
             <div class="tracking-section-head">
               <div>
                 <p class="eyebrow">Progreso del pedido</p>
-                <h2 id="tracking-progress-title" class="tracking-section-title">Así va tu entrega</h2>
+                <h2 id="tracking-progress-title" class="tracking-section-title"><span class="material-symbols-outlined" aria-hidden="true">local_shipping</span>Así va tu entrega</h2>
               </div>
               <span class="tracking-section-badge">{{ currentStepIndex() >= 0 ? currentStepIndex() + 1 : 0 }} de {{ steps.length }}</span>
             </div>
@@ -86,7 +86,7 @@
             <div class="tracking-section-head">
               <div>
                 <p class="eyebrow">Entrega</p>
-                <h2 id="tracking-delivery-title" class="tracking-section-title">{{ currentOrder.customerName }}</h2>
+                <h2 id="tracking-delivery-title" class="tracking-section-title"><span class="material-symbols-outlined" aria-hidden="true">location_on</span>{{ currentOrder.customerName }}</h2>
               </div>
             </div>
 
@@ -112,7 +112,7 @@
             <div class="tracking-section-head">
               <div>
                 <p class="eyebrow">Resumen</p>
-                <h2 id="tracking-summary-title" class="tracking-section-title">Tu pedido</h2>
+                <h2 id="tracking-summary-title" class="tracking-section-title"><span class="material-symbols-outlined" aria-hidden="true">receipt_long</span>Tu pedido</h2>
               </div>
               <span class="tracking-summary__count">{{ currentOrder.items.length }} artículos</span>
             </div>
@@ -131,12 +131,32 @@
                     <div>
                       <p class="tracking-item__name">{{ item.productNameSnapshot }}</p>
                       <p class="tracking-item__meta">{{ item.quantity }} piezas</p>
+                      @if (item.emptyContainersToExchange > 0) {
+                        <p class="tracking-item__meta">Intercambio: {{ item.emptyContainersToExchange }} envase{{ item.emptyContainersToExchange === 1 ? '' : 's' }} vacío{{ item.emptyContainersToExchange === 1 ? '' : 's' }}</p>
+                      }
                     </div>
                   </div>
                   <p class="tracking-item__price">{{ item.subtotal | currency: 'MXN':'symbol-narrow':'1.2-2' }}</p>
                 </div>
               }
             </div>
+
+            @if (currentOrder.deposits.length) {
+              <div class="tracking-items">
+                @for (deposit of currentOrder.deposits; track deposit.id) {
+                  <div class="tracking-item">
+                    <div class="tracking-item__content">
+                      <div class="tracking-item__icon"><span class="material-symbols-outlined text-primary">recycling</span></div>
+                      <div>
+                        <p class="tracking-item__name">Importe de {{ deposit.type === 2 ? 'cubeta' : 'cartón' }}</p>
+                        <p class="tracking-item__meta">{{ deposit.quantity }} × {{ deposit.productNameSnapshot }}</p>
+                      </div>
+                    </div>
+                    <p class="tracking-item__price">{{ deposit.total | currency: 'MXN':'symbol-narrow':'1.2-2' }}</p>
+                  </div>
+                }
+              </div>
+            }
 
             @if (currentOrder.appliedPromotionCode || currentOrder.discountTotal > 0) {
               <div class="tracking-promo">
@@ -153,6 +173,12 @@
                 <span>Subtotal</span>
                 <span>{{ currentOrder.subtotal | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span>
               </div>
+              @if (currentOrder.depositTotal > 0) {
+                <div class="tracking-breakdown__line">
+                  <span>Importe de envases</span>
+                  <span>{{ currentOrder.depositTotal | currency: 'MXN':'symbol-narrow':'1.2-2' }}</span>
+                </div>
+              }
               @if (currentOrder.discountTotal > 0) {
                 <div class="tracking-breakdown__line tracking-breakdown__line--discount">
                   <span>Descuento</span>

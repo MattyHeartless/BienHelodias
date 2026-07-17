@@ -67,11 +67,40 @@ public sealed class OrderService(
                 throw new ConflictException($"Not enough stock for product {product.Name}.");
             }
 
-            return OrderItem.Create(product.Id, product.Name, product.Price, itemRequest.Quantity);
+            if (itemRequest.EmptyContainersToExchange < 0 || itemRequest.EmptyContainersToExchange > itemRequest.Quantity)
+            {
+                throw new AppValidationException("Empty containers to exchange must be between zero and the requested quantity.");
+            }
+
+            if (product.DepositType == ContainerDepositType.None && itemRequest.EmptyContainersToExchange != 0)
+            {
+                throw new AppValidationException($"Product {product.Name} does not require a container exchange.");
+            }
+
+            return OrderItem.Create(product.Id, product.Name, product.Price, itemRequest.Quantity, itemRequest.EmptyContainersToExchange);
         }).ToArray();
 
+        var orderDeposits = request.Items.Select(itemRequest =>
+        {
+            var product = products.Single(x => x.Id == itemRequest.ProductId);
+            var depositQuantity = itemRequest.Quantity - itemRequest.EmptyContainersToExchange;
+            if (product.DepositType == ContainerDepositType.None || depositQuantity == 0)
+            {
+                return null;
+            }
+
+            var unitPrice = product.DepositType == ContainerDepositType.Bucket ? store.BucketPrice : store.CartonPrice;
+            if (!unitPrice.HasValue)
+            {
+                throw new ConflictException($"A {product.DepositType} deposit price must be configured before ordering {product.Name}.");
+            }
+
+            return OrderDeposit.Create(product.Id, product.Name, product.DepositType, depositQuantity, unitPrice.Value);
+        }).Where(deposit => deposit is not null).Cast<OrderDeposit>().ToArray();
+
         var subtotal = orderItems.Sum(item => item.Subtotal);
-        if (store.MinimumPurchase is { } minimumPurchase && subtotal < minimumPurchase)
+        var depositTotal = orderDeposits.Sum(deposit => deposit.Total);
+        if (store.MinimumPurchase is { } minimumPurchase && subtotal + depositTotal < minimumPurchase)
         {
             throw new ConflictException($"Minimum purchase is {minimumPurchase:0.00}.");
         }
@@ -91,6 +120,7 @@ public sealed class OrderService(
             request.DeliveryLongitude,
             request.Notes,
             orderItems,
+            orderDeposits,
             promotion?.DiscountTotal ?? 0m,
             promotion?.Code,
             promotion?.PromotionId);
