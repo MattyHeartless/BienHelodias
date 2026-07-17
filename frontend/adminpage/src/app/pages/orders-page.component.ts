@@ -1,5 +1,6 @@
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { ChangeDetectorRef, Component, ElementRef, HostListener, ViewChild, computed, inject, signal } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import gsap from 'gsap';
 import { OrderDto, OrderStatus } from '../core/models';
@@ -21,6 +22,7 @@ export class OrdersPageComponent {
   private readonly router = inject(Router);
   private readonly notifications = inject(NotificationUiService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly sanitizer = inject(DomSanitizer);
 
   @ViewChild('ordersListPanel') private readonly ordersListPanel?: ElementRef<HTMLElement>;
   @ViewChild('ordersDetailPanel') private readonly ordersDetailPanel?: ElementRef<HTMLElement>;
@@ -33,6 +35,7 @@ export class OrdersPageComponent {
   readonly selectedOrder = signal<OrderDto | null>(null);
   readonly mobileDetailVisible = signal(false);
   readonly searchTerm = signal('');
+  readonly orderActionLoading = signal(false);
 
   private mobileTransitionTimeline: gsap.core.Timeline | null = null;
   private searchDebounceHandle: ReturnType<typeof setTimeout> | null = null;
@@ -92,6 +95,57 @@ export class OrdersPageComponent {
         2: 'Ocupado'
       }[availability] ?? 'Sin estado'
     );
+  }
+
+  hasDeliveryCoordinates(order: OrderDto): boolean {
+    return order.deliveryLatitude !== null && order.deliveryLongitude !== null;
+  }
+
+  deliveryMapPreview(order: OrderDto): SafeResourceUrl | null {
+    if (!this.hasDeliveryCoordinates(order)) return null;
+
+    const params = new URLSearchParams({
+      q: `${order.deliveryLatitude},${order.deliveryLongitude}`,
+      z: '16',
+      output: 'embed',
+      hl: 'es'
+    });
+
+    return this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.google.com/maps?${params}`);
+  }
+
+  deliveryMapsUrl(order: OrderDto): string {
+    if (!this.hasDeliveryCoordinates(order)) return '';
+    return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${order.deliveryLatitude},${order.deliveryLongitude}`)}`;
+  }
+
+  canReleaseOrder(order: OrderDto): boolean {
+    return order.deliveryUserId !== null && order.status === OrderStatus.OnTheWay;
+  }
+
+  canCancelOrder(order: OrderDto): boolean {
+    return [OrderStatus.Pending, OrderStatus.Accepted, OrderStatus.Preparing].includes(order.status);
+  }
+
+  releaseOrder(order: OrderDto): void {
+    if (!this.canReleaseOrder(order) || this.orderActionLoading()) return;
+
+    this.orderActionLoading.set(true);
+    this.storeAdminApi.releaseOrder(order.id).subscribe({
+      next: (response) => this.handleOrderActionSuccess(response.data, 'Pedido desasignado.'),
+      error: (error) => this.handleOrderActionError(error, 'No fue posible desasignar el pedido.')
+    });
+  }
+
+  cancelOrder(order: OrderDto): void {
+    if (!this.canCancelOrder(order) || this.orderActionLoading()) return;
+    if (!window.confirm('¿Seguro que deseas cancelar este pedido? Esta acción no se puede deshacer.')) return;
+
+    this.orderActionLoading.set(true);
+    this.storeAdminApi.cancelOrder(order.id).subscribe({
+      next: (response) => this.handleOrderActionSuccess(response.data, 'Pedido cancelado.'),
+      error: (error) => this.handleOrderActionError(error, 'No fue posible cancelar el pedido.')
+    });
   }
 
   orderItemsLabel(order: OrderDto): string {
@@ -301,6 +355,19 @@ export class OrdersPageComponent {
         this.detailLoading.set(false);
       }
     });
+  }
+
+  private handleOrderActionSuccess(order: OrderDto, message: string): void {
+    this.selectedOrder.set(order);
+    this.orders.update((orders) => orders.map((item) => item.id === order.id ? order : item));
+    this.summaryOrders.update((orders) => orders.map((item) => item.id === order.id ? order : item));
+    this.orderActionLoading.set(false);
+    this.notifications.success({ summary: message });
+  }
+
+  private handleOrderActionError(error: unknown, fallbackMessage: string): void {
+    this.orderActionLoading.set(false);
+    this.notifications.error({ summary: getApiErrorMessage(error, fallbackMessage) });
   }
 
   private openMobileDetail(): void {

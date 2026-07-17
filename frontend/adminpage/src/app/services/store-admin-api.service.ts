@@ -157,6 +157,14 @@ export class StoreAdminApiService {
     return this.http.get<ApiResponse<OrderDto>>(`${this.ordersUrl}/${orderId}`);
   }
 
+  releaseOrder(orderId: string): Observable<ApiResponse<OrderDto>> {
+    return this.http.post<ApiResponse<OrderDto>>(`${this.ordersUrl}/${orderId}/release`, {});
+  }
+
+  cancelOrder(orderId: string): Observable<ApiResponse<OrderDto>> {
+    return this.http.patch<ApiResponse<OrderDto>>(`${this.ordersUrl}/${orderId}/status`, { status: 6 });
+  }
+
   getMyStore(): Observable<ApiResponse<StoreDto>> {
     return this.http.get<ApiResponse<StoreDto>>(`${this.storesUrl}/${this.requireStoreId()}`);
   }

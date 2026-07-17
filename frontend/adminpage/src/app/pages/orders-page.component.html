@@ -36,7 +36,7 @@
 
     <div class="orders-search">
       <app-animated-search-input
-        placeholder="Busca por cliente, telefono, direccion o producto"
+        placeholder="Busca por cliente, teléfono, dirección o producto"
         ariaLabel="Buscar pedidos"
         [value]="searchTerm()"
         (valueChange)="updateSearchTerm($event)"
@@ -83,8 +83,24 @@
       Volver
     </button>
 
-    <p class="eyebrow">Detalle</p>
-    <h3 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">Información del pedido</h3>
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <p class="eyebrow">Detalle</p>
+        <h3 class="mt-3 font-display text-2xl font-bold tracking-[-0.05em]">Información del pedido</h3>
+      </div>
+      @if (selectedOrder(); as order) {
+        <div class="orders-detail-actions">
+          <button class="ghost-button orders-detail-action" type="button" [disabled]="!canReleaseOrder(order) || orderActionLoading()" (click)="releaseOrder(order)" title="Desasignar repartidor">
+            <span class="material-symbols-outlined text-base">person_remove</span>
+            Desasignar
+          </button>
+          <button class="orders-detail-action orders-detail-action--danger" type="button" [disabled]="!canCancelOrder(order) || orderActionLoading()" (click)="cancelOrder(order)" title="Cancelar pedido">
+            <span class="material-symbols-outlined text-base">cancel</span>
+            Cancelar
+          </button>
+        </div>
+      }
+    </div>
 
     @if (detailLoading()) {
       <div class="mt-6 h-80 animate-pulse rounded-[1.5rem] bg-white/4"></div>
@@ -107,6 +123,21 @@
           <div class="rounded-[1.5rem] bg-white/4 p-5">
             <p class="text-xs uppercase tracking-[0.24em] text-on-surface-variant">Entrega</p>
             <p class="mt-3 text-sm leading-7 text-white">{{ order.deliveryAddress }}</p>
+            @if (hasDeliveryCoordinates(order)) {
+              <div class="orders-delivery-map" aria-label="Vista previa de la ubicación de entrega">
+                <iframe
+                  [src]="deliveryMapPreview(order)"
+                  title="Vista previa del punto de entrega"
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"
+                  tabindex="-1"
+                ></iframe>
+              </div>
+              <a class="ghost-button orders-delivery-map-action" [href]="deliveryMapsUrl(order)" target="_blank" rel="noopener noreferrer">
+                <span class="material-symbols-outlined text-base">open_in_new</span>
+                Abrir en Google Maps
+              </a>
+            }
             @if (order.notes) {
               <p class="mt-4 text-sm leading-7 text-on-surface-variant">Notas: {{ order.notes }}</p>
             }
@@ -144,7 +175,7 @@
 
           <div class="rounded-[1.5rem] bg-white/4 p-5">
             <div class="flex items-center justify-between gap-4">
-              <p class="text-xs uppercase tracking-[0.24em] text-on-surface-variant">Items</p>
+              <p class="text-xs uppercase tracking-[0.24em] text-on-surface-variant">Productos</p>
               <p class="font-display text-2xl font-bold text-primary">{{ order.total | currency: 'MXN':'symbol-narrow':'1.2-2' }}</p>
             </div>
 
@@ -216,7 +247,7 @@
           </div>
 
           <div class="rounded-[1.5rem] bg-white/4 p-5">
-            <p class="text-xs uppercase tracking-[0.24em] text-on-surface-variant">Timeline</p>
+            <p class="text-xs uppercase tracking-[0.24em] text-on-surface-variant">Seguimiento</p>
             <div class="mt-5 space-y-5">
               @for (step of orderTimeline(order); track step.label) {
                 <div class="timeline-step" [class.timeline-step-last]="$last">

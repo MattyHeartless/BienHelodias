@@ -31,6 +31,7 @@ export class CatalogPageComponent {
   private bannerPointerStartX: number | null = null;
   private bannerPointerStartY: number | null = null;
   private storeFinderNavigationHandle: ReturnType<typeof window.setTimeout> | null = null;
+  private categoryScrollHandle: ReturnType<typeof window.setTimeout> | null = null;
   private readonly quickAddFeedbackTimeouts = new Map<string, ReturnType<typeof window.setTimeout>>();
 
   readonly tenant = computed(() => this.storefrontTenant.store());
@@ -51,6 +52,7 @@ export class CatalogPageComponent {
   readonly storeInfoModalActive = signal(false);
   readonly storeInfoModalClosing = signal(false);
   readonly isStoreFabHidden = signal(false);
+  readonly isSearchFocused = signal(false);
   readonly isStoreFinderLaunching = signal(false);
   readonly activeCategory = signal<string>('all');
   readonly searchQuery = signal('');
@@ -207,6 +209,7 @@ export class CatalogPageComponent {
   selectCategory(categoryId: string): void {
     this.activeCategory.set(categoryId);
     this.closeDetail();
+    this.scrollToCatalogStart();
   }
 
   updateSearch(query: string): void {
@@ -297,8 +300,27 @@ export class CatalogPageComponent {
     if (this.storeFinderNavigationHandle !== null) {
       window.clearTimeout(this.storeFinderNavigationHandle);
     }
+    if (this.categoryScrollHandle !== null) {
+      window.clearTimeout(this.categoryScrollHandle);
+    }
     this.quickAddFeedbackTimeouts.forEach((handle) => window.clearTimeout(handle));
     this.quickAddFeedbackTimeouts.clear();
+  }
+
+  private scrollToCatalogStart(): void {
+    if (this.categoryScrollHandle !== null) {
+      window.clearTimeout(this.categoryScrollHandle);
+    }
+
+    this.categoryScrollHandle = window.setTimeout(() => {
+      const catalog = document.getElementById('catalog-products');
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (catalog) {
+        const top = Math.max(0, window.scrollY + catalog.getBoundingClientRect().top - window.innerHeight * 0.2);
+        window.scrollTo({ top, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+      }
+      this.categoryScrollHandle = null;
+    });
   }
 
   quickBuy(product: ProductDto): void {

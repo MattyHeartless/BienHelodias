@@ -88,24 +88,27 @@
 
         <label class="search-shell">
           <span class="material-symbols-outlined text-[1.15rem] text-on-surface-variant">search</span>
+          <span class="search-placeholder t-shimmer" data-text="Busca tus bien helodías..." [class.search-placeholder--hidden]="searchQuery()" aria-hidden="true">Busca tus bien helodías...</span>
           <input
             #searchInput
             type="text"
             class="search-input"
             [value]="searchQuery()"
             (input)="updateSearch(searchInput.value)"
-            placeholder="Buscar bebida fresca"
+            (focus)="isSearchFocused.set(true)"
+            (blur)="isSearchFocused.set(false)"
+            placeholder="Busca tus bien helodías..."
           />
         </label>
 
-        <div class="category-tabs">
+        <nav class="category-tabs" aria-label="Filtrar el catálogo por categoría">
           <button
             type="button"
             class="category-tab"
             [class.category-tab--active]="activeCategory() === 'all'"
             (click)="selectCategory('all')"
           >
-            New Fresh
+            Todo
           </button>
           @for (category of categories(); track category.id) {
             <button
@@ -117,7 +120,7 @@
               {{ category.name }}
             </button>
           }
-        </div>
+        </nav>
 
         @if (loading()) {
           <div class="product-grid">
@@ -126,7 +129,7 @@
             }
           </div>
         } @else {
-          <div class="product-grid">
+          <div id="catalog-products" class="product-grid">
             @for (product of filteredProducts(); track product.id; let index = $index) {
               <article
                 class="product-tile"
@@ -218,7 +221,7 @@
 
   <button
     class="store-fab"
-    [class.store-fab--hidden]="isStoreFabHidden()"
+    [class.store-fab--hidden]="isStoreFabHidden() || isSearchFocused()"
     type="button"
     (click)="openStoreInfoModal()"
     aria-label="Ver informacion de la tienda"
