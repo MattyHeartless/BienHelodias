@@ -1209,6 +1209,59 @@
   background: rgb(255 255 255 / 0.05);
 }
 
+.catalog-load-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  width: 100%;
+  min-height: 3.25rem;
+  margin-top: 0.35rem;
+  color: rgb(255 255 255 / 0.62);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.catalog-load-more--complete {
+  color: transparent;
+  --shimmer-base: rgb(255 255 255 / 0.44);
+  --shimmer-highlight: var(--color-primary);
+}
+
+.catalog-load-more--complete.t-shimmer::before {
+  text-align: center;
+  background-image: linear-gradient(
+    90deg,
+    var(--shimmer-base) 0%,
+    var(--shimmer-base) 40%,
+    var(--shimmer-highlight) 50%,
+    var(--shimmer-base) 60%,
+    var(--shimmer-base) 100%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catalog-load-more--complete { color: var(--shimmer-base); }
+  .catalog-load-more--complete.t-shimmer::before { display: none; }
+}
+
+.catalog-load-more--error {
+  flex-wrap: wrap;
+  border: 1px solid rgb(255 92 92 / 0.48);
+  border-radius: 0.9rem;
+  background: rgb(255 92 92 / 0.1);
+  color: #ffb4b4;
+  cursor: pointer;
+}
+
+.catalog-load-more--error span:last-child {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 0.18rem;
+}
+
+
 @keyframes quick-add-button-pop {
   0% { transform: scale(1); box-shadow: 0 0 0 0 rgb(210 253 110 / 0); }
   24% { transform: scale(1.12); box-shadow: 0 0 0 0.45rem rgb(210 253 110 / 0.18); }

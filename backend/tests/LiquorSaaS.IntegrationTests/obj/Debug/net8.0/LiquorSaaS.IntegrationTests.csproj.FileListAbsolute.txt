@@ -2725,3 +2725,4 @@ C:/Users/Dev/My Web Sites/BienHelodias/backend/artifacts/verification/Debug/net8
 C:/Users/Dev/My Web Sites/BienHelodias/backend/artifacts/verification/Debug/net8.0/refs/System.Xml.XPath.dll
 C:/Users/Dev/My Web Sites/BienHelodias/backend/artifacts/verification/Debug/net8.0/refs/System.Xml.XPath.XDocument.dll
 C:/Users/Dev/My Web Sites/BienHelodias/backend/artifacts/verification/Debug/net8.0/refs/WindowsBase.dll
+/Users/jaiman/Documents/My Web Sites/BienHelodias/backend/tests/LiquorSaaS.IntegrationTests/bin/Debug/net8.0/LiquorSaaS.Api.staticwebassets.endpoints.json

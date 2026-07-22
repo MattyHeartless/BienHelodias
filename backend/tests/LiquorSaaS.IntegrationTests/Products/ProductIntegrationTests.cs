@@ -45,4 +45,17 @@ public sealed class ProductIntegrationTests(TestWebApplicationFactory factory) :
         var payload = await productsResponse.Content.ReadFromJsonAsync<ApiResponse<PagedResult<ProductDto>>>();
         payload!.Data!.Items.Should().OnlyContain(x => x.StoreId != secondStoreId);
     }
+
+    [Fact]
+    public async Task PublicCatalog_ShouldSearchAcrossTheStoreCatalog()
+    {
+        var client = factory.CreateStoreClient();
+
+        var response = await client.GetAsync("/api/products/catalog?page=1&pageSize=20&search=Botanico");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await response.Content.ReadFromJsonAsync<ApiResponse<PagedResult<ProductDto>>>();
+        payload!.Data!.Total.Should().BeGreaterThan(0);
+        payload.Data.Items.Should().OnlyContain(product => product.Name.Contains("Botanico", StringComparison.OrdinalIgnoreCase));
+    }
 }

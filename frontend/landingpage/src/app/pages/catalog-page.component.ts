@@ -20,6 +20,8 @@ import { catchError, forkJoin, of } from 'rxjs';
 export class CatalogPageComponent {
   private static readonly BANNER_SWIPE_THRESHOLD = 45;
   private static readonly SKELETON_DELAY_MS = 240;
+  private static readonly CATALOG_PAGE_SIZE = 20;
+  private static readonly SEARCH_DEBOUNCE_MS = 280;
   private readonly productsApi = inject(ProductsApiService);
   private readonly storefrontContentApi = inject(StorefrontContentApiService);
   private readonly cartSession = inject(CartSessionService);
@@ -34,12 +36,20 @@ export class CatalogPageComponent {
   private storeFinderNavigationHandle: ReturnType<typeof window.setTimeout> | null = null;
   private categoryScrollHandle: ReturnType<typeof window.setTimeout> | null = null;
   private loadingSkeletonHandle: ReturnType<typeof window.setTimeout> | null = null;
+  private searchDebounceHandle: ReturnType<typeof window.setTimeout> | null = null;
+  private catalogObserverHandle: ReturnType<typeof window.setTimeout> | null = null;
+  private catalogLoadObserver: IntersectionObserver | null = null;
+  private catalogRequestId = 0;
   private readonly quickAddFeedbackTimeouts = new Map<string, ReturnType<typeof window.setTimeout>>();
 
   readonly tenant = computed(() => this.storefrontTenant.store());
   readonly storeAvailability = computed(() => this.storeAvailabilityService.getAvailability(this.tenant()));
   readonly loading = signal(true);
   readonly loadingSkeletonVisible = signal(false);
+  readonly loadingMore = signal(false);
+  readonly catalogLoadError = signal<string | null>(null);
+  readonly catalogPage = signal(0);
+  readonly catalogTotal = signal(0);
   readonly error = signal<string | null>(null);
   readonly products = signal<ProductDto[]>([]);
   readonly storeCategories = signal<StorefrontCategoryDto[]>([]);
@@ -68,13 +78,11 @@ export class CatalogPageComponent {
   readonly cartCount = computed(() => this.cartSession.cartCount());
   readonly quickAddFeedback = signal<Record<string, boolean>>({});
   readonly detailQuantity = signal(1);
+  readonly hasMorePages = computed(() => this.products().length < this.catalogTotal());
 
   readonly categories = computed(() => {
-    const productCategoryIds = new Set(this.products().map((product) => product.storeCategoryId).filter(Boolean));
-    const configuredCategories = this.storeCategories().filter((category) => productCategoryIds.has(category.id));
-
-    if (configuredCategories.length > 0) {
-      return configuredCategories;
+    if (this.storeCategories().length > 0) {
+      return this.storeCategories();
     }
 
     return Array.from(new Set(this.products().map((product) => product.category).filter(Boolean)))
@@ -186,12 +194,15 @@ export class CatalogPageComponent {
     this.error.set(null);
 
     forkJoin({
-      catalog: this.productsApi.getCatalog(),
+      catalog: this.productsApi.getCatalog(1, CatalogPageComponent.CATALOG_PAGE_SIZE),
       storefront: this.storefrontContentApi.getContent().pipe(catchError(() => of(null)))
     }).subscribe({
       next: (response) => {
         const activeProducts = response.catalog.data.items.filter((product) => product.isActive);
         this.products.set(activeProducts);
+        this.catalogPage.set(response.catalog.data.page);
+        this.catalogTotal.set(response.catalog.data.total);
+        this.catalogLoadError.set(null);
         this.highlightedProductId.set(activeProducts[0]?.id ?? null);
         this.welcomePhrase.set(response.storefront?.data.welcomePhrase?.trim() || 'No te compliques, aqui te lo mandamos.');
         this.banners.set(response.storefront?.data.banners ?? []);
@@ -201,6 +212,7 @@ export class CatalogPageComponent {
         this.detailQuantity.set(1);
         this.detailOpen.set(false);
         this.finishLoading();
+        this.scheduleCatalogLoadObserver();
       },
       error: (error) => {
         this.error.set(getApiErrorMessage(error, 'No fue posible cargar el catalogo.'));
@@ -210,13 +222,46 @@ export class CatalogPageComponent {
   }
 
   selectCategory(categoryId: string): void {
+    if (this.activeCategory() === categoryId) {
+      return;
+    }
+
     this.activeCategory.set(categoryId);
     this.closeDetail();
     this.scrollToCatalogStart();
+    this.resetCatalog();
   }
 
   updateSearch(query: string): void {
     this.searchQuery.set(query);
+
+    if (this.searchDebounceHandle !== null) {
+      window.clearTimeout(this.searchDebounceHandle);
+    }
+
+    this.searchDebounceHandle = window.setTimeout(() => {
+      this.searchDebounceHandle = null;
+      this.closeDetail();
+      this.scrollToCatalogStart();
+      this.resetCatalog();
+    }, CatalogPageComponent.SEARCH_DEBOUNCE_MS);
+  }
+
+  loadNextCatalogPage(): void {
+    if (this.loading() || this.loadingMore() || !this.hasMorePages()) {
+      return;
+    }
+
+    this.loadCatalogPage(this.catalogPage() + 1, false);
+  }
+
+  retryCatalogLoad(): void {
+    if (this.catalogPage() === 0) {
+      this.resetCatalog();
+      return;
+    }
+
+    this.loadCatalogPage(this.catalogPage() + 1, false);
   }
 
   selectProduct(productId: string): void {
@@ -309,6 +354,13 @@ export class CatalogPageComponent {
     if (this.loadingSkeletonHandle !== null) {
       window.clearTimeout(this.loadingSkeletonHandle);
     }
+    if (this.searchDebounceHandle !== null) {
+      window.clearTimeout(this.searchDebounceHandle);
+    }
+    if (this.catalogObserverHandle !== null) {
+      window.clearTimeout(this.catalogObserverHandle);
+    }
+    this.catalogLoadObserver?.disconnect();
     this.quickAddFeedbackTimeouts.forEach((handle) => window.clearTimeout(handle));
     this.quickAddFeedbackTimeouts.clear();
   }
@@ -326,6 +378,98 @@ export class CatalogPageComponent {
         window.scrollTo({ top, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
       }
       this.categoryScrollHandle = null;
+    });
+  }
+
+  private resetCatalog(): void {
+    this.catalogRequestId++;
+    this.catalogLoadObserver?.disconnect();
+    this.catalogLoadError.set(null);
+    this.catalogPage.set(0);
+    this.catalogTotal.set(0);
+    this.loadCatalogPage(1, true);
+  }
+
+  private loadCatalogPage(page: number, replace: boolean): void {
+    if (replace) {
+      this.beginLoading();
+      this.products.set([]);
+      this.highlightedProductId.set(null);
+    } else {
+      this.loadingMore.set(true);
+    }
+
+    const requestId = ++this.catalogRequestId;
+    const categoryId = this.activeCategory() === 'all' ? undefined : this.activeCategory();
+    const search = this.searchQuery();
+
+    this.productsApi.getCatalog(page, CatalogPageComponent.CATALOG_PAGE_SIZE, search, categoryId).subscribe({
+      next: (response) => {
+        if (requestId !== this.catalogRequestId) {
+          return;
+        }
+
+        const receivedProducts = response.data.items.filter((product) => product.isActive);
+        const nextProducts = replace
+          ? receivedProducts
+          : [...this.products(), ...receivedProducts.filter((product) => !this.products().some((current) => current.id === product.id))];
+
+        this.products.set(nextProducts);
+        this.catalogPage.set(response.data.page);
+        this.catalogTotal.set(response.data.total);
+        this.catalogLoadError.set(null);
+        if (replace) {
+          this.highlightedProductId.set(nextProducts[0]?.id ?? null);
+        }
+      },
+      error: (error) => {
+        if (requestId !== this.catalogRequestId) {
+          return;
+        }
+
+        this.catalogLoadError.set(getApiErrorMessage(error, 'No fue posible cargar más productos.'));
+        this.loadingMore.set(false);
+        if (replace) {
+          this.finishLoading();
+        }
+      },
+      complete: () => {
+        if (requestId !== this.catalogRequestId) {
+          return;
+        }
+
+        this.loadingMore.set(false);
+        if (replace) {
+          this.finishLoading();
+        }
+        this.scheduleCatalogLoadObserver();
+      }
+    });
+  }
+
+  private scheduleCatalogLoadObserver(): void {
+    if (this.catalogObserverHandle !== null) {
+      window.clearTimeout(this.catalogObserverHandle);
+    }
+
+    this.catalogObserverHandle = window.setTimeout(() => {
+      this.catalogObserverHandle = null;
+      this.catalogLoadObserver?.disconnect();
+
+      const trigger = document.getElementById('catalog-load-trigger');
+      if (!trigger || !this.hasMorePages() || !('IntersectionObserver' in window)) {
+        return;
+      }
+
+      this.catalogLoadObserver = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) {
+            this.loadNextCatalogPage();
+          }
+        },
+        { rootMargin: '360px 0px' }
+      );
+      this.catalogLoadObserver.observe(trigger);
     });
   }
 

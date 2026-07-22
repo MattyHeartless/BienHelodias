@@ -48,6 +48,10 @@ public interface IProductService
     Task DeleteAsync(Guid id, CancellationToken cancellationToken);
     Task<ProductDto> GetByIdAsync(Guid id, CancellationToken cancellationToken);
     Task<PagedResult<ProductDto>> GetStoreProductsAsync(PaginationRequest request, CancellationToken cancellationToken);
-    Task<PagedResult<ProductDto>> GetPublicCatalogAsync(PaginationRequest request, CancellationToken cancellationToken);
+    Task<PagedResult<ProductDto>> GetPublicCatalogAsync(
+        PaginationRequest request,
+        string? search,
+        Guid? categoryId,
+        CancellationToken cancellationToken);
     Task<ProductDto> UpdateStatusAsync(Guid id, UpdateProductStatusRequest request, CancellationToken cancellationToken);
 }

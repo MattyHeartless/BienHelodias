@@ -19,9 +19,18 @@ public sealed class ProductsController(IProductService productService) : Control
 
     [AllowAnonymous]
     [HttpGet("catalog")]
-    public async Task<ActionResult<ApiResponse<PagedResult<ProductDto>>>> GetPublicCatalog([FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken cancellationToken = default)
+    public async Task<ActionResult<ApiResponse<PagedResult<ProductDto>>>> GetPublicCatalog(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] string? search = null,
+        [FromQuery] Guid? categoryId = null,
+        CancellationToken cancellationToken = default)
     {
-        var result = await productService.GetPublicCatalogAsync(new PaginationRequest { Page = page, PageSize = pageSize }, cancellationToken);
+        var result = await productService.GetPublicCatalogAsync(
+            new PaginationRequest { Page = page, PageSize = pageSize },
+            search,
+            categoryId,
+            cancellationToken);
         return Ok(ApiResponse<PagedResult<ProductDto>>.Ok(result, "Catalog retrieved successfully."));
     }
 

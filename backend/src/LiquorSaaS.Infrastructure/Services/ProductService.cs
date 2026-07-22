@@ -101,13 +101,34 @@ public sealed class ProductService(
             .ToPagedResultAsync(request, cancellationToken);
     }
 
-    public async Task<PagedResult<ProductDto>> GetPublicCatalogAsync(PaginationRequest request, CancellationToken cancellationToken)
+    public async Task<PagedResult<ProductDto>> GetPublicCatalogAsync(
+        PaginationRequest request,
+        string? search,
+        Guid? categoryId,
+        CancellationToken cancellationToken)
     {
         var storeId = tenantProvider.GetRequiredStoreId();
+        var normalizedSearch = search?.Trim();
+        var query = dbContext.Products.AsNoTracking()
+            .Where(x => x.StoreId == storeId && x.IsActive);
 
-        return await dbContext.Products.AsNoTracking()
-            .Where(x => x.StoreId == storeId && x.IsActive)
+        if (categoryId.HasValue)
+        {
+            query = query.Where(x => x.StoreCategoryId == categoryId.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(normalizedSearch))
+        {
+            var pattern = $"%{normalizedSearch}%";
+            query = query.Where(x =>
+                EF.Functions.Like(x.Name, pattern) ||
+                EF.Functions.Like(x.Description, pattern) ||
+                EF.Functions.Like(x.Category, pattern));
+        }
+
+        return await query
             .OrderBy(x => x.Name)
+            .ThenBy(x => x.Id)
             .Select(x => x.ToDto())
             .ToPagedResultAsync(request, cancellationToken);
     }
