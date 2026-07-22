@@ -42,6 +42,7 @@ public static class DependencyInjection
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.Configure<OpenAiInventoryOptions>(configuration.GetSection(OpenAiInventoryOptions.SectionName));
         services.Configure<PushNotificationOptions>(configuration.GetSection(PushNotificationOptions.SectionName));
+        services.Configure<GoogleMapsOptions>(configuration.GetSection(GoogleMapsOptions.SectionName));
         services.AddSingleton(TimeProvider.System);
         services.AddScoped<BcryptPasswordHasher>();
         services.AddScoped<IPasswordHasher>(sp => sp.GetRequiredService<BcryptPasswordHasher>());
@@ -59,6 +60,11 @@ public static class DependencyInjection
         services.AddScoped<IDeliveryService, DeliveryService>();
         services.AddScoped<IAdminService, AdminService>();
         services.AddHttpClient<IInventoryAiService, InventoryAiService>();
+        services.AddHttpClient<IRouteDurationService, GoogleRoutesService>(client =>
+        {
+            client.BaseAddress = new Uri("https://routes.googleapis.com/");
+            client.Timeout = TimeSpan.FromSeconds(5);
+        });
         services.AddScoped<IPushSubscriptionService, PushSubscriptionService>();
         services.AddScoped<IPushNotificationService, PushNotificationService>();
 

@@ -49,6 +49,11 @@ public sealed record OrderDto(
     decimal Total,
     DateTime CreatedAtUtc,
     DateTime UpdatedAtUtc,
+    int? EstimatedTravelMinutes,
+    int? EstimatedPreparationMinutes,
+    DateTime? EstimateCalculatedAtUtc,
+    DateTime? EstimatedDeliveryAtUtc,
+    bool IsDeliveryEstimateFallback,
     IReadOnlyCollection<OrderItemDto> Items,
     IReadOnlyCollection<OrderDepositDto> Deposits,
     OrderDeliveryAssigneeDto? DeliveryAssignee = null);

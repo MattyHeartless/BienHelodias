@@ -33,6 +33,26 @@ export class OrderTrackingPageComponent implements OnDestroy {
     const orderId = this.order()?.id ?? '';
     return orderId ? `#${orderId.slice(-5)}` : '';
   });
+  readonly estimatedDeliveryLabel = computed(() => {
+    const estimatedDeliveryAtUtc = this.order()?.estimatedDeliveryAtUtc;
+    if (!estimatedDeliveryAtUtc) {
+      return null;
+    }
+
+    const estimatedDelivery = new Date(estimatedDeliveryAtUtc);
+    if (Number.isNaN(estimatedDelivery.getTime())) {
+      return null;
+    }
+
+    const timeFormatter = new Intl.DateTimeFormat('es-MX', {
+      timeZone: 'America/Mexico_City',
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+
+    const latestDelivery = new Date(estimatedDelivery.getTime() + 7 * 60 * 1000);
+    return `${timeFormatter.format(estimatedDelivery)} - ${timeFormatter.format(latestDelivery)}`;
+  });
   readonly activeSlug = signal<string | null>(null);
   readonly activeOrderId = signal<string | null>(null);
   readonly steps = [

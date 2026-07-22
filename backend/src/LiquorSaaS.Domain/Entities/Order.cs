@@ -28,6 +28,11 @@ public sealed class Order : AuditableEntity
     public Guid? AppliedPromotionId { get; private set; }
     public string? AppliedPromotionCode { get; private set; }
     public decimal Total { get; private set; }
+    public int? EstimatedTravelMinutes { get; private set; }
+    public int? EstimatedPreparationMinutes { get; private set; }
+    public DateTime? EstimateCalculatedAtUtc { get; private set; }
+    public DateTime? EstimatedDeliveryAtUtc { get; private set; }
+    public bool IsDeliveryEstimateFallback { get; private set; }
     public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
     public IReadOnlyCollection<OrderDeposit> Deposits => _deposits.AsReadOnly();
 
@@ -162,6 +167,21 @@ public sealed class Order : AuditableEntity
         AppliedPromotionCode = string.IsNullOrWhiteSpace(appliedPromotionCode) ? null : appliedPromotionCode.Trim().ToUpperInvariant();
         AppliedPromotionId = AppliedPromotionCode is null ? null : appliedPromotionId;
         Total = Subtotal + DepositTotal - DiscountTotal;
+        Touch();
+    }
+
+    public void SetDeliveryEstimate(int travelMinutes, int preparationMinutes, DateTime calculatedAtUtc, bool isFallback)
+    {
+        if (travelMinutes < 0 || preparationMinutes < 0)
+        {
+            throw new DomainRuleException("Delivery estimate minutes cannot be negative.");
+        }
+
+        EstimatedTravelMinutes = travelMinutes;
+        EstimatedPreparationMinutes = preparationMinutes;
+        EstimateCalculatedAtUtc = DateTime.SpecifyKind(calculatedAtUtc, DateTimeKind.Utc);
+        EstimatedDeliveryAtUtc = EstimateCalculatedAtUtc.Value.AddMinutes(travelMinutes + preparationMinutes);
+        IsDeliveryEstimateFallback = isFallback;
         Touch();
     }
 

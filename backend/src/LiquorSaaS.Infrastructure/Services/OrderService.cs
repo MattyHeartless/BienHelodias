@@ -21,10 +21,13 @@ public sealed class OrderService(
     ICurrentUserService currentUserService,
     IPromotionService promotionService,
     IPushNotificationService pushNotificationService,
+    IRouteDurationService routeDurationService,
+    Microsoft.Extensions.Options.IOptions<GoogleMapsOptions> googleMapsOptions,
     TimeProvider timeProvider,
     ILogger<OrderService> logger) : IOrderService
 {
     private const string StoreTimeZoneId = "America/Mexico_City";
+    private readonly GoogleMapsOptions deliveryEstimateOptions = googleMapsOptions.Value;
 
     public async Task<OrderDto> CreateAsync(CreateOrderRequest request, CancellationToken cancellationToken)
     {
@@ -125,6 +128,8 @@ public sealed class OrderService(
             promotion?.Code,
             promotion?.PromotionId);
 
+        await SetDeliveryEstimateAsync(order, store, request, cancellationToken);
+
         await dbContext.Orders.AddAsync(order, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
@@ -140,6 +145,40 @@ public sealed class OrderService(
         }
 
         return order.ToDto();
+    }
+
+    private async Task SetDeliveryEstimateAsync(Order order, Store store, CreateOrderRequest request, CancellationToken cancellationToken)
+    {
+        var travelMinutes = Math.Max(0, deliveryEstimateOptions.FallbackTravelMinutes);
+        var preparationMinutes = Math.Max(0, deliveryEstimateOptions.PreparationMinutes);
+        var isFallback = true;
+
+        if (store.Latitude.HasValue && store.Longitude.HasValue
+            && request.DeliveryLatitude.HasValue && request.DeliveryLongitude.HasValue)
+        {
+            RouteDuration? route = null;
+            try
+            {
+                route = await routeDurationService.GetDrivingDurationAsync(
+                    store.Latitude.Value,
+                    store.Longitude.Value,
+                    request.DeliveryLatitude.Value,
+                    request.DeliveryLongitude.Value,
+                    cancellationToken);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
+            {
+                logger.LogWarning(ex, "Delivery route calculation failed; using the delivery estimate fallback.");
+            }
+
+            if (route is not null)
+            {
+                travelMinutes = route.TravelMinutes;
+                isFallback = false;
+            }
+        }
+
+        order.SetDeliveryEstimate(travelMinutes, preparationMinutes, timeProvider.GetUtcNow().UtcDateTime, isFallback);
     }
 
     public async Task<OrderDto> GetByIdAsync(Guid id, CancellationToken cancellationToken)

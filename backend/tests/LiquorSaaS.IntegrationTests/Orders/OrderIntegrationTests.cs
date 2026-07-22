@@ -45,6 +45,44 @@ public sealed class OrderIntegrationTests(TestWebApplicationFactory factory) : I
     }
 
     [Fact]
+    public async Task CreateOrder_ShouldPersistRouteBasedDeliveryEstimate()
+    {
+        try
+        {
+            factory.SetUtcNow(new DateTimeOffset(2026, 7, 15, 18, 0, 0, TimeSpan.Zero));
+            await UpdateSeedStoreAsync(latitude: 20.659699m, longitude: -103.349609m);
+            var client = factory.CreateStoreClient();
+
+            var response = await client.PostAsJsonAsync("/api/orders", CreateOrderRequestForGin());
+
+            response.StatusCode.Should().Be(HttpStatusCode.Created);
+            var payload = await response.Content.ReadFromJsonAsync<ApiResponse<OrderDto>>();
+            payload!.Data!.EstimatedTravelMinutes.Should().Be(17);
+            payload.Data.EstimatedPreparationMinutes.Should().Be(10);
+            payload.Data.EstimatedDeliveryAtUtc.Should().Be(new DateTime(2026, 7, 15, 18, 27, 0, DateTimeKind.Utc));
+            payload.Data.IsDeliveryEstimateFallback.Should().BeFalse();
+        }
+        finally
+        {
+            await UpdateSeedStoreAsync();
+        }
+    }
+
+    [Fact]
+    public async Task CreateOrder_ShouldUseFallbackEstimateWhenStoreCoordinatesAreMissing()
+    {
+        var client = factory.CreateStoreClient();
+
+        var response = await client.PostAsJsonAsync("/api/orders", CreateOrderRequestForGin());
+
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        var payload = await response.Content.ReadFromJsonAsync<ApiResponse<OrderDto>>();
+        payload!.Data!.EstimatedTravelMinutes.Should().Be(20);
+        payload.Data.EstimatedPreparationMinutes.Should().Be(10);
+        payload.Data.IsDeliveryEstimateFallback.Should().BeTrue();
+    }
+
+    [Fact]
     public async Task CreateOrder_ShouldRejectOrderBelowMinimumPurchase()
     {
         try
@@ -300,6 +338,8 @@ public sealed class OrderIntegrationTests(TestWebApplicationFactory factory) : I
         var payload = await response.Content.ReadFromJsonAsync<ApiResponse<OrderDto>>();
         payload!.Data!.Id.Should().Be(orderId);
         payload.Data.Status.Should().Be(OrderStatus.Preparing);
+        payload.Data.EstimatedDeliveryAtUtc.Should().NotBeNull();
+        payload.Data.EstimatedDeliveryAtUtc!.Value.Kind.Should().Be(DateTimeKind.Utc);
     }
 
     private async Task<Guid> CreateOrderAsync()
@@ -324,7 +364,12 @@ public sealed class OrderIntegrationTests(TestWebApplicationFactory factory) : I
         return payload!.Data!.Id;
     }
 
-    private async Task UpdateSeedStoreAsync(TimeOnly? openingTime = null, TimeOnly? closingTime = null, decimal? minimumPurchase = null)
+    private async Task UpdateSeedStoreAsync(
+        TimeOnly? openingTime = null,
+        TimeOnly? closingTime = null,
+        decimal? minimumPurchase = null,
+        decimal? latitude = null,
+        decimal? longitude = null)
     {
         using var scope = factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<LiquorSaaSDbContext>();
@@ -340,8 +385,8 @@ public sealed class OrderIntegrationTests(TestWebApplicationFactory factory) : I
             store.BucketPrice,
             minimumPurchase,
             store.BusinessAddress,
-            store.Latitude,
-            store.Longitude);
+            latitude,
+            longitude);
         await dbContext.SaveChangesAsync();
     }
 

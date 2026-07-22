@@ -94,6 +94,11 @@ internal static class DtoMappings
             entity.Total,
             entity.CreatedAtUtc,
             entity.UpdatedAtUtc,
+            entity.EstimatedTravelMinutes,
+            entity.EstimatedPreparationMinutes,
+            AsUtc(entity.EstimateCalculatedAtUtc),
+            AsUtc(entity.EstimatedDeliveryAtUtc),
+            entity.IsDeliveryEstimateFallback,
             entity.Items.Select(item => new OrderItemDto(
                 item.Id,
                 item.ProductId,
@@ -120,6 +125,9 @@ internal static class DtoMappings
                     deliveryAssignee.Email,
                     deliveryAssignee.IsActive,
                     (int)deliveryAssignee.CurrentAvailability));
+
+    private static DateTime? AsUtc(DateTime? value) =>
+        value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
 
     public static DeliveryUserDto ToDto(this DeliveryUser entity, string? storeName = null) =>
         new(

@@ -126,6 +126,8 @@ public sealed class LiquorSaaSDbContext(DbContextOptions<LiquorSaaSDbContext> op
             entity.Property(x => x.DepositTotal).HasColumnType("decimal(18,2)");
             entity.Property(x => x.AppliedPromotionCode).HasMaxLength(80);
             entity.Property(x => x.Total).HasColumnType("decimal(18,2)");
+            entity.Property(x => x.EstimateCalculatedAtUtc).HasColumnType("datetime2");
+            entity.Property(x => x.EstimatedDeliveryAtUtc).HasColumnType("datetime2");
             entity.Property(x => x.Status).HasConversion<int>();
             entity.HasIndex(x => x.StoreId);
             entity.HasIndex(x => x.Status);

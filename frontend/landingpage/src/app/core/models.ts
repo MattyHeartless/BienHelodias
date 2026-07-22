@@ -167,6 +167,11 @@ export interface OrderDto {
   total: number;
   createdAtUtc: string;
   updatedAtUtc: string;
+  estimatedTravelMinutes: number | null;
+  estimatedPreparationMinutes: number | null;
+  estimateCalculatedAtUtc: string | null;
+  estimatedDeliveryAtUtc: string | null;
+  isDeliveryEstimateFallback: boolean;
   items: OrderItemDto[];
   deposits: OrderDepositDto[];
 }

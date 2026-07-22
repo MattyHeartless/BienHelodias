@@ -34,13 +34,15 @@
 
             <dl class="tracking-meta">
               <div>
-                <dt>Actualizado</dt>
-                <dd>{{ currentOrder.updatedAtUtc | date: 'dd MMM, HH:mm' }}</dd>
-              </div>
-              <div>
                 <dt>Creado</dt>
                 <dd>{{ currentOrder.createdAtUtc | date: 'dd MMM, HH:mm' }}</dd>
               </div>
+              @if (estimatedDeliveryLabel(); as estimatedDelivery) {
+                <div>
+                  <dt>Llegando a las</dt>
+                  <dd>{{ estimatedDelivery }}</dd>
+                </div>
+              }
             </dl>
           </section>
 
@@ -68,6 +70,8 @@
                       <img [src]="step.staticIcon" alt="" class="tracking-step__status-icon" />
                     } @else if (isCompleted(index) || index === currentStepIndex()) {
                       <span class="material-symbols-outlined text-base">check</span>
+                    } @else if (step.label === 'Entregado') {
+                      <span class="material-symbols-outlined tracking-step__next-check">check</span>
                     } @else {
                       {{ index + 1 }}
                     }
@@ -87,26 +91,35 @@
             <div class="tracking-section-head">
               <div>
                 <p class="eyebrow">Entrega</p>
-                <h2 id="tracking-delivery-title" class="tracking-section-title"><span class="material-symbols-outlined" aria-hidden="true">location_on</span>{{ currentOrder.customerName }}</h2>
+                <h2 id="tracking-delivery-title" class="tracking-section-title">{{ currentOrder.customerName }}</h2>
               </div>
             </div>
 
-            <dl class="tracking-detail-grid">
-              <div class="tracking-detail-row">
-                <dt>Teléfono</dt>
-                <dd>{{ currentOrder.customerPhone }}</dd>
+            <div class="tracking-delivery__phone-row">
+              <span class="material-symbols-outlined" aria-hidden="true">call</span>
+              <div>
+                <p class="tracking-delivery__label">Teléfono</p>
+                <a class="tracking-delivery__phone" [href]="'tel:' + currentOrder.customerPhone" [attr.aria-label]="'Llamar a ' + currentOrder.customerName">{{ currentOrder.customerPhone }}</a>
               </div>
-              <div class="tracking-detail-row">
-                <dt>Dirección</dt>
-                <dd>{{ currentOrder.deliveryAddress }}</dd>
+            </div>
+
+            <div class="tracking-delivery__destination">
+              <span class="material-symbols-outlined tracking-delivery__destination-icon" aria-hidden="true">location_on</span>
+              <div>
+                <p class="tracking-delivery__label">Te caemos aquí</p>
+                <p class="tracking-delivery__address">{{ currentOrder.deliveryAddress }}</p>
               </div>
-              @if (currentOrder.notes) {
-                <div class="tracking-detail-row">
-                  <dt>Notas</dt>
-                  <dd>{{ currentOrder.notes }}</dd>
+            </div>
+
+            @if (currentOrder.notes) {
+              <div class="tracking-delivery__notes">
+                <span class="material-symbols-outlined" aria-hidden="true">edit_note</span>
+                <div>
+                  <p class="tracking-delivery__label">Indicaciones para llegar</p>
+                  <p>{{ currentOrder.notes }}</p>
                 </div>
-              }
-            </dl>
+              </div>
+            }
           </section>
 
           <section class="tracking-summary" aria-labelledby="tracking-summary-title">

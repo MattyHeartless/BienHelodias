@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using LiquorSaaS.Application.Auth;
 using LiquorSaaS.Application.Common;
+using LiquorSaaS.Application.Orders;
 using LiquorSaaS.Infrastructure.Persistence;
 using LiquorSaaS.Infrastructure.Persistence.Seed;
 using Microsoft.AspNetCore.Hosting;
@@ -35,6 +36,9 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>, 
 
             services.RemoveAll<TimeProvider>();
             services.AddSingleton<TimeProvider>(_timeProvider);
+
+            services.RemoveAll<IRouteDurationService>();
+            services.AddSingleton<IRouteDurationService, TestRouteDurationService>();
         });
     }
 
@@ -74,6 +78,17 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>, 
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return client;
     }
+}
+
+public sealed class TestRouteDurationService : IRouteDurationService
+{
+    public Task<RouteDuration?> GetDrivingDurationAsync(
+        decimal originLatitude,
+        decimal originLongitude,
+        decimal destinationLatitude,
+        decimal destinationLongitude,
+        CancellationToken cancellationToken) =>
+        Task.FromResult<RouteDuration?>(new RouteDuration(17, 4_500));
 }
 
 public sealed class FixedTimeProvider : TimeProvider
