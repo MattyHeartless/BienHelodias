@@ -73,6 +73,11 @@
 .cart-promo__row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.55rem; }
 .cart-promo__input { min-width: 0; border: 1px solid rgb(255 255 255 / 0.14); border-radius: 0.75rem; padding: 0.68rem 0.72rem; background: rgb(10 10 10 / 0.52); color: #fff; font: inherit; font-size: 0.8rem; letter-spacing: 0.06em; outline: none; text-transform: uppercase; }
 .cart-promo__input:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgb(210 253 110 / 0.1); }
+
+@media (max-width: 767px) {
+  .cart-promo__input { font-size: 16px; }
+}
+
 .cart-promo__apply { border: 0; border-radius: 0.75rem; padding: 0 0.85rem; background: var(--color-primary); color: #12140c; font: inherit; font-size: 0.78rem; font-weight: 900; cursor: pointer; }
 .cart-promo__apply:active { transform: scale(0.97); }
 .cart-promo__apply:disabled { background: rgb(255 255 255 / 0.1); color: rgb(255 255 255 / 0.35); cursor: not-allowed; }
