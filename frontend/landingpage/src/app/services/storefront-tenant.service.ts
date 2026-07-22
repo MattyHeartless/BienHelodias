@@ -7,7 +7,7 @@ import { StorefrontContentApiService } from './storefront-content-api.service';
 
 @Injectable({ providedIn: 'root' })
 export class StorefrontTenantService {
-  private static readonly DEFAULT_TITLE = 'Bien Helodias | Landing';
+  private static readonly DEFAULT_TITLE = 'Bien Helodias';
   private readonly storefrontContentApi = inject(StorefrontContentApiService);
   private readonly title = inject(Title);
 
