@@ -218,8 +218,6 @@ export function MartiniHeroContent() {
           <a
             className="platform-search-cta"
             href="https://bienhelodias.qzz.io/"
-            target="_blank"
-            rel="noreferrer"
             aria-label="Encontrar tiendas cerca en BienHelodias"
           >
             <span className="platform-search-cta__lens" aria-hidden="true" />
