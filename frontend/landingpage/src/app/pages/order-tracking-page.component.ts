@@ -36,12 +36,25 @@ export class OrderTrackingPageComponent implements OnDestroy {
   readonly activeSlug = signal<string | null>(null);
   readonly activeOrderId = signal<string | null>(null);
   readonly steps = [
-    { label: 'Pedido recibido', status: OrderStatus.Pending },
-    { label: 'Aceptado', status: OrderStatus.Accepted },
-    { label: 'Preparando', status: OrderStatus.Preparing },
-    { label: 'Listo', status: OrderStatus.Ready },
-    { label: 'En camino', status: OrderStatus.OnTheWay },
-    { label: 'Entregado', status: OrderStatus.Delivered }
+    {
+      label: 'Pedido recibido',
+      statuses: [OrderStatus.Pending, OrderStatus.Accepted],
+      staticIcon: '/timeline-icons/wired-outline-139-basket-morph-fill.svg',
+      animatedIcon: '/timeline-icons/wired-outline-139-basket-morph-fill.webp'
+    },
+    {
+      label: 'Preparando',
+      statuses: [OrderStatus.Preparing, OrderStatus.Ready],
+      staticIcon: '/timeline-icons/wired-outline-240-red-wine-hover-cheers.svg',
+      animatedIcon: '/timeline-icons/wired-outline-240-red-wine-loop-swirl.webp'
+    },
+    {
+      label: 'En camino',
+      statuses: [OrderStatus.OnTheWay],
+      staticIcon: '/timeline-icons/wired-outline-497-truck-delivery-hover-pinch.svg',
+      animatedIcon: '/timeline-icons/wired-outline-497-truck-delivery-hover-pinch.webp'
+    },
+    { label: 'Entregado', statuses: [OrderStatus.Delivered] }
   ];
 
   readonly statusLabel = computed(() => {
@@ -50,7 +63,8 @@ export class OrderTrackingPageComponent implements OnDestroy {
       return 'Sin datos';
     }
 
-    return this.steps.find((step) => step.status === currentOrder.status)?.label ?? 'Cancelado';
+    const currentStepIndex = this.currentStepIndex();
+    return currentStepIndex >= 0 ? this.steps[currentStepIndex].label : 'Cancelado';
   });
 
   readonly currentStepIndex = computed(() => {
@@ -59,10 +73,14 @@ export class OrderTrackingPageComponent implements OnDestroy {
       return -1;
     }
 
-    return this.steps.findIndex((step) => step.status === currentOrder.status);
-  });
+    // A new order is shown as being prepared to give the customer a more useful first progress state.
+    // The persisted order status remains Pending until the operational flow updates it.
+    if (currentOrder.status === OrderStatus.Pending) {
+      return 1;
+    }
 
-  readonly isOnTheWay = computed(() => this.order()?.status === OrderStatus.OnTheWay);
+    return this.steps.findIndex((step) => step.statuses.includes(currentOrder.status));
+  });
 
   constructor() {
     const slug = this.route.snapshot.paramMap.get('slug');
@@ -103,9 +121,9 @@ export class OrderTrackingPageComponent implements OnDestroy {
     this.clearStatusChangeHandle();
   }
 
-  isCompleted(status: OrderStatus): boolean {
-    const currentOrder = this.order();
-    return currentOrder ? currentOrder.status >= status : false;
+  isCompleted(stepIndex: number): boolean {
+    const currentIndex = this.currentStepIndex();
+    return currentIndex > stepIndex;
   }
 
   private fetchTracking(): void {

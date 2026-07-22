@@ -54,27 +54,28 @@
             </div>
 
             <div class="tracking-steps">
-              @for (step of steps; track step.status) {
+              @for (step of steps; track step.label; let index = $index) {
                 <div
                   class="tracking-step"
-                  [class.tracking-step--current]="step.status === currentOrder.status"
-                  [class.tracking-step--done]="isCompleted(step.status)"
-                  [class.tracking-step--changed]="step.status === currentOrder.status && statusJustChanged()"
-                  [class.tracking-step--en-route]="step.status === currentOrder.status && isOnTheWay()"
+                  [class.tracking-step--current]="index === currentStepIndex()"
+                  [class.tracking-step--done]="isCompleted(index)"
+                  [class.tracking-step--changed]="index === currentStepIndex() && statusJustChanged()"
                 >
                   <div class="tracking-step__index">
-                    @if (step.status === currentOrder.status) {
-                      <span class="material-symbols-outlined text-base">local_shipping</span>
-                    } @else if (isCompleted(step.status)) {
+                    @if (step.animatedIcon && index === currentStepIndex()) {
+                      <img [src]="step.animatedIcon" alt="" class="tracking-step__status-icon" />
+                    } @else if (step.staticIcon) {
+                      <img [src]="step.staticIcon" alt="" class="tracking-step__status-icon" />
+                    } @else if (isCompleted(index) || index === currentStepIndex()) {
                       <span class="material-symbols-outlined text-base">check</span>
                     } @else {
-                      {{ $index + 1 }}
+                      {{ index + 1 }}
                     }
                   </div>
                   <div class="tracking-step__copy">
                     <span class="tracking-step__label">{{ step.label }}</span>
                     <span class="tracking-step__meta">
-                      {{ step.status === currentOrder.status ? 'Estado actual' : isCompleted(step.status) ? 'Completado' : 'Pendiente' }}
+                      {{ index === currentStepIndex() ? 'Estado actual' : isCompleted(index) ? 'Completado' : 'Pendiente' }}
                     </span>
                   </div>
                 </div>

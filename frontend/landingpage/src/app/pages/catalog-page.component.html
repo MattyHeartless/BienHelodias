@@ -222,12 +222,12 @@
               }
             </div>
           } @else {
-            <p
-              class="catalog-load-more catalog-load-more--complete t-shimmer"
-              data-text="Ya le diste la vuelta a todo el refri."
-              aria-live="polite"
-            >
-              Ya le diste la vuelta a todo el refri.
+            <p class="catalog-load-more catalog-load-more--complete" aria-live="polite">
+              <span
+                class="t-shimmer"
+                data-text="Ya le diste la vuelta a todo el refri."
+                style="--shimmer-base: rgb(255 255 255 / 0.44); --shimmer-highlight: var(--color-primary)"
+              >Ya le diste la vuelta a todo el refri.</span>
             </p>
           }
         }
