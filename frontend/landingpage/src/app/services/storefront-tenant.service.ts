@@ -23,6 +23,7 @@ export class StorefrontTenantService {
 
     if (currentStore?.slug === normalizedSlug) {
       this.error.set(null);
+      this.setStoreTitle(currentStore);
       return of(currentStore);
     }
 
@@ -34,7 +35,7 @@ export class StorefrontTenantService {
       tap((store) => {
         this.store.set(store);
         this.error.set(null);
-        this.title.setTitle(`${store.name} | Landing`);
+        this.setStoreTitle(store);
       }),
       catchError((error) => {
         this.store.set(null);
@@ -53,5 +54,10 @@ export class StorefrontTenantService {
     this.error.set(null);
     this.loading.set(false);
     this.title.setTitle(StorefrontTenantService.DEFAULT_TITLE);
+  }
+
+  private setStoreTitle(store: StorefrontStoreDto): void {
+    const storeName = store.name.trim();
+    this.title.setTitle(storeName ? `Bien Helodias | ${storeName}` : StorefrontTenantService.DEFAULT_TITLE);
   }
 }
