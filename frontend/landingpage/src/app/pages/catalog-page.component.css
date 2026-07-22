@@ -33,6 +33,63 @@
   padding: 5.9rem 1.35rem 6.9rem;
 }
 
+.catalog-stage--store-closed .phone-shell__body {
+  padding-top: 8.85rem;
+}
+
+.store-closed-banner {
+  position: fixed;
+  top: 4.55rem;
+  left: 50%;
+  z-index: 14;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: min(100vw, 26rem);
+  min-height: 3.1rem;
+  padding: 0.55rem 1.35rem;
+  transform: translateX(-50%);
+  background: #FF5C5C;
+  color: #fff;
+  box-shadow: 0 10px 20px rgb(75 12 10 / 0.28);
+}
+
+.store-closed-banner__icon {
+  flex: 0 0 auto;
+  font-size: 1.2rem;
+}
+
+.store-closed-banner__message {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.45rem;
+  margin: 0;
+  font-size: 0.76rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.store-closed-banner__message strong {
+  font-weight: 800;
+}
+
+.store-closed-banner__message span {
+  color: rgb(255 255 255 / 0.86);
+  font-weight: 800;
+}
+
+.store-closed-banner__schedule {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.store-closed-banner__schedule-icon {
+  font-size: 0.9rem;
+  font-variation-settings: 'FILL' 1, 'wght' 700;
+}
+
 .brand-mark,
 .icon-button {
   display: inline-flex;
@@ -1191,6 +1248,11 @@
 }
 
 @media (max-width: 640px) {
+  .store-closed-banner {
+    padding-right: 1rem;
+    padding-left: 1rem;
+  }
+
   .catalog-layout {
     width: 100%;
   }

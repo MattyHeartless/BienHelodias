@@ -1,4 +1,7 @@
-<div class="catalog-stage min-h-screen text-on-surface">
+<div
+  class="catalog-stage min-h-screen text-on-surface"
+  [class.catalog-stage--store-closed]="!storeAvailability().isOpen"
+>
   <div class="catalog-stage__glow catalog-stage__glow--one"></div>
   <div class="catalog-stage__glow catalog-stage__glow--two"></div>
 
@@ -25,23 +28,20 @@
         </div>
       </div>
 
-      <div class="phone-shell__body">
-        @if (!storeAvailability().isOpen) {
-          <section class="store-closed-notice" role="status">
-            <div class="store-closed-notice__icon" aria-hidden="true">
-              <span class="material-symbols-outlined">lock_clock</span>
-            </div>
-            <div>
-              <p class="store-closed-notice__title">La tienda está cerrada</p>
-              <p class="store-closed-notice__copy">Podrás agregar bebidas al abrir.</p>
-            </div>
-            <div class="store-closed-notice__schedule">
-              <p class="store-closed-notice__schedule-label">Horario para pedir</p>
-              <p class="store-closed-notice__schedule-value">{{ storeAvailability().scheduleLabel }}</p>
-            </div>
-          </section>
-        }
+      @if (!storeAvailability().isOpen) {
+        <section class="store-closed-banner" role="status" aria-live="polite">
+          <span class="material-symbols-outlined store-closed-banner__icon" aria-hidden="true">lock_clock</span>
+          <p class="store-closed-banner__message">
+            <strong>La tienda está cerrada.</strong>
+            <span class="store-closed-banner__schedule">
+              <span class="material-symbols-outlined store-closed-banner__schedule-icon" aria-hidden="true">schedule</span>
+              Horario: {{ storeAvailability().scheduleLabel }}
+            </span>
+          </p>
+        </section>
+      }
 
+      <div class="phone-shell__body">
         @if (activeBanner(); as banner) {
           <section
             class="promo-strip promo-strip--draggable"
